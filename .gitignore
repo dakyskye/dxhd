@@ -25,3 +25,5 @@
 
 # End of https://www.gitignore.io/api/go
 
+# ignore built executable
+dxhd
