@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"os"
 	"path/filepath"
@@ -14,64 +15,95 @@ import (
 func main() {
 	if runtime.GOOS != "linux" {
 		log.Fatal("dxhd is only supported on linux")
+		os.Exit(1)
 	}
 
-	configDirPath, err := os.UserConfigDir()
-	if err != nil {
-		log.Fatalf("couldn't get config directory (%s)", err.Error())
-	}
+	customConfigPath := flag.String("c", "", "reads the config from custom path")
 
-	configDirPath = filepath.Join(configDirPath, "dxhd")
-	configFilePath := filepath.Join(configDirPath, "dxhd.sh")
+	flag.Parse()
 
-	configStat, err := os.Stat(configDirPath)
+	var (
+		configStat     os.FileInfo
+		configFilePath string
+		err            error
+	)
 
-	if err != nil {
-		if os.IsNotExist(err) {
-			err = os.Mkdir(configDirPath, 0744)
-			if err != nil {
-				log.Fatalf("couldn't create %s directory (%s)", configDirPath, err.Error())
-				os.Exit(1)
-			}
-			configStat, err = os.Stat(configDirPath)
-			if err != nil {
+	// we default to "", no need to make sure it's not nil
+	if *customConfigPath != "" {
+		configStat, err = os.Stat(*customConfigPath)
+
+		if err != nil {
+			log.Fatalf("can't read from %s file (%s)", *customConfigPath, err.Error())
+			os.Exit(1)
+		}
+
+		if !configStat.Mode().IsRegular() {
+			log.Fatalf("%s is not a regular file", configFilePath)
+			os.Exit(1)
+		}
+
+		configFilePath = *customConfigPath
+	} else {
+		configDirPath, err := os.UserConfigDir()
+		if err != nil {
+			log.Fatalf("couldn't get config directory (%s)", err.Error())
+			os.Exit(1)
+		}
+
+		configDirPath = filepath.Join(configDirPath, "dxhd")
+		configFilePath = filepath.Join(configDirPath, "dxhd.sh")
+
+		configStat, err = os.Stat(configDirPath)
+
+		if err != nil {
+			if os.IsNotExist(err) {
+				err = os.Mkdir(configDirPath, 0744)
+				if err != nil {
+					log.Fatalf("couldn't create %s directory (%s)", configDirPath, err.Error())
+					os.Exit(1)
+				}
+				configStat, err = os.Stat(configDirPath)
+				if err != nil {
+					log.Fatalf("error occurred - %s", err.Error())
+					os.Exit(1)
+				}
+			} else {
 				log.Fatalf("error occurred - %s", err.Error())
 				os.Exit(1)
 			}
-		} else {
-			log.Fatalf("error occurred - %s", err.Error())
+		}
+
+		if !configStat.Mode().IsDir() {
+			log.Fatalf("%s is not a directory", configDirPath)
 			os.Exit(1)
 		}
-	}
 
-	if !configStat.Mode().IsDir() {
-		log.Fatalf("%s is not a directory", configDirPath)
-	}
+		configStat, err = os.Stat(configFilePath)
 
-	configStat, err = os.Stat(configFilePath)
-
-	if err != nil {
-		if os.IsNotExist(err) {
-			file, err := os.Create(configFilePath)
-			if err != nil {
-				log.Fatalf("couldn't create %s file (%s)", configFilePath, err.Error())
+		if err != nil {
+			if os.IsNotExist(err) {
+				file, err := os.Create(configFilePath)
+				if err != nil {
+					log.Fatalf("couldn't create %s file (%s)", configFilePath, err.Error())
+					os.Exit(1)
+				}
+				file.Write([]byte("#!/bin/sh\n"))
+				err = file.Close()
+				if err != nil {
+					log.Fatalf("can't close newly created file %s (%s)", configFilePath, err.Error())
+					os.Exit(1)
+				}
+				os.Exit(0)
+			} else {
+				log.Fatalf("error ocured - %s", err.Error())
 				os.Exit(1)
 			}
-			file.Write([]byte("#!/bin/sh\n"))
-			err = file.Close()
-			if err != nil {
-				log.Fatalf("can't close newly created file %s (%s)", configFilePath, err.Error())
-				os.Exit(1)
-			}
-			os.Exit(0)
-		} else {
-			log.Fatalf("error ocured - %s", err.Error())
+		}
+
+		if !configStat.Mode().IsRegular() {
+			log.Fatalf("%s is not a regular file", configFilePath)
 			os.Exit(1)
 		}
-	}
-
-	if !configStat.Mode().IsRegular() {
-		log.Fatalf("%s is not a regular file", configFilePath)
 	}
 
 	var data []filedata
