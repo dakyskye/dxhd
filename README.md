@@ -21,6 +21,7 @@ This hotkey daemon is quite stable already and can be used *in production*, howe
 * [ ] released keybindings (take action on key release event)
 * [ ] ranges (1-9 and a-z)
 * [ ] formatting (to expand ranges, i.e. `{1-9}` -> `%{F1}1-9`, which means 11-19)
+* [ ] reloading as a command (dxhd reload)
 
 ## License
 

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"strings"
 
@@ -13,6 +14,8 @@ import (
 )
 
 func listenKeybinding(X *xgbutil.XUtil, keybinding, do string) (err error) {
+	fmt.Println("keybinding: " + keybinding)
+	fmt.Println("action: " + do)
 	binding := keybind.KeyPressFun(func(xu *xgbutil.XUtil, event xevent.KeyPressEvent) {
 		var file *syntax.File
 		file, err = syntax.NewParser().Parse(strings.NewReader(do), "")
