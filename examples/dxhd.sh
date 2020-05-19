@@ -1,13 +1,13 @@
 #!/bin/sh
 
-# Mod4 + Return
+# super + Return
 alacritty
 
-# Mod4 + d
+# super + d
 rofi -modi drun -show drun
 
-# Mod4 + Ctrl + n
+# super + ctrl + n
 redshift -P -O 4500
 
-# Mod4 + Ctrl + d
+# super + ctrl + d
 redshift -P -O 6500

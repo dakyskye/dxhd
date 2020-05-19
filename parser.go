@@ -90,8 +90,19 @@ func parse(file string, data *[]filedata) (err error) {
 					index++
 					datum = append(datum, datumType{})
 				}
-				lineStr = strings.ReplaceAll(strings.TrimPrefix(lineStr, "#"), "+", "-")
-				// overwrite previous prefix
+				replace := func(origin *string, old, new string) {
+					*origin = strings.ReplaceAll(*origin, old, new)
+				}
+
+				// trim # prefix
+				lineStr = strings.TrimPrefix(lineStr, "#")
+				// lowercase whole string, since xgbutil accepts any case
+				lineStr = strings.ToLower(lineStr)
+				// replace shorthands
+				replace(&lineStr, "super", "mod4")
+				replace(&lineStr, "ctrl", "control")
+				replace(&lineStr, "+", "-")
+				// overwrite previous prefix if needed
 				if wasKeybinding {
 					if datum[index].binding.Len() != 0 {
 						datum[index].binding.Reset()

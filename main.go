@@ -87,6 +87,7 @@ func main() {
 					log.Fatalf("couldn't create %s file (%s)", configFilePath, err.Error())
 					os.Exit(1)
 				}
+				// write to the file, and exit
 				file.Write([]byte("#!/bin/sh\n"))
 				err = file.Close()
 				if err != nil {
@@ -95,7 +96,7 @@ func main() {
 				}
 				os.Exit(0)
 			} else {
-				log.Fatalf("error ocured - %s", err.Error())
+				log.Fatalf("error occurred - %s", err.Error())
 				os.Exit(1)
 			}
 		}
