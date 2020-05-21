@@ -107,8 +107,11 @@ func main() {
 		}
 	}
 
-	var data []filedata
-	err = parse(configFilePath, &data)
+	var (
+		data  []filedata
+		shell string
+	)
+	shell, err = parse(configFilePath, &data)
 	if err != nil {
 		log.Fatalf("failed to parse file %s (%s)", configFilePath, err.Error())
 		os.Exit(0)
@@ -123,7 +126,7 @@ func main() {
 	keybind.Initialize(X)
 
 	for _, d := range data {
-		err = listenKeybinding(X, d.binding, d.action)
+		err = listenKeybinding(X, shell, d.binding, d.action)
 		if err != nil {
 			log.Printf("error occurred whilst trying to register keybinding %s (%s)", d.binding, err.Error())
 		}

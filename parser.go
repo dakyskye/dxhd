@@ -16,9 +16,9 @@ type filedata struct {
 	action  string
 }
 
-func parse(file string, data *[]filedata) (err error) {
+func parse(file string, data *[]filedata) (shell string, err error) {
 	if data == nil {
-		return errors.New("empty value was passed to parse function")
+		return "", errors.New("empty value was passed to parse function")
 	}
 
 	configFile, err := os.Open(file)
@@ -32,6 +32,7 @@ func parse(file string, data *[]filedata) (err error) {
 	reader := bufio.NewReader(configFile)
 
 	lineNumber := 0
+	shell = "/bin/sh"
 	wasKeybinding := false
 	wasPrefix := false
 	type datumType struct {
@@ -63,6 +64,7 @@ func parse(file string, data *[]filedata) (err error) {
 
 		// skip the shebang
 		if lineNumber == 1 && strings.HasPrefix(lineStr, "#!") {
+			shell = lineStr[2:]
 			continue
 		}
 
@@ -95,7 +97,7 @@ func parse(file string, data *[]filedata) (err error) {
 				}
 
 				// trim # prefix
-				lineStr = strings.TrimPrefix(lineStr, "#")
+				lineStr := lineStr[1:]
 				// lowercase whole string, since xgbutil accepts any case
 				lineStr = strings.ToLower(lineStr)
 				// replace shorthands
