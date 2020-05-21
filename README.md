@@ -17,11 +17,11 @@ This hotkey daemon is quite stable already and can be used *in production*, howe
 
 ### Roadmap
 
-* [x] basic keybindings (all pressed together)
-* [ ] released keybindings (take action on key release event)
-* [ ] ranges (1-9 and a-z)
-* [ ] formatting (to expand ranges, i.e. `{1-9}` -> `%{F1}1-9`, which means 11-19)
-* [ ] reloading as a command (dxhd reload)
+* [x] basic keybindings
+* [ ] released keybindings ([#4](https://github.com/dakyskye/dxhd/issues/4))
+* [ ] ranges ([#5](https://github.com/dakyskye/dxhd/issues/5))
+* [ ] formatting ([#6](https://github.com/dakyskye/dxhd/issues/6))
+* [ ] daemonisation ([#3](https://github.com/dakyskye/dxhd/issues/3))
 
 ## License
 
