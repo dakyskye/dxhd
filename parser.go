@@ -86,7 +86,7 @@ func parse(file string, data *[]filedata) (shell string, err error) {
 			}
 			// erase spaces for key validation
 			lineStr = strings.ReplaceAll(lineStr, " ", "")
-			validator := regexp.MustCompile(`(?m)^#\w+((\+\w+)+)?$`)
+			validator := regexp.MustCompile(`^#\w+((\+\w+)+)?$`)
 			if validator.MatchString(lineStr) {
 				if datum[index].action.Len() != 0 {
 					index++
