@@ -4,7 +4,7 @@
 alacritty
 
 # super + d
-rofi -modi drun -show drun
+rofi %{F-modi} drun %{F-show} drun
 
 # super + ctrl + n
 redshift -P -O 4500

@@ -118,6 +118,8 @@ func parse(file string, data *[]filedata) (shell string, err error) {
 			}
 		} else {
 			wasKeybinding = false
+			formatting := regexp.MustCompile(`(?m)%{F(.*?)}`)
+			line = formatting.ReplaceAll(line, []byte("$1"))
 			if isPrefix {
 				if wasPrefix {
 					datum[index].action.Write(line)
