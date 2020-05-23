@@ -126,9 +126,9 @@ func main() {
 	keybind.Initialize(X)
 
 	for _, d := range data {
-		err = listenKeybinding(X, shell, d.binding, d.action)
+		err = listenKeybinding(X, shell, d.binding.String(), d.action.String())
 		if err != nil {
-			log.Printf("error occurred whilst trying to register keybinding %s (%s)", d.binding, err.Error())
+			log.Printf("error occurred whilst trying to register keybinding %s (%s)", d.binding.String(), err.Error())
 		}
 	}
 
