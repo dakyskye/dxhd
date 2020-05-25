@@ -47,8 +47,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	customConfigPath := flag.String("c", "", "reads the config from custom path")
-	printVersion := flag.Bool("v", false, "prints current version of program")
+	var (
+		customConfigPath = flag.String("c", "", "reads the config from custom path")
+		printVersion     = flag.Bool("v", false, "prints current version of program")
+		dryRun           = flag.Bool("d", false, "prints bindings and their actions and exits")
+	)
 
 	flag.Usage = func() {
 		fmt.Println(usage)
@@ -155,6 +158,17 @@ func main() {
 	shell, err = parse(configFilePath, &data)
 	if err != nil {
 		log.Fatalf("failed to parse file %s (%s)", configFilePath, err.Error())
+		os.Exit(0)
+	}
+
+	if *dryRun {
+		fmt.Println("dxhd dry run")
+		for _, d := range data {
+			fmt.Println("keybinding: " + d.binding.String())
+			fmt.Println("action:")
+			fmt.Println(d.action.String())
+			fmt.Println()
+		}
 		os.Exit(0)
 	}
 
