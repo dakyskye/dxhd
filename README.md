@@ -2,16 +2,46 @@
 
 ## daky's X11 hotkey daemon
 
-This hotkey daemon is quite stable already and can be used *in production*, however, it's still WIP as it lacks some good features, like ranges and key release event support.
+dxhd is heavily inspired by [sxhkd](https://github.com/baskerville/sxhkd), written in Go, and has quite elegant syntax for configuration files!
 
-### Testing
+## Features
 
-* git clone the repo
-* install Go programming language
-* run `go build -o dxhd .`
-* execute `./dxhd`
+* basic keybindings (all presed together)
+* variants in keybindings and their actions ({a,b,c})
+* ranges in keybindings and their actions ({1-9} in a keybinding, {11-19} or whatever range of `9-1` in the action)
+* support for any shell scripting language (sh, bash, ksh, zsh, python, perl etc.) given as a shebang
+* support for scripting, as much as a user wishes!
+
+## Configuration
+
+The default config file is located at `~/.config/dxhd/dxhd.sh`, however, dxhd can use a file from any path, by passing it to `-c`:
+
+```sh
+dxhd -c /my/custom/path/to/a/config/file
+```
+
+A dxhd config file should containt a shebang (defaults to `/bin/sh`) on top of a file, which is where binding actions take action
+
+## Syntax
+
+```
+<file>
+
+#! shebang
+
+## a comment
+######### a comment
+
+# key + combo
+<what to do>
+
+# key + combo + with + {1-9,0,a-z} + ranges
+<what to do {with,these,ranges}>
+```
 
 ### Demo
+
+!outdated demo!
 
 ![demo gif](./dxhd_demo.gif)
 
