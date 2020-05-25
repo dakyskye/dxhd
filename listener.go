@@ -14,6 +14,7 @@ func listenKeybinding(X *xgbutil.XUtil, shell, keybinding, do string) (err error
 	binding := keybind.KeyPressFun(func(xu *xgbutil.XUtil, event xevent.KeyPressEvent) {
 		cmd := exec.Command(shell)
 		cmd.Stdin = strings.NewReader(do)
+		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 		cmd.Start()
 	})
