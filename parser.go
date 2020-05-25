@@ -363,8 +363,6 @@ func replicate(binding, action string) (replicated []*filedata, err error) {
 					}
 				}
 			}
-			fmt.Println("appending " + replicatedBindings[i])
-			fmt.Println("appending " + replicatedActions[i])
 			replicated = append(replicated, &filedata{})
 			replicated[r].binding.WriteString(replicatedBindings[i])
 			replicated[r].action.WriteString(replicatedActions[i])

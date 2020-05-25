@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -12,6 +13,34 @@ import (
 	"github.com/BurntSushi/xgbutil/xevent"
 )
 
+var usage = `NAME
+  dxhd - daky's X11 Hotkey Daemon
+DESCRIPTION
+  dxhd is easy to use X11 hotkey daemon, written in Golang programming language.
+  The biggest advantage of dxhd is that you can write your configs in different languages,
+  like sh, bash, ksh, zsh, Python, Perl
+  A config file is meant to have quite easy layout:
+	first line starting with #! is treated as a shebang
+    lines having ##+ prefix are ignored
+    lines having one # and then a keybinding are parsed as keybindings
+    lines under a keybinding are executed when keybinding is triggered
+EXAMPLE
+  ## restart i3
+  # super + shift + r
+  i3-msg -t command restart
+  ## switch to workspace 1-10
+  # super + {1-9,0}
+  i3-msg -t command workspace {1-9,10}
+  ## switch to workspace 11-20
+  # super + ctrl + {1-9,0}
+  i3-msg -t command workspace {11-19,20}
+BUGS
+  report bugs here, if you encounter one - https://github.com/dakyskye/dxhd/issues
+AUTHOR
+  Lasha Kanteladze <kanteladzelasha339@gmail.com>`
+
+var version = `25.05.2020`
+
 func main() {
 	if runtime.GOOS != "linux" {
 		log.Fatal("dxhd is only supported on linux")
@@ -19,8 +48,20 @@ func main() {
 	}
 
 	customConfigPath := flag.String("c", "", "reads the config from custom path")
+	printVersion := flag.Bool("v", false, "prints current version of program")
+
+	flag.Usage = func() {
+		fmt.Println(usage)
+		fmt.Println("FLAGS")
+		flag.PrintDefaults()
+	}
 
 	flag.Parse()
+
+	if *printVersion {
+		fmt.Println("you are using dxhd, version " + version)
+		os.Exit(0)
+	}
 
 	var (
 		configStat     os.FileInfo
