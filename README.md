@@ -4,6 +4,34 @@
 
 dxhd is heavily inspired by [sxhkd](https://github.com/baskerville/sxhkd), written in Go, and has quite elegant syntax for configuration files!
 
+## Installation
+
+* Arch User Repository
+
+```sh
+git clone https://aur.archlinux.org/dxhd-git.git
+cd dxhd-git
+makepkg -si
+```
+
+or use an AUR helper like yay - `yay -S dxhd-git`
+
+* From the source
+
+```sh
+git clone https://github.com/dakyskye/dxhd.git
+cd dxhd
+go build -o dxhd .
+```
+
+and copy `dxhd` executable file to somewhere in your `$PATH`
+
+* From releases
+
+Download the `dxhd` executable file from the latest release, from [releases page](https://github.com/dakyskye/dxhd/releases)
+
+and copy `dxhd` executable file to somewhere in your `$PATH`
+
 ## Features
 
 * basic keybindings (all presed together)
