@@ -352,8 +352,19 @@ func replicate(binding, action string) (replicated []*filedata, err error) {
 			return
 		}
 
+	appender:
 		for i := 0; i != len(replicatedBindings); i++ {
 			replicatedBindings[i] = strings.ReplaceAll(replicatedBindings[i], "--", "-")
+			if i > 0 {
+				for _, aR := range replicated {
+
+					if aR.binding.String() == replicatedBindings[i] {
+						continue appender
+					}
+				}
+			}
+			fmt.Println("appending " + replicatedBindings[i])
+			fmt.Println("appending " + replicatedActions[i])
 			replicated = append(replicated, &filedata{})
 			replicated[r].binding.WriteString(replicatedBindings[i])
 			replicated[r].action.WriteString(replicatedActions[i])
