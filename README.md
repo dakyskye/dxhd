@@ -35,10 +35,14 @@ and copy `dxhd` executable file to somewhere in your `$PATH`
 ## Features
 
 * basic keybindings (all presed together)
-* variants in keybindings and their actions ({a,b,c})
-* ranges in keybindings and their actions ({1-9} in a keybinding, {11-19} or whatever range of `9-1` in the action)
+* variants (`{a,b,c}`)
+* ranges (`{1-9}`, `{a-z}`, `{1-3,5-9,i-k,o-z}`)
 * support for any shell scripting language (sh, bash, ksh, zsh, python, perl etc.) given as a shebang
 * support for scripting, as much as a user wishes!
+
+### Demo
+
+![demo gif](./dxhd_demo.gif)
 
 ## Configuration
 
@@ -52,9 +56,8 @@ A dxhd config file should containt a shebang (defaults to `/bin/sh`) on top of a
 
 ## Syntax
 
+\* config file *
 ```
-<file>
-
 #! shebang
 
 ## a comment
@@ -67,11 +70,13 @@ A dxhd config file should containt a shebang (defaults to `/bin/sh`) on top of a
 <what to do {with,these,ranges}>
 ```
 
-### Demo
+## Daemonisation
 
-!outdated demo!
+Rather then dxhd self daemonising itself, let other programs do their job.
 
-![demo gif](./dxhd_demo.gif)
+Use `systemd`, `runit`, `openrc` or other Linux init system to start dxhd on system startup,
+or let your DE/WM start it by adding an ampersant at the end `dxhd -c path/to/config &`,
+optionally, use `disown` keyword to make it not owned by the DE/WM process.
 
 ### Roadmap
 
@@ -79,7 +84,7 @@ A dxhd config file should containt a shebang (defaults to `/bin/sh`) on top of a
 * [ ] released keybindings ([#4](https://github.com/dakyskye/dxhd/issues/4))
 * [x] ranges ([#5](https://github.com/dakyskye/dxhd/issues/5))
 * ~~[x] formatting ([#6](https://github.com/dakyskye/dxhd/issues/6))~~
-* [ ] daemonisation ([#3](https://github.com/dakyskye/dxhd/issues/3))
+* ~~[ ] daemonisation ([#3](https://github.com/dakyskye/dxhd/issues/3))~~
 
 ## License
 
