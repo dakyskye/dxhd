@@ -78,6 +78,12 @@ Use `systemd`, `runit`, `openrc` or other Linux init system to start dxhd on sys
 or let your DE/WM start it by adding an ampersant at the end `dxhd -c path/to/config &`,
 optionally, use `disown` keyword to make it not owned by the DE/WM process.
 
+### For further help, join the developer's Discord guild
+
+<a target="_blank" href="https://discord.gg/x5RuZCN">
+	<img src="https://img.shields.io/discord/627168403005767711?color=%238577ce&label=dakyskye%27s%20discord%20guild&logo=discord&logoColor=%23FFFFFF&style=plastic">
+</a>
+
 ### Roadmap
 
 * [x] basic keybindings
