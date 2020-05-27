@@ -172,6 +172,7 @@ func parse(file string, data *[]filedata) (shell string, err error) {
 		builder.Reset()
 		modified := strings.ReplaceAll(origin, "+", "-")
 		modified = strings.ReplaceAll(modified, "super", "mod4")
+		modified = strings.ReplaceAll(modified, "alt", "mod1")
 		modified = strings.ReplaceAll(modified, "ctrl", "control")
 		_, err = builder.WriteString(modified)
 		return
