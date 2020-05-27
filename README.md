@@ -84,6 +84,12 @@ optionally, use `disown` keyword to make it not owned by the DE/WM process.
 	<img src="https://img.shields.io/discord/627168403005767711?color=%238577ce&label=dakyskye%27s%20discord%20guild&logo=discord&logoColor=%23FFFFFF&style=plastic">
 </a>
 
+## Examples
+
+* [shell](https://github.com/dakyskye/dxhd/tree/master/examples/dxhd.sh)
+* [python](https://github.com/dakyskye/dxhd/tree/master/examples/dxhd.py)
+* [author's config](https://github.com/dakyskye/dotfiles/tree/master/dxhd/)
+
 ### Roadmap
 
 * [x] basic keybindings
