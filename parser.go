@@ -317,6 +317,11 @@ func replicate(binding, action string) (replicated []*filedata, err error) {
 		}
 	}
 
+	if len(expandedBindingRanges) == 0 {
+		expandedBindingRanges = append(expandedBindingRanges, binding)
+		expandedActionRanges = append(expandedActionRanges, action)
+	}
+
 	for i, r := 0, 0; i != len(expandedBindingRanges); i++ {
 		var replicatedBindings, replicatedActions []string
 		vGroup := &variantGroup{}
