@@ -5,12 +5,17 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
+	"os/signal"
 	"path/filepath"
 	"runtime"
+	"strings"
+	"syscall"
 
 	"github.com/BurntSushi/xgbutil"
 	"github.com/BurntSushi/xgbutil/keybind"
 	"github.com/BurntSushi/xgbutil/xevent"
+	"go.uber.org/zap"
 )
 
 var usage = `NAME
@@ -20,11 +25,12 @@ DESCRIPTION
   The biggest advantage of dxhd is that you can write your configs in different languages,
   like sh, bash, ksh, zsh, Python, Perl
   A config file is meant to have quite easy layout:
-	first line starting with #! is treated as a shebang
+    first line starting with #! is treated as a shebang
     lines having ##+ prefix are ignored
     lines having one # and then a keybinding are parsed as keybindings
     lines under a keybinding are executed when keybinding is triggered
 EXAMPLE
+  #!/bin/sh
   ## restart i3
   # super + shift + r
   i3-msg -t command restart
@@ -48,6 +54,7 @@ func main() {
 	}
 
 	var (
+		reload           = flag.Bool("r", false, "reloads every running instance of dxhd")
 		customConfigPath = flag.String("c", "", "reads the config from custom path")
 		printVersion     = flag.Bool("v", false, "prints current version of program")
 		dryRun           = flag.Bool("d", false, "prints bindings and their actions and exits")
@@ -55,8 +62,11 @@ func main() {
 
 	flag.Usage = func() {
 		fmt.Println(usage)
+		fmt.Println("VERSION")
+		fmt.Println("  " + version)
 		fmt.Println("FLAGS")
 		flag.PrintDefaults()
+		os.Exit(0)
 	}
 
 	flag.Parse()
@@ -66,88 +76,46 @@ func main() {
 		os.Exit(0)
 	}
 
+	if *reload {
+		execName, err := os.Executable()
+		if err != nil {
+			zap.L().Fatal("can not get executable", zap.Error(err))
+		}
+		exec := exec.Command("pkill", "-USR1", "-x", filepath.Base(execName))
+		err = exec.Start()
+		if err != nil {
+			zap.L().Fatal("can not reload dxhd instances", zap.Error(err))
+		}
+		fmt.Println("reloading every running instance of dxhd")
+		os.Exit(0)
+	}
+
 	var (
-		configStat     os.FileInfo
 		configFilePath string
 		err            error
+		validPath      bool
 	)
 
-	// we default to "", no need to make sure it's not nil
 	if *customConfigPath != "" {
-		configStat, err = os.Stat(*customConfigPath)
-
-		if err != nil {
-			log.Fatalf("can't read from %s file (%s)", *customConfigPath, err.Error())
-			os.Exit(1)
+		if validPath, err = isPathToConfigValid(*customConfigPath); !(err == nil && validPath) {
+			zap.L().Fatal("path to the config is not valid", zap.String("path", *customConfigPath), zap.Bool("valid", validPath), zap.Error(err))
 		}
-
-		if !configStat.Mode().IsRegular() {
-			log.Fatalf("%s is not a regular file", configFilePath)
-			os.Exit(1)
-		}
-
 		configFilePath = *customConfigPath
 	} else {
-		configDirPath, err := os.UserConfigDir()
+		configFilePath, _, err = getDefaultConfigPath()
 		if err != nil {
-			log.Fatalf("couldn't get config directory (%s)", err.Error())
-			os.Exit(1)
+			zap.L().Fatal("can not get default config path", zap.Error(err))
 		}
 
-		configDirPath = filepath.Join(configDirPath, "dxhd")
-		configFilePath = filepath.Join(configDirPath, "dxhd.sh")
-
-		configStat, err = os.Stat(configDirPath)
-
-		if err != nil {
+		if validPath, err = isPathToConfigValid(configFilePath); !(err == nil && validPath) {
 			if os.IsNotExist(err) {
-				err = os.Mkdir(configDirPath, 0744)
+				err = createDefaultConfig()
 				if err != nil {
-					log.Fatalf("couldn't create %s directory (%s)", configDirPath, err.Error())
-					os.Exit(1)
-				}
-				configStat, err = os.Stat(configDirPath)
-				if err != nil {
-					log.Fatalf("error occurred - %s", err.Error())
-					os.Exit(1)
+					zap.L().Fatal("can not create default config", zap.String("path", configFilePath), zap.Error(err))
 				}
 			} else {
-				log.Fatalf("error occurred - %s", err.Error())
-				os.Exit(1)
+				zap.L().Fatal("path to the config is not valid", zap.String("path", configFilePath), zap.Bool("valid", validPath), zap.Error(err))
 			}
-		}
-
-		if !configStat.Mode().IsDir() {
-			log.Fatalf("%s is not a directory", configDirPath)
-			os.Exit(1)
-		}
-
-		configStat, err = os.Stat(configFilePath)
-
-		if err != nil {
-			if os.IsNotExist(err) {
-				file, err := os.Create(configFilePath)
-				if err != nil {
-					log.Fatalf("couldn't create %s file (%s)", configFilePath, err.Error())
-					os.Exit(1)
-				}
-				// write to the file, and exit
-				file.Write([]byte("#!/bin/sh\n"))
-				err = file.Close()
-				if err != nil {
-					log.Fatalf("can't close newly created file %s (%s)", configFilePath, err.Error())
-					os.Exit(1)
-				}
-				os.Exit(0)
-			} else {
-				log.Fatalf("error occurred - %s", err.Error())
-				os.Exit(1)
-			}
-		}
-
-		if !configStat.Mode().IsRegular() {
-			log.Fatalf("%s is not a regular file", configFilePath)
-			os.Exit(1)
 		}
 	}
 
@@ -155,10 +123,10 @@ func main() {
 		data  []filedata
 		shell string
 	)
+
 	shell, err = parse(configFilePath, &data)
 	if err != nil {
-		log.Fatalf("failed to parse file %s (%s)", configFilePath, err.Error())
-		os.Exit(0)
+		zap.L().Fatal("failed to parse config", zap.String("file", configFilePath), zap.Error(err))
 	}
 
 	if *dryRun {
@@ -172,20 +140,44 @@ func main() {
 		os.Exit(0)
 	}
 
-	X, err := xgbutil.NewConn()
-	if err != nil {
-		log.Fatalf("can not open connection to Xorg (%s)", err.Error())
-		os.Exit(1)
-	}
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM, syscall.SIGUSR1, syscall.SIGUSR2, os.Interrupt, os.Kill)
 
-	keybind.Initialize(X)
+	for {
+		if len(data) == 0 {
+			shell, err = parse(configFilePath, &data)
+			if err != nil {
+				zap.L().Fatal("failed to parse config", zap.String("file", configFilePath), zap.Error(err))
+			}
+		}
 
-	for _, d := range data {
-		err = listenKeybinding(X, shell, d.binding.String(), d.action.String())
+		X, err := xgbutil.NewConn()
 		if err != nil {
-			log.Printf("error occurred whilst trying to register keybinding %s (%s)", d.binding.String(), err.Error())
+			zap.L().Fatal("can not open connection to Xorg", zap.Error(err))
+		}
+
+		keybind.Initialize(X)
+
+		for _, d := range data {
+			err = listenKeybinding(X, shell, d.binding.String(), d.action.String())
+			if err != nil {
+				zap.L().Fatal("can not register a keybinding", zap.String("keybinding", d.binding.String()), zap.Error(err))
+			}
+		}
+
+		data = nil
+
+		go func() { xevent.Main(X) }()
+
+		select {
+		case sig := <-signals:
+			keybind.Detach(X, X.RootWin())
+			xevent.Quit(X)
+			if strings.HasPrefix(sig.String(), "user defined signal") {
+				continue
+			}
+			zap.L().Info("signal received, shutting down", zap.String("signal", sig.String()))
+			os.Exit(0)
 		}
 	}
-
-	xevent.Main(X)
 }
