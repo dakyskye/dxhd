@@ -39,6 +39,7 @@ and copy `dxhd` executable file to somewhere in your `$PATH`
 * basic keybindings (all presed together)
 * variants (`{a,b,c}`)
 * ranges (`{1-9}`, `{a-z}`, `{1-3,5-9,i-k,o-z}`)
+* hot reloading (`dxhd -r`)
 * support for any shell scripting language (sh, bash, ksh, zsh, python, perl etc.) given as a shebang
 * support for scripting, as much as a user wishes!
 
