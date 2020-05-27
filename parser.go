@@ -175,7 +175,7 @@ func parse(file string, data *[]filedata) (shell string, err error) {
 		modified = strings.ReplaceAll(modified, "super", "mod4")
 		modified = strings.ReplaceAll(modified, "alt", "mod1")
 		modified = strings.ReplaceAll(modified, "ctrl", "control")
-		_, err = data.binding.WriteString(data.originalBinding)
+		_, err = data.binding.WriteString(modified)
 		return
 	}
 
