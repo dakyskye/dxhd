@@ -39,7 +39,7 @@ BUGS
 AUTHOR
   Lasha Kanteladze <kanteladzelasha339@gmail.com>`
 
-var version = `25.05.2020`
+var version = `master`
 
 func main() {
 	if runtime.GOOS != "linux" {

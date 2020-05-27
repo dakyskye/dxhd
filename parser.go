@@ -191,6 +191,11 @@ func parse(file string, data *[]filedata) (shell string, err error) {
 		}
 	}
 
+	if len(*data) == 1 && ((*data)[0].action.String() == "" || (*data)[0].binding.String() == "") {
+		err = errors.New("config file does not contain any binding/action")
+		return
+	}
+
 	return
 }
 
@@ -233,39 +238,38 @@ func replicate(binding, action string) (replicated []*filedata, err error) {
 
 	var expandedBindingRanges, expandedActionRanges []string
 
-	expandBindingRange := func(r ranges, key string, where *[]string) {
+	// expands a range in a keybinding({1-9} -> {1},{2},{3},{...},{9})
+	expandRange := func(r ranges, binding, acton string, bindings, actions *[]string) {
+		// bindings
 		for bIn := r.binding.start; bIn != r.binding.end+1; bIn++ {
-			*where = append(*where, strings.Replace(
-				key,
+			*bindings = append(*bindings, strings.Replace(
+				binding,
 				fmt.Sprintf("%s-%s", r.binding.startStr, r.binding.endStr),
 				fmt.Sprintf("%c", rune(bIn)),
 				1,
 			))
-		}
-	}
-
-	expandActionRange := func(r ranges, action string, where *[]string) {
-		if r.action.skip {
-			for i := 0; i != r.binding.end-r.binding.start+1; i++ {
-				*where = append(*where, action)
+			if r.action.skip {
+				*actions = append(*actions, acton)
 			}
-			return
 		}
-		for aIn := r.action.start; aIn != r.action.end+1; aIn++ {
-			if r.action.numerical {
-				*where = append(*where, strings.Replace(
-					action,
-					fmt.Sprintf("%s-%s", r.action.startStr, r.action.endStr),
-					fmt.Sprintf("%d", aIn),
-					1,
-				))
-			} else {
-				*where = append(*where, strings.Replace(
-					action,
-					fmt.Sprintf("%s-%s", r.action.startStr, r.action.endStr),
-					fmt.Sprintf("%c", rune(aIn)),
-					1,
-				))
+		// actions
+		if !r.action.skip {
+			for aIn := r.action.start; aIn != r.action.end+1; aIn++ {
+				if r.action.numerical {
+					*actions = append(*actions, strings.Replace(
+						action,
+						fmt.Sprintf("%s-%s", r.action.startStr, r.action.endStr),
+						fmt.Sprintf("%d", aIn),
+						1,
+					))
+				} else {
+					*actions = append(*actions, strings.Replace(
+						action,
+						fmt.Sprintf("%s-%s", r.action.startStr, r.action.endStr),
+						fmt.Sprintf("%c", rune(aIn)),
+						1,
+					))
+				}
 			}
 		}
 	}
@@ -274,17 +278,17 @@ func replicate(binding, action string) (replicated []*filedata, err error) {
 		if len(expandedBindingRanges) > 0 {
 			var newBindingRanges, newActionRanges []string
 
-			for _, alreadyE := range expandedBindingRanges {
-				expandBindingRange(rngs[0], alreadyE, &newBindingRanges)
+			if len(expandedActionRanges) != len(expandedBindingRanges) {
+				err = errors.New("an unknown error occurred whilst expanding keybinding and action ranges")
 			}
-			for _, alreadyE := range expandedActionRanges {
-				expandActionRange(rngs[0], alreadyE, &newActionRanges)
+
+			for i := 0; i != len(expandedBindingRanges); i++ {
+				expandRange(rngs[0], expandedBindingRanges[i], expandedActionRanges[i], &newBindingRanges, &newActionRanges)
 			}
 
 			expandedBindingRanges, expandedActionRanges = newBindingRanges, newActionRanges
 		} else {
-			expandBindingRange(rngs[0], binding, &expandedBindingRanges)
-			expandActionRange(rngs[0], action, &expandedActionRanges)
+			expandRange(rngs[0], binding, action, &expandedBindingRanges, &expandedActionRanges)
 		}
 		rngs = rngs[1:]
 	}
