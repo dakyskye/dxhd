@@ -13,9 +13,10 @@ import (
 )
 
 type filedata struct {
-	binding    strings.Builder
-	action     strings.Builder
-	hasVariant bool
+	originalBinding string
+	binding         strings.Builder
+	action          strings.Builder
+	hasVariant      bool
 }
 
 type ranges struct {
@@ -167,14 +168,14 @@ func parse(file string, data *[]filedata) (shell string, err error) {
 		return
 	}
 
-	replaceShorthands := func(builder *strings.Builder) (err error) {
-		origin := builder.String()
-		builder.Reset()
-		modified := strings.ReplaceAll(origin, "+", "-")
+	replaceShorthands := func(data *filedata) (err error) {
+		data.originalBinding = data.binding.String()
+		data.binding.Reset()
+		modified := strings.ReplaceAll(data.originalBinding, "+", "-")
 		modified = strings.ReplaceAll(modified, "super", "mod4")
 		modified = strings.ReplaceAll(modified, "alt", "mod1")
 		modified = strings.ReplaceAll(modified, "ctrl", "control")
-		_, err = builder.WriteString(modified)
+		_, err = data.binding.WriteString(data.originalBinding)
 		return
 	}
 
@@ -187,18 +188,18 @@ func parse(file string, data *[]filedata) (shell string, err error) {
 				return
 			}
 			for _, repl := range replicated {
-				err = replaceShorthands(&repl.binding)
+				err = replaceShorthands(repl)
 				if err != nil {
 					return
 				}
-				*data = append(*data, filedata{binding: repl.binding, action: repl.action})
+				*data = append(*data, filedata{originalBinding: repl.originalBinding, binding: repl.binding, action: repl.action})
 			}
 		} else {
-			err = replaceShorthands(&d.binding)
+			err = replaceShorthands(&d)
 			if err != nil {
 				return
 			}
-			*data = append(*data, filedata{binding: d.binding, action: d.action})
+			*data = append(*data, filedata{originalBinding: d.originalBinding, binding: d.binding, action: d.action})
 		}
 	}
 

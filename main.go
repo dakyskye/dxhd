@@ -164,7 +164,7 @@ func main() {
 	if *dryRun {
 		fmt.Println("dxhd dry run")
 		for _, d := range data {
-			fmt.Println("keybinding: " + d.binding.String())
+			fmt.Println("binding: " + d.originalBinding)
 			fmt.Println("action:")
 			fmt.Println(d.action.String())
 			fmt.Println()
