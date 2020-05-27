@@ -117,18 +117,10 @@ func parse(file string, data *[]filedata) (shell string, err error) {
 					index++
 					datum = append(datum, filedata{})
 				}
-				replace := func(origin *string, old, new string) {
-					*origin = strings.ReplaceAll(*origin, old, new)
-				}
-
 				// trim # prefix
 				lineStr := lineStr[1:]
 				// lowercase whole string, since xgbutil accepts any case
 				lineStr = strings.ToLower(lineStr)
-				// replace shorthands
-				replace(&lineStr, "super", "mod4")
-				replace(&lineStr, "ctrl", "control")
-				replace(&lineStr, "+", "-")
 				// overwrite previous prefix if needed
 				if wasKeybinding {
 					if datum[index].binding.Len() != 0 {
@@ -175,6 +167,16 @@ func parse(file string, data *[]filedata) (shell string, err error) {
 		return
 	}
 
+	replaceShorthands := func(builder *strings.Builder) (err error) {
+		origin := builder.String()
+		builder.Reset()
+		modified := strings.ReplaceAll(origin, "+", "-")
+		modified = strings.ReplaceAll(modified, "super", "mod4")
+		modified = strings.ReplaceAll(modified, "ctrl", "control")
+		_, err = builder.WriteString(modified)
+		return
+	}
+
 	*data = nil
 	for _, d := range datum {
 		if d.hasVariant {
@@ -184,9 +186,17 @@ func parse(file string, data *[]filedata) (shell string, err error) {
 				return
 			}
 			for _, repl := range replicated {
+				err = replaceShorthands(&repl.binding)
+				if err != nil {
+					return
+				}
 				*data = append(*data, filedata{binding: repl.binding, action: repl.action})
 			}
 		} else {
+			err = replaceShorthands(&d.binding)
+			if err != nil {
+				return
+			}
 			*data = append(*data, filedata{binding: d.binding, action: d.action})
 		}
 	}
@@ -373,8 +383,14 @@ func replicate(binding, action string) (replicated []*filedata, err error) {
 				}
 			}
 			replicated = append(replicated, &filedata{})
-			replicated[r].binding.WriteString(replicatedBindings[i])
-			replicated[r].action.WriteString(replicatedActions[i])
+			_, err = replicated[r].binding.WriteString(replicatedBindings[i])
+			if err != nil {
+				return
+			}
+			_, err = replicated[r].action.WriteString(replicatedActions[i])
+			if err != nil {
+				return
+			}
 			r++
 		}
 	}
