@@ -92,14 +92,6 @@ optionally, use `disown` keyword to make it not owned by the DE/WM process.
 * [python](https://github.com/dakyskye/dxhd/tree/master/examples/dxhd.py)
 * [author's config](https://github.com/dakyskye/dotfiles/tree/master/dxhd/)
 
-### Roadmap
-
-* [x] basic keybindings
-* [ ] released keybindings ([#4](https://github.com/dakyskye/dxhd/issues/4))
-* [x] ranges ([#5](https://github.com/dakyskye/dxhd/issues/5))
-* ~~[x] formatting ([#6](https://github.com/dakyskye/dxhd/issues/6))~~
-* ~~[ ] daemonisation ([#3](https://github.com/dakyskye/dxhd/issues/3))~~
-
 ## License
 
 Licensed under the [**MIT**](https://choosealicense.com/licenses/mit/) license.
