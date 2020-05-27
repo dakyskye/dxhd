@@ -1,5 +1,5 @@
 VERSION := $(shell git describe --tags --dirty --always)
-DATE := $(shell date "+%d.%m.%Y")
+DATE := $(shell date "+%d.%m.%Y_%H.%M")
 
 fast:
 	go build -ldflags "-X main.version=$(VERSION)" -o dxhd .
