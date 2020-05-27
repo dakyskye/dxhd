@@ -10,11 +10,13 @@ dxhd is heavily inspired by [sxhkd](https://github.com/baskerville/sxhkd), writt
 
 ```sh
 git clone https://aur.archlinux.org/dxhd-git.git
+# or binary version - git clone https://aur.archlinux.org/dxhd-bin.git
 cd dxhd-git
+# or cd dxhd-bin if you cloned binary one
 makepkg -si
 ```
 
-or use an AUR helper like yay - `yay -S dxhd-git`
+or use an AUR helper like yay - `yay -S dxhd`
 
 * From the source
 
