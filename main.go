@@ -143,6 +143,7 @@ func main() {
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM, syscall.SIGUSR1, syscall.SIGUSR2, os.Interrupt, os.Kill)
 
+	// infinite loop - if user sends USR signal, reload configration (so, continue loop), otherwise, exit
 	for {
 		if len(data) == 0 {
 			shell, err = parse(configFilePath, &data)

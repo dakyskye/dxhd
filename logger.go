@@ -8,6 +8,7 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+// init the logger before main function
 func init() {
 	var config zap.Config
 

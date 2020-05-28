@@ -13,6 +13,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// event definitions
 const (
 	evtKeyPress int = iota
 	evtKeyRelease
@@ -20,6 +21,7 @@ const (
 	evtButtonRelease
 )
 
+// filedata holds the data of parsed file
 type filedata struct {
 	originalBinding string
 	binding         strings.Builder
@@ -28,6 +30,7 @@ type filedata struct {
 	hasVariant      bool
 }
 
+// ranges hold the data of a keybinding and it's action
 type ranges struct {
 	binding rng
 	action  struct {
@@ -46,6 +49,7 @@ type variantGroup struct {
 	action, binding []string
 }
 
+// global regular expressions, compiled once at run-time
 var (
 	keybindingPattern   = regexp.MustCompile(`^#((@|!)?\w+{.*?}|(@|!)?{.*?}|(@|!)?\w+)(((\+((@|!)?\w+{.*?}|(@|!)?{.*?}|(@|!)?\w+)))+)?`)
 	variantPattern      = regexp.MustCompile(`{.*?}`)
@@ -56,6 +60,7 @@ var (
 	mouseBindPattern    = regexp.MustCompile(`mouse([0-9]+)`)
 )
 
+// parese function parses a config file, and returns data
 func parse(file string, data *[]filedata) (shell string, err error) {
 	if data == nil {
 		return "", errors.New("empty value was passed to parse function")
@@ -78,6 +83,7 @@ func parse(file string, data *[]filedata) (shell string, err error) {
 	datum := []filedata{}
 	index := 0
 
+	// read file line by line
 	for {
 		lineNumber++
 
@@ -141,6 +147,7 @@ func parse(file string, data *[]filedata) (shell string, err error) {
 					}
 				}
 
+				// getEventType merges two events into one type
 				getEventType := func(old, new int) (evt int) {
 					switch old {
 					case evtKeyPress:
@@ -161,6 +168,7 @@ func parse(file string, data *[]filedata) (shell string, err error) {
 					return
 				}
 
+				// set to -1, in case a keybinding is a single letter
 				datum[index].evtType = -1
 				for _, key := range strings.Split(lineStr, "+") {
 					if len(key) > 1 {
@@ -179,6 +187,7 @@ func parse(file string, data *[]filedata) (shell string, err error) {
 						datum[index].evtType = getEventType(datum[index].evtType, evt)
 					}
 				}
+				// means a keybinding was the single letter
 				if datum[index].evtType == -1 {
 					datum[index].evtType = evtKeyPress
 				}
@@ -213,12 +222,14 @@ func parse(file string, data *[]filedata) (shell string, err error) {
 		}
 	}
 
+	// we are ok when we reach the end of line
 	if err == io.EOF {
 		err = nil
 	} else {
 		return
 	}
 
+	// xgb requires these shorthands to be replaced to what they are called internally
 	replaceShorthands := func(data *filedata) (err error) {
 		data.originalBinding = data.binding.String()
 		data.binding.Reset()
@@ -227,6 +238,7 @@ func parse(file string, data *[]filedata) (shell string, err error) {
 		modified = strings.ReplaceAll(modified, "alt", "mod1")
 		modified = strings.ReplaceAll(modified, "ctrl", "control")
 		modified = strings.ReplaceAll(strings.ReplaceAll(modified, "@", ""), "!", "")
+		// replace mouseN with N
 		if data.evtType == evtButtonPress || data.evtType == evtButtonRelease {
 			zap.L().Debug("before mouse binding replace", zap.String("binding", modified))
 			modified = mouseBindPattern.ReplaceAllString(modified, "$1")
@@ -238,6 +250,7 @@ func parse(file string, data *[]filedata) (shell string, err error) {
 
 	*data = nil
 	for _, d := range datum {
+		// replicate a keybinding and it's action if it has variants
 		if d.hasVariant {
 			replicated, e := replicate(d.binding.String(), d.action.String())
 			if e != nil {
@@ -260,6 +273,7 @@ func parse(file string, data *[]filedata) (shell string, err error) {
 		}
 	}
 
+	// means config file was empty
 	if len(*data) == 1 && ((*data)[0].action.String() == "" || (*data)[0].binding.String() == "") {
 		err = errors.New("config file does not contain any binding/action")
 		return
@@ -268,8 +282,9 @@ func parse(file string, data *[]filedata) (shell string, err error) {
 	return
 }
 
+// replicate replicates variants
 func replicate(binding, action string) (replicated []*filedata, err error) {
-	// find all variants
+	// find all the variants
 	bindingVariants, actionVariants := variantPattern.FindAllString(binding, -1), variantPattern.FindAllString(action, -1)
 
 	// make sure the amount of variants do match
@@ -343,6 +358,7 @@ func replicate(binding, action string) (replicated []*filedata, err error) {
 		}
 	}
 
+	// for as long as we have unexpanded ranges, expand them
 	for len(rngs) > 0 {
 		if len(expandedBindingRanges) > 0 {
 			var newBindingRanges, newActionRanges []string
@@ -366,6 +382,7 @@ func replicate(binding, action string) (replicated []*filedata, err error) {
 		err = errors.New("an unknown error occurred whilst expanding keybinding and action ranges")
 	}
 
+	// replicateVariant replaces pattern with each member of variants group
 	replicateVariant := func(in, pattern string, variants []string, where *[]string) {
 		for _, v := range variants {
 			if v == "_" {
@@ -386,11 +403,13 @@ func replicate(binding, action string) (replicated []*filedata, err error) {
 		}
 	}
 
+	// in case our keybinding and action had no ranges
 	if len(expandedBindingRanges) == 0 {
 		expandedBindingRanges = append(expandedBindingRanges, binding)
 		expandedActionRanges = append(expandedActionRanges, action)
 	}
 
+	// do replicate every variant member
 	for i, r := 0, 0; i != len(expandedBindingRanges); i++ {
 		var replicatedBindings, replicatedActions []string
 		vGroup := &variantGroup{}
@@ -402,9 +421,12 @@ func replicate(binding, action string) (replicated []*filedata, err error) {
 			return
 		}
 
+		// for as long as we have binding AND action in a variant group
 		for len(vGroup.binding) > 0 {
+			// extract variant members
 			bVariantMembers := strings.Split(strings.TrimSuffix(strings.TrimPrefix(vGroup.binding[0], "{"), "}"), ",")
 			aVariantMembers := strings.Split(strings.TrimSuffix(strings.TrimPrefix(vGroup.action[0], "{"), "}"), ",")
+			// if we already replicated a variant, use it
 			if len(replicatedBindings) > 0 {
 				var newBindingVariants, newActionVariants []string
 
@@ -430,8 +452,10 @@ func replicate(binding, action string) (replicated []*filedata, err error) {
 			return
 		}
 
+		// append replicated bindings and actions to the return result
 	appender:
 		for i := 0; i != len(replicatedBindings); i++ {
+			// we get ++ when we replace underscore literal with nothing
 			replicatedBindings[i] = strings.ReplaceAll(replicatedBindings[i], "++", "+")
 			if i > 0 {
 				for _, aR := range replicated {
@@ -457,6 +481,7 @@ func replicate(binding, action string) (replicated []*filedata, err error) {
 	return
 }
 
+// extracts every range from a config file
 func extractRanges(bindingVars, actionVars [][]string) (r []ranges, err error) {
 	// range patterns for binding and action and range errors
 	var (

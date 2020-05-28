@@ -13,6 +13,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// listenKeybinding does connect a keybinding/mousebinding to the Xorg server
 func listenKeybinding(X *xgbutil.XUtil, evtType int, shell, keybinding, do string) (err error) {
 	zap.L().Debug("registering new keybinding", zap.String("shell", shell), zap.String("keybinding", keybinding), zap.String("do", do))
 
@@ -52,6 +53,7 @@ func listenKeybinding(X *xgbutil.XUtil, evtType int, shell, keybinding, do strin
 	return
 }
 
+// do a given shell command
 func doAction(shell, do string) {
 	cmd := exec.Command(shell)
 	cmd.Stdin = strings.NewReader(do)
