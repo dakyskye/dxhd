@@ -104,19 +104,19 @@ Licensed under the [**MIT**](https://choosealicense.com/licenses/mit/) license.
 
 ## FAQ
 
-### why was dxhd made
+### Why was dxhd made
 
 Because I had (and have) 20 workspaces, and `sxhkd` did not allow me to have `11-19` range,
 that was one of the main reasons I started developing dxhd
 
-### what makes dxhd better than sxhkd
+### What makes dxhd better than sxhkd
 
 * dxhd uses shebang to determine which shell to use (so you don't have to set an environment variable)
 * dxhd config file syntax matches shell, python, perl and probably some other languages syntax
 * dxhd is great with scripting, because of it's elegant syntax.  multi line scripts do not need `\` at the end of line
 * dxhd allows you to have different range in a keybinding's action, for example, `1-9` in a keybinding, and `11-19` in it's action
 
-### how do I port my sxhkd config to dxhd
+### How do I port my sxhkd config to dxhd
 
 It is simple enough! (I personally used Vim macros when I did it, because if you use Vim, you'll know why:)
 * convert any line starting with single `#` to a *dxhd comment* (so ## or more)
@@ -144,7 +144,11 @@ echo hello
 echo world
 ```
 
-### is dxhd faster than sxhkd
+### I use ranges, released key events and chords from sxhkd, does dxhd have them
+
+Yes! and no.  dxhd has released key events and ranges, but no chords (yet - [wip](https://github.com/dakyskye/dxhd/issues/8))
+
+### Is dxhd faster than sxhkd
 
 They haven't benchmarked yet, so I don't know.
 However, been using dxhd since [the first release](https://github.com/dakyskye/dxhd/releases/tag/25.05.2020) and haven't noticed any speed loss!
