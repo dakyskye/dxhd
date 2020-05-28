@@ -51,7 +51,7 @@ type variantGroup struct {
 
 // global regular expressions, compiled once at run-time
 var (
-	keybindingPattern   = regexp.MustCompile(`^#((@|!)?\w+{.*?}|(@|!)?{.*?}|(@|!)?\w+)(((\+((@|!)?\w+{.*?}|(@|!)?{.*?}|(@|!)?\w+)))+)?`)
+	keybindingPattern   = regexp.MustCompile(`^#(((!?@?)|@?!?)\w+{.*?}|((!?@?)|@?!?){.*?}|((!?@?)|@?!?)\w+)(((\+(((!?@?)|@?!?)\w+{.*?}|((!?@?)|@?!?){.*?}|((!?@?)|@?!?)\w+)))+)?`)
 	variantPattern      = regexp.MustCompile(`{.*?}`)
 	bindingRangePattern = regexp.MustCompile(`([0-9]|[a-z])-([0-9]|[a-z])`)
 	actionRangePattern  = regexp.MustCompile(`(?m)^(([0-9]+)-([0-9]+))|(([a-z])-([a-z]))$`)
@@ -258,6 +258,7 @@ func parse(file string, data *[]filedata) (shell string, err error) {
 				return
 			}
 			for _, repl := range replicated {
+				repl.evtType = d.evtType
 				err = replaceShorthands(repl)
 				if err != nil {
 					return
