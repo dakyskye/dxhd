@@ -159,7 +159,7 @@ func main() {
 		keybind.Initialize(X)
 
 		for _, d := range data {
-			err = listenKeybinding(X, shell, d.binding.String(), d.action.String())
+			err = listenKeybinding(X, d.evtType, shell, d.binding.String(), d.action.String())
 			if err != nil {
 				zap.L().Fatal("can not register a keybinding", zap.String("keybinding", d.binding.String()), zap.Error(err))
 			}

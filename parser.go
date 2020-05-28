@@ -5,17 +5,26 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"regexp"
 	"strconv"
 	"strings"
+
+	"go.uber.org/zap"
+)
+
+const (
+	evtKeyPress int = iota
+	evtKeyRelease
+	evtButtonPress
+	evtButtonRelease
 )
 
 type filedata struct {
 	originalBinding string
 	binding         strings.Builder
 	action          strings.Builder
+	evtType         int
 	hasVariant      bool
 }
 
@@ -38,12 +47,13 @@ type variantGroup struct {
 }
 
 var (
-	keybindingPattern   = regexp.MustCompile(`^#(\w+{.*?}|{.*?}|\w+)(((\+(\w+{.*?}|{.*?}|\w+)))+)?`)
+	keybindingPattern   = regexp.MustCompile(`^#((@|!)?\w+{.*?}|(@|!)?{.*?}|(@|!)?\w+)(((\+((@|!)?\w+{.*?}|(@|!)?{.*?}|(@|!)?\w+)))+)?`)
 	variantPattern      = regexp.MustCompile(`{.*?}`)
 	bindingRangePattern = regexp.MustCompile(`([0-9]|[a-z])-([0-9]|[a-z])`)
 	actionRangePattern  = regexp.MustCompile(`(?m)^(([0-9]+)-([0-9]+))|(([a-z])-([a-z]))$`)
 	numericalPattern    = regexp.MustCompile(`([0-9]+)-([0-9]+)`)
 	alphabeticalPattern = regexp.MustCompile(`([a-z])-([a-z])`)
+	mouseBindPattern    = regexp.MustCompile(`mouse([0-9]+)`)
 )
 
 func parse(file string, data *[]filedata) (shell string, err error) {
@@ -107,8 +117,8 @@ func parse(file string, data *[]filedata) (shell string, err error) {
 		// decide whether the line is a keybinding or not
 		if strings.HasPrefix(lineStr, "#") {
 			if isPrefix {
-				log.Fatalf("a keybinding can't be that long, line %d, file %s", lineNumber, file)
-				os.Exit(1)
+				err = errors.New(fmt.Sprintf("a keybinding can't be that long, line %d, file %s", lineNumber, file))
+				return
 			}
 			// erase spaces for key validation
 			lineStr = strings.ReplaceAll(lineStr, " ", "")
@@ -126,12 +136,53 @@ func parse(file string, data *[]filedata) (shell string, err error) {
 				if wasKeybinding {
 					if datum[index].binding.Len() != 0 {
 						datum[index].binding.Reset()
-						fmt.Println(fmt.Sprintf("overwriting %d", lineNumber))
-						fmt.Println(fmt.Sprintf("previous - \"%s\"", datum[index].binding.String()))
-						fmt.Println(fmt.Sprintf("new - \"%s\"", lineStr))
+						zap.L().Info("overwriting older keybinding", zap.String("file", file), zap.Int("line", lineNumber))
+						zap.L().Debug("overwriting keybinding", zap.String("old", datum[index].binding.String()), zap.String("new", lineStr))
 					}
 				}
-				datum[index].binding.Write([]byte(lineStr))
+
+				getEventType := func(old, new int) (evt int) {
+					switch old {
+					case evtKeyPress:
+						evt = new
+					case evtKeyRelease:
+						if new != evtKeyPress {
+							evt = new
+						}
+					case evtButtonPress:
+						if new == evtKeyRelease || new == evtButtonRelease {
+							evt = evtButtonRelease
+						}
+					case evtButtonRelease:
+						evt = evtButtonRelease
+					default:
+						evt = new
+					}
+					return
+				}
+
+				datum[index].evtType = -1
+				for _, key := range strings.Split(lineStr, "+") {
+					if len(key) > 1 {
+						evt := -1
+						if strings.HasPrefix(key, "@!") {
+							evt = evtButtonRelease
+						} else if strings.HasPrefix(key, "!@") {
+							evt = evtButtonRelease
+						} else if strings.HasPrefix(key, "!") {
+							evt = evtButtonPress
+						} else if strings.HasPrefix(key, "@") {
+							evt = evtKeyRelease
+						} else {
+							evt = evtKeyPress
+						}
+						datum[index].evtType = getEventType(datum[index].evtType, evt)
+					}
+				}
+				if datum[index].evtType == -1 {
+					datum[index].evtType = evtKeyPress
+				}
+				datum[index].binding.WriteString(lineStr)
 				datum[index].hasVariant = len(variantPattern.FindStringIndex(lineStr)) > 0
 				wasKeybinding = true
 			}
@@ -175,6 +226,14 @@ func parse(file string, data *[]filedata) (shell string, err error) {
 		modified = strings.ReplaceAll(modified, "super", "mod4")
 		modified = strings.ReplaceAll(modified, "alt", "mod1")
 		modified = strings.ReplaceAll(modified, "ctrl", "control")
+		if data.evtType != evtKeyPress {
+			modified = strings.ReplaceAll(strings.ReplaceAll(modified, "@", ""), "!", "")
+			if data.evtType != evtKeyRelease {
+				zap.L().Debug("before mouse binding replace", zap.String("binding", modified))
+				modified = mouseBindPattern.ReplaceAllString(modified, "$1")
+				zap.L().Debug("after mouse binding replace", zap.String("binding", modified))
+			}
+		}
 		_, err = data.binding.WriteString(modified)
 		return
 	}
@@ -192,14 +251,14 @@ func parse(file string, data *[]filedata) (shell string, err error) {
 				if err != nil {
 					return
 				}
-				*data = append(*data, filedata{originalBinding: repl.originalBinding, binding: repl.binding, action: repl.action})
+				*data = append(*data, filedata{originalBinding: repl.originalBinding, binding: repl.binding, action: repl.action, evtType: d.evtType})
 			}
 		} else {
 			err = replaceShorthands(&d)
 			if err != nil {
 				return
 			}
-			*data = append(*data, filedata{originalBinding: d.originalBinding, binding: d.binding, action: d.action})
+			*data = append(*data, filedata{originalBinding: d.originalBinding, binding: d.binding, action: d.action, evtType: d.evtType})
 		}
 	}
 
@@ -375,7 +434,7 @@ func replicate(binding, action string) (replicated []*filedata, err error) {
 
 	appender:
 		for i := 0; i != len(replicatedBindings); i++ {
-			replicatedBindings[i] = strings.ReplaceAll(replicatedBindings[i], "--", "-")
+			replicatedBindings[i] = strings.ReplaceAll(replicatedBindings[i], "++", "+")
 			if i > 0 {
 				for _, aR := range replicated {
 
