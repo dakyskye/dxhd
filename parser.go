@@ -226,13 +226,11 @@ func parse(file string, data *[]filedata) (shell string, err error) {
 		modified = strings.ReplaceAll(modified, "super", "mod4")
 		modified = strings.ReplaceAll(modified, "alt", "mod1")
 		modified = strings.ReplaceAll(modified, "ctrl", "control")
-		if data.evtType != evtKeyPress {
-			modified = strings.ReplaceAll(strings.ReplaceAll(modified, "@", ""), "!", "")
-			if data.evtType != evtKeyRelease {
-				zap.L().Debug("before mouse binding replace", zap.String("binding", modified))
-				modified = mouseBindPattern.ReplaceAllString(modified, "$1")
-				zap.L().Debug("after mouse binding replace", zap.String("binding", modified))
-			}
+		modified = strings.ReplaceAll(strings.ReplaceAll(modified, "@", ""), "!", "")
+		if data.evtType == evtButtonPress || data.evtType == evtButtonRelease {
+			zap.L().Debug("before mouse binding replace", zap.String("binding", modified))
+			modified = mouseBindPattern.ReplaceAllString(modified, "$1")
+			zap.L().Debug("after mouse binding replace", zap.String("binding", modified))
 		}
 		_, err = data.binding.WriteString(modified)
 		return
