@@ -34,16 +34,21 @@ Download the `dxhd` executable file from the latest release, from [releases page
 
 and copy `dxhd` executable file to somewhere in your `$PATH`
 
-## Features
+## Features (what's inside parentheses, are just minimal example patterns)
 
-* basic keybindings (all presed together)
+* key press events (`super + key`, where `key` is a non-modifier key)
+* key release events (`super + @key` where `key` is a non-modifier key, and `@` is specifier)
+* mouse button press events (`!mouseN` where `n` is button number, and `!` is specifier)
+* mouse button release events (`!@mouseN` where `n` is button number, and `!` and `@` are specifiers)
 * variants (`{a,b,c}`)
 * ranges (`{1-9}`, `{a-z}`, `{1-3,5-9,i-k,o-z}`)
-* hot reloading (`dxhd -r`)
+* in-place reloading (`dxhd -r`)
 * support for any shell scripting language (sh, bash, ksh, zsh, python, perl etc.) given as a shebang
 * support for scripting, as much as a user wishes!
 
 ### Demo
+
+! outdated gif !
 
 ![demo gif](./dxhd_demo.gif)
 
