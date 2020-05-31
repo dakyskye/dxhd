@@ -72,7 +72,16 @@ func parse(file string, data *[]filedata) (shell string, err error) {
 		return
 	}
 
-	defer configFile.Close()
+	defer func() {
+		e := configFile.Close()
+		if e != nil {
+			if err == nil {
+				err = e
+			} else {
+				zap.L().Debug("failed to close config file", zap.Error(e))
+			}
+		}
+	}()
 
 	reader := bufio.NewReader(configFile)
 

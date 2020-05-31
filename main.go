@@ -35,11 +35,14 @@ EXAMPLE
   # super + shift + r
   i3-msg -t command restart
   ## switch to workspace 1-10
-  # super + {1-9,0}
+  # super + @{1-9,0}
   i3-msg -t command workspace {1-9,10}
   ## switch to workspace 11-20
   # super + ctrl + {1-9,0}
   i3-msg -t command workspace {11-19,20}
+  ## switch to next/prev workspace
+  # super + !mouse{4,5}
+  i3-msg -t command workspace {next,prev}
 BUGS
   report bugs here, if you encounter one - https://github.com/dakyskye/dxhd/issues
 AUTHOR

@@ -20,28 +20,28 @@ func listenKeybinding(X *xgbutil.XUtil, evtType int, shell, keybinding, do strin
 	switch evtType {
 	case evtKeyPress:
 		binding := keybind.KeyPressFun(func(xu *xgbutil.XUtil, event xevent.KeyPressEvent) {
-			doAction(shell, do)
+			err = doAction(shell, do)
 		})
 
 		err = binding.Connect(X, X.RootWin(), keybinding, true)
 		zap.L().Debug("added key press event", zap.String("binding", keybinding), zap.Error(err))
 	case evtKeyRelease:
 		binding := keybind.KeyReleaseFun(func(xu *xgbutil.XUtil, event xevent.KeyReleaseEvent) {
-			doAction(shell, do)
+			err = doAction(shell, do)
 		})
 
 		err = binding.Connect(X, X.RootWin(), keybinding, true)
 		zap.L().Debug("added key release event", zap.String("binding", keybinding), zap.Error(err))
 	case evtButtonPress:
 		binding := mousebind.ButtonPressFun(func(xu *xgbutil.XUtil, event xevent.ButtonPressEvent) {
-			doAction(shell, do)
+			err = doAction(shell, do)
 		})
 
 		err = binding.Connect(X, X.RootWin(), keybinding, false, true)
 		zap.L().Debug("added button press event", zap.String("binding", keybinding), zap.Error(err))
 	case evtButtonRelease:
 		binding := mousebind.ButtonReleaseFun(func(xu *xgbutil.XUtil, event xevent.ButtonReleaseEvent) {
-			doAction(shell, do)
+			err = doAction(shell, do)
 		})
 
 		err = binding.Connect(X, X.RootWin(), keybinding, false, true)
@@ -54,9 +54,10 @@ func listenKeybinding(X *xgbutil.XUtil, evtType int, shell, keybinding, do strin
 }
 
 // do a given shell command
-func doAction(shell, do string) {
+func doAction(shell, do string) (err error) {
 	cmd := exec.Command(shell)
 	cmd.Stdin = strings.NewReader(do)
 	cmd.Stdout = os.Stdout
-	cmd.Start()
+	err = cmd.Start()
+	return
 }
