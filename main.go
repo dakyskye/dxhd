@@ -11,6 +11,7 @@ import (
 	"runtime"
 	"strings"
 	"syscall"
+	"time"
 
 	"github.com/BurntSushi/xgbutil"
 	"github.com/BurntSushi/xgbutil/keybind"
@@ -53,7 +54,6 @@ var version = `master`
 func main() {
 	if runtime.GOOS != "linux" {
 		log.Fatal("dxhd is only supported on linux")
-		os.Exit(1)
 	}
 
 	var (
@@ -61,6 +61,7 @@ func main() {
 		customConfigPath = flag.String("c", "", "reads the config from custom path")
 		printVersion     = flag.Bool("v", false, "prints current version of program")
 		dryRun           = flag.Bool("d", false, "prints bindings and their actions and exits")
+		parseTime        = flag.Bool("p", false, "prints how much time parsing a config took")
 	)
 
 	flag.Usage = func() {
@@ -123,13 +124,30 @@ func main() {
 	}
 
 	var (
-		data  []filedata
-		shell string
+		data      []filedata
+		shell     string
+		startTime time.Time
 	)
+
+	if *parseTime {
+		startTime = time.Now()
+	}
 
 	shell, err = parse(configFilePath, &data)
 	if err != nil {
 		zap.L().Fatal("failed to parse config", zap.String("file", configFilePath), zap.Error(err))
+	}
+
+	if *parseTime {
+		since := time.Since(startTime)
+		timeTaken := fmt.Sprintf("%.0fs%dms%dµs",
+			since.Seconds(),
+			since.Milliseconds(),
+			since.Microseconds(),
+		)
+		fmt.Println(fmt.Sprintf("it took %s to parse the config", timeTaken))
+		fmt.Println(fmt.Sprintf("%d parsed keybindins (including replicated variants and ranges)", len(data)))
+		os.Exit(0)
 	}
 
 	if *dryRun {
