@@ -249,9 +249,7 @@ func parse(file string, data *[]filedata) (shell string, err error) {
 		modified = strings.ReplaceAll(strings.ReplaceAll(modified, "@", ""), "!", "")
 		// replace mouseN with N
 		if data.evtType == evtButtonPress || data.evtType == evtButtonRelease {
-			zap.L().Debug("before mouse binding replace", zap.String("binding", modified))
 			modified = mouseBindPattern.ReplaceAllString(modified, "$1")
-			zap.L().Debug("after mouse binding replace", zap.String("binding", modified))
 		}
 		_, err = data.binding.WriteString(modified)
 		return
