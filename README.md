@@ -115,6 +115,7 @@ that was one of the main reasons I started developing dxhd
 * dxhd config file syntax matches shell, python, perl and probably some other languages syntax
 * dxhd is great with scripting, because of it's elegant syntax.  multi line scripts do not need `\` at the end of line
 * dxhd allows you to have different range in a keybinding's action, for example, `1-9` in a keybinding, and `11-19` in it's action
+* dxhd has support for mouse bindings out of the box, no patching required!
 
 ### How do I port my sxhkd config to dxhd
 
@@ -152,3 +153,7 @@ Yes! and no.  dxhd has released key events and ranges, but no chords (yet - [wip
 
 They haven't benchmarked yet, so I don't know.
 However, been using dxhd since [the first release](https://github.com/dakyskye/dxhd/releases/tag/25.05.2020) and haven't noticed any speed loss!
+
+### Why is the released binary file +8mb
+
+Because it's statically built, to make sure it will work on any amd64 linux machine! You can build dxhd instead to get much smaller file size.
