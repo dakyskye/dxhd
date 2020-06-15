@@ -58,6 +58,7 @@ var (
 	numericalPattern    = regexp.MustCompile(`([0-9]+)-([0-9]+)`)
 	alphabeticalPattern = regexp.MustCompile(`([a-z])-([a-z])`)
 	mouseBindPattern    = regexp.MustCompile(`mouse([0-9]+)`)
+	xfKeyPattern        = regexp.MustCompile(`XF86\w+`)
 )
 
 // parese function parses a config file, and returns data
@@ -145,8 +146,7 @@ func parse(file string, data *[]filedata) (shell string, err error) {
 				}
 				// trim # prefix
 				lineStr := lineStr[1:]
-				// lowercase whole string, since xgbutil accepts any case
-				lineStr = strings.ToLower(lineStr)
+				
 				// overwrite previous prefix if needed
 				if wasKeybinding {
 					if datum[index].binding.Len() != 0 {
@@ -242,7 +242,26 @@ func parse(file string, data *[]filedata) (shell string, err error) {
 	replaceShorthands := func(data *filedata) (err error) {
 		data.originalBinding = data.binding.String()
 		data.binding.Reset()
-		modified := strings.ReplaceAll(data.originalBinding, "+", "-")
+		
+		modified := data.originalBinding
+		
+		// extract xf86 keys if any
+		matches := xfKeyPattern.FindAllString(modified, -1)
+		indexes := xfKeyPattern.FindAllStringIndex(modified, -1)
+		if len(matches) != len(indexes) {
+			err = errors.New("can not process XF86 keys properly")
+			return
+		}
+		
+		// lowercase whole line
+		modified = strings.ToLower(modified)
+				
+		// put XF86 keys as they were before in lineStr
+		for in, index := range indexes {
+			modified = strings.Replace(modified, modified[index[0]:index[1]], matches[in], 1)
+		}
+		
+		modified = strings.ReplaceAll(data.originalBinding, "+", "-")
 		modified = strings.ReplaceAll(modified, "super", "mod4")
 		modified = strings.ReplaceAll(modified, "alt", "mod1")
 		modified = strings.ReplaceAll(modified, "ctrl", "control")
