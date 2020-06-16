@@ -161,6 +161,7 @@ func main() {
 		os.Exit(0)
 	}
 
+	// catch these signals
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM, syscall.SIGUSR1, syscall.SIGUSR2, os.Interrupt, os.Kill)
 
@@ -196,6 +197,7 @@ func main() {
 			keybind.Detach(X, X.RootWin())
 			xevent.Quit(X)
 			if strings.HasPrefix(sig.String(), "user defined signal") {
+				zap.L().Debug("user defined signal received, reloading")
 				continue
 			}
 			zap.L().Info("signal received, shutting down", zap.String("signal", sig.String()))
