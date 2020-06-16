@@ -38,11 +38,12 @@ and copy `dxhd` executable file to somewhere in your `$PATH`
 
 * key press events (`super + key`, where `key` is a non-modifier key)
 * key release events (`super + @key` where `key` is a non-modifier key, and `@` is specifier)
-* mouse button press events (`!mouseN` where `n` is button number, and `!` is specifier)
-* mouse button release events (`!@mouseN` where `n` is button number, and `!` and `@` are specifiers)
+* mouse button press events (`mouseN` where `n` is button number)
+* mouse button release events (`@mouseN` where `n` is button number, and `@` is specifier)
 * variants (`{a,b,c}`)
 * ranges (`{1-9}`, `{a-z}`, `{1-3,5-9,i-k,o-z}`)
 * in-place reloading (`dxhd -r`)
+* calculating the time parsing a config file took (`dxhd -p`)
 * support for any shell scripting language (sh, bash, ksh, zsh, python, perl etc.) given as a shebang
 * support for scripting, as much as a user wishes!
 
