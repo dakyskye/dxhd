@@ -23,29 +23,29 @@ func listenKeybinding(X *xgbutil.XUtil, evtType int, shell, keybinding, do strin
 			err = doAction(shell, do)
 		})
 
+		zap.L().Debug("adding key press event", zap.String("binding", keybinding), zap.Error(err))
 		err = binding.Connect(X, X.RootWin(), keybinding, true)
-		zap.L().Debug("added key press event", zap.String("binding", keybinding), zap.Error(err))
 	case evtKeyRelease:
 		binding := keybind.KeyReleaseFun(func(xu *xgbutil.XUtil, event xevent.KeyReleaseEvent) {
 			err = doAction(shell, do)
 		})
 
+		zap.L().Debug("adding key release event", zap.String("binding", keybinding), zap.Error(err))
 		err = binding.Connect(X, X.RootWin(), keybinding, true)
-		zap.L().Debug("added key release event", zap.String("binding", keybinding), zap.Error(err))
 	case evtButtonPress:
 		binding := mousebind.ButtonPressFun(func(xu *xgbutil.XUtil, event xevent.ButtonPressEvent) {
 			err = doAction(shell, do)
 		})
 
+		zap.L().Debug("adding button press event", zap.String("binding", keybinding), zap.Error(err))
 		err = binding.Connect(X, X.RootWin(), keybinding, false, true)
-		zap.L().Debug("added button press event", zap.String("binding", keybinding), zap.Error(err))
 	case evtButtonRelease:
 		binding := mousebind.ButtonReleaseFun(func(xu *xgbutil.XUtil, event xevent.ButtonReleaseEvent) {
 			err = doAction(shell, do)
 		})
 
+		zap.L().Debug("adding button release event", zap.String("binding", keybinding), zap.Error(err))
 		err = binding.Connect(X, X.RootWin(), keybinding, false, true)
-		zap.L().Debug("added button release event", zap.String("binding", keybinding), zap.Error(err))
 	default:
 		err = errors.New("wrong event type passed")
 	}
@@ -54,10 +54,9 @@ func listenKeybinding(X *xgbutil.XUtil, evtType int, shell, keybinding, do strin
 }
 
 // do a given shell command
-func doAction(shell, do string) (err error) {
+func doAction(shell, do string) error {
 	cmd := exec.Command(shell)
 	cmd.Stdin = strings.NewReader(do)
 	cmd.Stdout = os.Stdout
-	err = cmd.Start()
-	return
+	return cmd.Run()
 }
