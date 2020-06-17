@@ -6,6 +6,8 @@ dxhd is heavily inspired by [sxhkd](https://github.com/baskerville/sxhkd), writt
 
 ## Installation
 
+**NOTE:** the git version, a.k.a. the master version is usually more bug free than the released, binary ones, since introduced bugs first get fixed in this version.
+
 * Arch User Repository
 
 ```sh
