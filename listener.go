@@ -20,28 +20,28 @@ func listenKeybinding(X *xgbutil.XUtil, evtType int, shell, keybinding, do strin
 	switch evtType {
 	case evtKeyPress:
 		binding := keybind.KeyPressFun(func(xu *xgbutil.XUtil, event xevent.KeyPressEvent) {
-			err = doAction(shell, do)
+			go func() { err = doAction(shell, do) }()
 		})
 
 		zap.L().Debug("adding key press event", zap.String("binding", keybinding), zap.Error(err))
 		err = binding.Connect(X, X.RootWin(), keybinding, true)
 	case evtKeyRelease:
 		binding := keybind.KeyReleaseFun(func(xu *xgbutil.XUtil, event xevent.KeyReleaseEvent) {
-			err = doAction(shell, do)
+			go func() { err = doAction(shell, do) }()
 		})
 
 		zap.L().Debug("adding key release event", zap.String("binding", keybinding), zap.Error(err))
 		err = binding.Connect(X, X.RootWin(), keybinding, true)
 	case evtButtonPress:
 		binding := mousebind.ButtonPressFun(func(xu *xgbutil.XUtil, event xevent.ButtonPressEvent) {
-			err = doAction(shell, do)
+			go func() { err = doAction(shell, do) }()
 		})
 
 		zap.L().Debug("adding button press event", zap.String("binding", keybinding), zap.Error(err))
 		err = binding.Connect(X, X.RootWin(), keybinding, false, true)
 	case evtButtonRelease:
 		binding := mousebind.ButtonReleaseFun(func(xu *xgbutil.XUtil, event xevent.ButtonReleaseEvent) {
-			err = doAction(shell, do)
+			go func() { err = doAction(shell, do) }()
 		})
 
 		zap.L().Debug("adding button release event", zap.String("binding", keybinding), zap.Error(err))
