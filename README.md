@@ -153,8 +153,8 @@ Yes! and no.  dxhd has released key events and ranges, but no chords (yet - [wip
 ### Is dxhd faster than sxhkd
 
 They haven't benchmarked yet, so I don't know.
-However, been using dxhd since [the first release](https://github.com/dakyskye/dxhd/releases/tag/25.05.2020) and haven't noticed any speed loss!
+However, been using dxhd since the first release and haven't noticed any speed loss!
 
 ### Why is the released binary file +8mb
 
-Because it's statically built, to make sure it will work on any amd64 linux machine! You can build dxhd instead to get much smaller file size.
+Because it's statically built, to make sure it will work on any amd64 linux machine! You can build dxhd instead to get ~~much~~ smaller file size. (build with `-ldflags "-s -w"`)
