@@ -9,12 +9,14 @@ import (
 	"os/signal"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
 
 	"github.com/BurntSushi/xgbutil"
 	"github.com/BurntSushi/xgbutil/keybind"
+	"github.com/BurntSushi/xgbutil/mousebind"
 	"github.com/BurntSushi/xgbutil/xevent"
 	"go.uber.org/zap"
 )
@@ -163,9 +165,13 @@ func main() {
 
 	// catch these signals
 	signals := make(chan os.Signal, 1)
-	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM, syscall.SIGUSR1, syscall.SIGUSR2, os.Interrupt, os.Kill)
+	signal.Notify(signals, os.Interrupt, os.Kill, syscall.SIGINT, syscall.SIGTERM, syscall.SIGUSR1, syscall.SIGUSR2)
+
+	// errors channel
+	errs := make(chan error)
 
 	// infinite loop - if user sends USR signal, reload configration (so, continue loop), otherwise, exit
+toplevel:
 	for {
 		if len(data) == 0 {
 			shell, err = parse(configFilePath, &data)
@@ -182,26 +188,38 @@ func main() {
 		keybind.Initialize(X)
 
 		for _, d := range data {
-			err = listenKeybinding(X, d.evtType, shell, d.binding.String(), d.action.String())
-			if err != nil {
-				zap.L().Fatal("can not register a keybinding", zap.String("keybinding", d.binding.String()), zap.Error(err))
-			}
+			go func(evtType int, keybinding, do string) {
+				errs <- listenKeybinding(X, evtType, shell, keybinding, do)
+			}(d.evtType, d.binding.String(), d.action.String())
 		}
 
 		data = nil
 
 		go func() { xevent.Main(X) }()
 
-		select {
-		case sig := <-signals:
-			keybind.Detach(X, X.RootWin())
-			xevent.Quit(X)
-			if strings.HasPrefix(sig.String(), "user defined signal") {
-				zap.L().Debug("user defined signal received, reloading")
+		for {
+			select {
+			case err = <-errs:
+				if err != nil {
+					zap.L().Fatal("can not register/listen a keybinding", zap.Error(err))
+				}
 				continue
+			case sig := <-signals:
+				keybind.Detach(X, X.RootWin())
+				mousebind.Detach(X, X.RootWin())
+				xevent.Quit(X)
+				if strings.HasPrefix(sig.String(), "user defined signal") {
+					zap.L().Debug("user defined signal received, reloading")
+					continue toplevel
+				}
+				zap.L().Info("signal received, shutting down", zap.String("signal", sig.String()))
+				if env, err := strconv.ParseBool(os.Getenv("STACKTRACE")); env && err == nil {
+					buf := make([]byte, 1<<20)
+					stackLen := runtime.Stack(buf, true)
+					log.Printf("\nPriting goroutine stack trace, because `STACKTRACE` was set.\n%s\n", buf[:stackLen])
+				}
+				os.Exit(0)
 			}
-			zap.L().Info("signal received, shutting down", zap.String("signal", sig.String()))
-			os.Exit(0)
 		}
 	}
 }
