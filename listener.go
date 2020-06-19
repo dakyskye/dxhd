@@ -15,40 +15,46 @@ import (
 
 // listenKeybinding does connect a keybinding/mousebinding to the Xorg server
 func listenKeybinding(X *xgbutil.XUtil, evtType int, shell, keybinding, do string) (err error) {
-	zap.L().Debug("registering new keybinding", zap.String("shell", shell), zap.String("keybinding", keybinding), zap.String("do", do))
+	errs := make(chan error, 1)
 
 	switch evtType {
 	case evtKeyPress:
 		binding := keybind.KeyPressFun(func(xu *xgbutil.XUtil, event xevent.KeyPressEvent) {
-			go func() { err = doAction(shell, do) }()
+			go func() { errs <- doAction(shell, do) }()
 		})
 
-		zap.L().Debug("adding key press event", zap.String("binding", keybinding), zap.Error(err))
+		zap.L().Debug("adding key press event", zap.String("binding", keybinding), zap.String("do", do), zap.Error(err))
 		err = binding.Connect(X, X.RootWin(), keybinding, true)
 	case evtKeyRelease:
 		binding := keybind.KeyReleaseFun(func(xu *xgbutil.XUtil, event xevent.KeyReleaseEvent) {
-			go func() { err = doAction(shell, do) }()
+			go func() { errs <- doAction(shell, do) }()
 		})
 
-		zap.L().Debug("adding key release event", zap.String("binding", keybinding), zap.Error(err))
+		zap.L().Debug("adding key release event", zap.String("binding", keybinding), zap.String("do", do), zap.Error(err))
 		err = binding.Connect(X, X.RootWin(), keybinding, true)
 	case evtButtonPress:
 		binding := mousebind.ButtonPressFun(func(xu *xgbutil.XUtil, event xevent.ButtonPressEvent) {
-			go func() { err = doAction(shell, do) }()
+			go func() { errs <- doAction(shell, do) }()
 		})
 
-		zap.L().Debug("adding button press event", zap.String("binding", keybinding), zap.Error(err))
+		zap.L().Debug("adding button press event", zap.String("binding", keybinding), zap.String("do", do), zap.Error(err))
 		err = binding.Connect(X, X.RootWin(), keybinding, false, true)
 	case evtButtonRelease:
 		binding := mousebind.ButtonReleaseFun(func(xu *xgbutil.XUtil, event xevent.ButtonReleaseEvent) {
-			go func() { err = doAction(shell, do) }()
+			go func() { errs <- doAction(shell, do) }()
 		})
 
-		zap.L().Debug("adding button release event", zap.String("binding", keybinding), zap.Error(err))
+		zap.L().Debug("adding button release event", zap.String("binding", keybinding), zap.String("do", do), zap.Error(err))
 		err = binding.Connect(X, X.RootWin(), keybinding, false, true)
 	default:
 		err = errors.New("wrong event type passed")
 	}
+
+	if err != nil {
+		return nil
+	}
+
+	err = <-errs
 
 	return
 }
