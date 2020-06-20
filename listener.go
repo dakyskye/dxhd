@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 	"strings"
@@ -51,10 +52,18 @@ func listenKeybinding(X *xgbutil.XUtil, evtType int, shell, keybinding, do strin
 	}
 
 	if err != nil {
-		return nil
+		return err
 	}
 
-	err = <-errs
+	for {
+		err = <-errs
+		if err != nil {
+			err = fmt.Errorf("binding (%s); error (%w)", keybinding, err)
+			break
+		}
+	}
+
+	zap.L().Debug("errs chan received an error", zap.Error(err))
 
 	return
 }
@@ -64,5 +73,6 @@ func doAction(shell, do string) error {
 	cmd := exec.Command(shell)
 	cmd.Stdin = strings.NewReader(do)
 	cmd.Stdout = os.Stdout
+	zap.L().Debug("now executing a command", zap.String("command", do))
 	return cmd.Run()
 }
