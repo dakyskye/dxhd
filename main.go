@@ -59,7 +59,8 @@ func main() {
 	}
 
 	var (
-		reload           = flag.Bool("r", false, "reloads every running instance of dxhd")
+		kill             = flag.Bool("k", false, "gracefully kills every running instances of dxhd")
+		reload           = flag.Bool("r", false, "reloads every running instances of dxhd")
 		customConfigPath = flag.String("c", "", "reads the config from custom path")
 		printVersion     = flag.Bool("v", false, "prints current version of program")
 		dryRun           = flag.Bool("d", false, "prints bindings and their actions and exits")
@@ -77,22 +78,43 @@ func main() {
 
 	flag.Parse()
 
-	if *printVersion {
-		fmt.Println("you are using dxhd, version " + version)
-		os.Exit(0)
-	}
-
-	if *reload {
+	if *kill || *reload {
 		execName, err := os.Executable()
 		if err != nil {
 			zap.L().Fatal("can not get executable", zap.Error(err))
 		}
-		exec := exec.Command("pkill", "-USR1", "-x", filepath.Base(execName))
-		err = exec.Start()
-		if err != nil {
-			zap.L().Fatal("can not reload dxhd instances", zap.Error(err))
+
+		cmd := new(exec.Cmd)
+
+		if *kill {
+			cmd = exec.Command("pkill", "-INT", "-x", filepath.Base(execName))
+		} else {
+			cmd = exec.Command("pkill", "-USR1", "-x", filepath.Base(execName))
 		}
-		fmt.Println("reloading every running instance of dxhd")
+
+		err = cmd.Start()
+
+		if err != nil {
+			if *kill {
+				log.Println("can not kill dxhd instances:")
+				log.Fatalln(err)
+			} else {
+				log.Println("can not reload dxhd instances:")
+				log.Fatalln(err)
+			}
+		}
+
+		if *kill {
+			fmt.Println("killing every running instances of dxhd")
+		} else {
+			fmt.Println("reloading every running instances of dxhd")
+		}
+
+		os.Exit(0)
+	}
+
+	if *printVersion {
+		fmt.Println("you are using dxhd, version " + version)
 		os.Exit(0)
 	}
 
@@ -201,7 +223,7 @@ toplevel:
 			select {
 			case err = <-errs:
 				if err != nil {
-					zap.L().Fatal("can not register/listen a keybinding", zap.Error(err))
+					zap.L().Info("can not register/listen a keybinding", zap.Error(err))
 				}
 				continue
 			case sig := <-signals:
