@@ -208,6 +208,7 @@ toplevel:
 		}
 
 		keybind.Initialize(X)
+		mousebind.Initialize(X)
 
 		for _, d := range data {
 			go func(evtType int, keybinding, do string) {
