@@ -198,7 +198,10 @@ func parse(file string, data *[]filedata) (shell string, err error) {
 				if datum[index].evtType == -1 {
 					datum[index].evtType = evtKeyPress
 				}
-				datum[index].binding.WriteString(lineStr)
+				_, err = datum[index].binding.WriteString(lineStr)
+				if err != nil {
+					return
+				}
 				datum[index].hasVariant = len(variantPattern.FindStringIndex(lineStr)) > 0
 				wasKeybinding = true
 			}
