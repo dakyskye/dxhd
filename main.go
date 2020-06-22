@@ -211,14 +211,12 @@ toplevel:
 		mousebind.Initialize(X)
 
 		for _, d := range data {
-			go func(evtType int, keybinding, do string) {
-				errs <- listenKeybinding(X, evtType, shell, keybinding, do)
-			}(d.evtType, d.binding.String(), d.action.String())
+			go listenKeybinding(X, errs, d.evtType, shell, d.binding.String(), d.action.String())
 		}
 
 		data = nil
 
-		go func() { xevent.Main(X) }()
+		go xevent.Main(X)
 
 		for {
 			select {
