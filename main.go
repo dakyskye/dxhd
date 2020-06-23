@@ -185,6 +185,8 @@ func main() {
 		os.Exit(0)
 	}
 
+	zap.L().Debug("starting dxhd", zap.String("version", version))
+
 	// catch these signals
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, os.Interrupt, os.Kill, syscall.SIGINT, syscall.SIGTERM, syscall.SIGUSR1, syscall.SIGUSR2)
@@ -211,7 +213,10 @@ toplevel:
 		mousebind.Initialize(X)
 
 		for _, d := range data {
-			go listenKeybinding(X, errs, d.evtType, shell, d.binding.String(), d.action.String())
+			err = listenKeybinding(X, errs, d.evtType, shell, d.binding.String(), d.action.String())
+			if err != nil {
+				zap.L().Info("can not register a keybinding", zap.String("keybinding", d.binding.String()), zap.Error(err))
+			}
 		}
 
 		data = nil
@@ -222,7 +227,7 @@ toplevel:
 			select {
 			case err = <-errs:
 				if err != nil {
-					zap.L().Info("can not register/listen a keybinding", zap.Error(err))
+					zap.L().Info("command resulted into an error", zap.Error(err))
 				}
 				continue
 			case sig := <-signals:
