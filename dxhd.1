@@ -1,0 +1,86 @@
+.Dd June 24, 2020
+.Dt DXHD 1
+.Os
+.
+.Sh NAME
+.Nm dxhd
+.Nd daky's X11 Hotkey Daemon
+.
+.Sh SYNOPSIS
+.Nm
+.Op Fl c Ar path
+.Op Fl d
+.Op Fl k
+.Op Fl p
+.Op Fl r
+.Op Fl v
+.
+.Sh DESCRIPTION
+.Nm
+is an easy-to-use hotkey daemon for X11, written in the Go programming
+language and inspired by
+.Xr sxhkd 1 .
+.Pp
+The options are as follows:
+.Bl -tag -length Ds
+.It Fl c Ar path
+Specify an alternative configuration file.
+.It Fl d
+Only print bindings and their actions.
+.It Fl k
+Gracefully kill all running instances of
+.Nm .
+.It Fl p
+Print how much time parsing of the configuration file took,
+.It Fl r
+Reload all running instances of
+.Nm .
+.It Fl v
+Print the version of
+.Nm .
+.El
+.Pp
+In contrast to
+.Xr sxhkd 1 ,
+it enables the use of different languages in the scripts run.
+.
+.Sh CONFIGURATION
+.\" TODO: describe syntax of keybindings and variants and ranges and
+.\" stuff
+The configuration file is made of a series of keybindings, each
+followed by an action to be invoked when that keybinding is pressed.
+Lines starting with '##' are comments.
+.Pp
+A keybinding is specified on a line starting with '#'.
+.Pp
+An action is a series of lines containing commands for a shell. The
+default shell is
+.Pa /bin/sh ,
+but a different shell can be specified via a shebang on the first line
+of the file.
+.
+.Sh EXAMPLES
+.Bd -literal
+#!/bin/sh
+## restart i3
+# super + shift + r
+i3-msg -t command restart
+## switch to workspace 1-10
+# super + @{1-9,0}
+i3-msg -t command workspace {1-9,10}
+## switch to workspace 11-20
+# super + ctrl + {1-9,0}
+i3-msg -t command workspace {11-19,20}
+## switch to next/prev workspace
+# super + !mouse{4,5}
+i3-msg -t command workspace {next,prev}
+.Ed
+.
+.Sh SEE ALSO
+.Xr sxhkd 1
+.
+.Sh AUTHORS
+.An Lasha Kanteladze Aq Mt kanteladzelasha339@gmail.com
+.
+.Sh BUGS
+Yes.
