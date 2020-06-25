@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -28,10 +27,11 @@ DESCRIPTION
   One of the biggest advantages of dxhd is that you can write your configs in different languages,
   for example: sh, bash, ksh, zsh, Python, Perl.
   A config file is meant to have quite easy layout:
-    first line starting with #! is treated as a shebang
-    lines having ##+ prefix are treated as comments (get ignored)
-    lines having one # and then a keybinding are parsed as keybindings
-    lines under a keybinding are executed when keybinding is triggered
+    First line starting with #! is treated as a shebang
+    Lines having ##+ prefix are treated as comments (get ignored)
+    Lines having one # and then a keybinding are parsed as keybindings
+    Lines under a keybinding are executed when keybinding is triggered
+OPTIONS%s
 EXAMPLE CONFIG
   #!/bin/sh
   ## restart i3
@@ -58,64 +58,18 @@ func main() {
 		log.Fatal("dxhd is only supported on linux")
 	}
 
-	var (
-		kill             = flag.Bool("k", false, "gracefully kills every running instances of dxhd")
-		reload           = flag.Bool("r", false, "reloads every running instances of dxhd")
-		customConfigPath = flag.String("c", "", "reads the config from custom path")
-		printVersion     = flag.Bool("v", false, "prints current version of program")
-		dryRun           = flag.Bool("d", false, "prints bindings and their actions and exits")
-		parseTime        = flag.Bool("p", false, "prints how much time parsing a config took")
-	)
+	exit := false
 
-	flag.Usage = func() {
+	if opts.help {
 		fmt.Println(usage)
-		fmt.Println("VERSION")
-		fmt.Println("  " + version)
-		fmt.Println("FLAGS")
-		flag.PrintDefaults()
-		os.Exit(0)
+		fmt.Println()
+		exit = true
 	}
 
-	flag.Parse()
-
-	if *kill || *reload {
-		execName, err := os.Executable()
-		if err != nil {
-			zap.L().Fatal("can not get executable", zap.Error(err))
-		}
-
-		cmd := new(exec.Cmd)
-
-		if *kill {
-			cmd = exec.Command("pkill", "-INT", "-x", filepath.Base(execName))
-		} else {
-			cmd = exec.Command("pkill", "-USR1", "-x", filepath.Base(execName))
-		}
-
-		err = cmd.Start()
-
-		if err != nil {
-			if *kill {
-				log.Println("can not kill dxhd instances:")
-				log.Fatalln(err)
-			} else {
-				log.Println("can not reload dxhd instances:")
-				log.Fatalln(err)
-			}
-		}
-
-		if *kill {
-			fmt.Println("killing every running instances of dxhd")
-		} else {
-			fmt.Println("reloading every running instances of dxhd")
-		}
-
-		os.Exit(0)
-	}
-
-	if *printVersion {
+	if opts.version && !opts.help {
 		fmt.Println("you are using dxhd, version " + version)
-		os.Exit(0)
+		fmt.Println()
+		exit = true
 	}
 
 	var (
@@ -124,11 +78,11 @@ func main() {
 		validPath      bool
 	)
 
-	if *customConfigPath != "" {
-		if validPath, err = isPathToConfigValid(*customConfigPath); !(err == nil && validPath) {
-			zap.L().Fatal("path to the config is not valid", zap.String("path", *customConfigPath), zap.Bool("valid", validPath), zap.Error(err))
+	if opts.config != nil {
+		if validPath, err = isPathToConfigValid(*opts.config); !(err == nil && validPath) {
+			zap.L().Fatal("path to the config is not valid", zap.String("path", *opts.config), zap.Bool("valid", validPath), zap.Error(err))
 		}
-		configFilePath = *customConfigPath
+		configFilePath = *opts.config
 	} else {
 		configFilePath, _, err = getDefaultConfigPath()
 		if err != nil {
@@ -153,7 +107,7 @@ func main() {
 		startTime time.Time
 	)
 
-	if *parseTime {
+	if opts.parseTime {
 		startTime = time.Now()
 	}
 
@@ -162,7 +116,7 @@ func main() {
 		zap.L().Fatal("failed to parse config", zap.String("file", configFilePath), zap.Error(err))
 	}
 
-	if *parseTime {
+	if opts.parseTime {
 		since := time.Since(startTime)
 		timeTaken := fmt.Sprintf("%.0fs%dms%dµs",
 			since.Seconds(),
@@ -171,21 +125,61 @@ func main() {
 		)
 		fmt.Println(fmt.Sprintf("it took %s to parse the config", timeTaken))
 		fmt.Println(fmt.Sprintf("%d parsed keybindins (including replicated variants and ranges)", len(data)))
-		os.Exit(0)
+		exit = true
 	}
 
-	if *dryRun {
+	if opts.dryRun {
 		fmt.Println("dxhd dry run")
 		for _, d := range data {
 			fmt.Println("binding: " + d.originalBinding)
 			fmt.Println("action:")
 			fmt.Println(d.action.String())
-			fmt.Println()
 		}
+		fmt.Println()
+		exit = true
+	}
+
+	if opts.kill || opts.reload {
+		execName, err := os.Executable()
+		if err != nil {
+			zap.L().Fatal("can not get executable", zap.Error(err))
+		}
+
+		cmd := new(exec.Cmd)
+
+		if opts.kill {
+			cmd = exec.Command("pkill", "-INT", "-x", filepath.Base(execName))
+		} else {
+			cmd = exec.Command("pkill", "-USR1", "-x", filepath.Base(execName))
+		}
+
+		err = cmd.Start()
+
+		if err != nil {
+			if opts.kill {
+				log.Println("can not kill dxhd instances:")
+				log.Fatalln(err)
+			} else {
+				log.Println("can not reload dxhd instances:")
+				log.Fatalln(err)
+			}
+		}
+
+		if opts.kill {
+			fmt.Println("killing every running instances of dxhd")
+		} else {
+			fmt.Println("reloading every running instances of dxhd")
+		}
+
+		exit = true
+	}
+
+	if exit {
 		os.Exit(0)
 	}
 
 	zap.L().Debug("starting dxhd", zap.String("version", version))
+	zap.L().Debug("custom path might be provided", zap.String("path", configFilePath))
 
 	// catch these signals
 	signals := make(chan os.Signal, 1)
