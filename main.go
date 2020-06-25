@@ -24,15 +24,15 @@ import (
 var usage = `NAME
   dxhd - daky's X11 Hotkey Daemon
 DESCRIPTION
-  dxhd is easy to use X11 hotkey daemon, written in Golang programming language.
-  The biggest advantage of dxhd is that you can write your configs in different languages,
-  like sh, bash, ksh, zsh, Python, Perl
+  dxhd is an easy-to-use X11 hotkey daemon, written in Go programming language, and inspired by sxhkd.
+  One of the biggest advantages of dxhd is that you can write your configs in different languages,
+  for example: sh, bash, ksh, zsh, Python, Perl.
   A config file is meant to have quite easy layout:
     first line starting with #! is treated as a shebang
-    lines having ##+ prefix are ignored
+    lines having ##+ prefix are treated as comments (get ignored)
     lines having one # and then a keybinding are parsed as keybindings
     lines under a keybinding are executed when keybinding is triggered
-EXAMPLE
+EXAMPLE CONFIG
   #!/bin/sh
   ## restart i3
   # super + shift + r
@@ -44,7 +44,7 @@ EXAMPLE
   # super + ctrl + {1-9,0}
   i3-msg -t command workspace {11-19,20}
   ## switch to next/prev workspace
-  # super + !mouse{4,5}
+  # super + mouse{4,5}
   i3-msg -t command workspace {next,prev}
 BUGS
   report bugs here, if you encounter one - https://github.com/dakyskye/dxhd/issues

@@ -25,7 +25,7 @@ or use an AUR helper like yay - `yay -S dxhd`
 ```sh
 git clone https://github.com/dakyskye/dxhd.git
 cd dxhd
-go build -o dxhd .
+make fast
 ```
 
 and copy `dxhd` executable file to somewhere in your `$PATH`
@@ -36,12 +36,14 @@ Download the `dxhd` executable file from the latest release, from [releases page
 
 and copy `dxhd` executable file to somewhere in your `$PATH`
 
+**Note:** it is also possible to just `go get github.com/dakyskye/dxhd` and `go install github.com/dakyskye/dxhd`, but we can't know exactly what version it is!
+
 ## Features (what's inside parentheses, are just minimal example patterns)
 
 * key press events (`super + key`, where `key` is a non-modifier key)
-* key release events (`super + @key` where `key` is a non-modifier key, and `@` is specifier)
+* key release events (`super + @key` where `key` is a non-modifier key, and `@` is a specifier)
 * mouse button press events (`mouseN` where `n` is button number)
-* mouse button release events (`@mouseN` where `n` is button number, and `@` is specifier)
+* mouse button release events (`@mouseN` where `n` is button number, and `@` is a specifier)
 * variants (`{a,b,c}`)
 * ranges (`{1-9}`, `{a-z}`, `{1-3,5-9,i-k,o-z}`)
 * in-place reloading (`dxhd -r`)
@@ -57,29 +59,37 @@ and copy `dxhd` executable file to somewhere in your `$PATH`
 
 ## Configuration
 
-The default config file is located at `~/.config/dxhd/dxhd.sh`, however, dxhd can use a file from any path, by passing it to `-c`:
+The default config file is located at `~/.config/dxhd/dxhd.sh`, however, dxhd can read a file from any path, by passing it to `-c`:
 
 ```sh
 dxhd -c /my/custom/path/to/a/config/file
 ```
 
-A dxhd config file should containt a shebang (defaults to `/bin/sh`) on top of a file, which is where binding actions take action
+A dxhd config file should contain a shebang (defaults to `/bin/sh`) on top of a file, which will be the shell used for executing commands.
 
 ## Syntax
 
 \* config file *
 ```
-#! shebang
+#!/shebang
 
 ## a comment
-######### a comment
+######### also a comment
 
-# key + combo
+# modifier + keys
 <what to do>
 
-# key + combo + with + {1-9,0,a-z} + ranges
-<what to do {with,these,ranges}>
+# modifier + @keys
+<what to do on release event>
 ```
+
+## Running
+
+By just running `dxhd`, you only get information level logs, however, you can set `DEBUG` environment variable, which will output more information, like what bindings are registered, what command failed etc.
+
+dxhd disowns running processes when you kill it.  It is recommended to send TERM signal to kill dxhd (`kill -15`), however other signals work as well.
+
+To kill every running instance of dxhd, use `dxhd -k` command.
 
 ## Daemonisation
 
@@ -122,7 +132,7 @@ that was one of the main reasons I started developing dxhd
 
 ### How do I port my sxhkd config to dxhd
 
-It is simple enough! (I personally used Vim macros when I did it, because if you use Vim, you'll know why:)
+It is simple enough! (I personally used Vim macros when I did it.. Vim users will get it)
 * convert any line starting with single `#` to a *dxhd comment* (so ## or more)
 * put `#` before every keybinding (`super + a` to `# super + a`)
 * remove spaces before lines (`  echo foo` to `echo foo`) (optional)
@@ -157,6 +167,6 @@ Yes! and no.  dxhd has released key events and ranges, but no chords (yet - [wip
 They haven't benchmarked yet, so I don't know.
 However, been using dxhd since the first release and haven't noticed any speed loss!
 
-### Why is the released binary file +8mb
+### Why is the released binary file ~~+8mb~~ +6mb
 
-Because it's statically built, to make sure it will work on any amd64 linux machine! You can build dxhd instead to get ~~much~~ smaller file size. (build with `-ldflags "-s -w"`)
+Because it's statically built, to make sure it will work on any amd64 linux machine!
