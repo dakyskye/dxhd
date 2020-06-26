@@ -96,7 +96,7 @@ To kill every running instance of dxhd, use `dxhd -k` command.
 Rather then dxhd self daemonising itself, let other programs do their job.
 
 Use `systemd`, `runit`, `openrc` or other Linux init system to start dxhd on system startup,
-or let your DE/WM start it by adding an ampersant at the end `dxhd -c path/to/config &`,
+or let your DE/WM start it by adding an ampersand at the end `dxhd -c path/to/config &`,
 optionally, use `disown` keyword to make it not owned by the DE/WM process.
 
 ### For further help, join the developer's Discord guild
@@ -160,7 +160,7 @@ echo world
 
 ### I use ranges, released key events and chords from sxhkd, does dxhd have them
 
-Yes! and no.  dxhd has released key events and ranges, but no chords (yet - [wip](https://github.com/dakyskye/dxhd/issues/8))
+Yes! And no.  dxhd has released key events and ranges, but no chords (yet - [wip](https://github.com/dakyskye/dxhd/issues/8))
 
 ### Is dxhd faster than sxhkd
 
