@@ -6,7 +6,7 @@ set -e
 
 BINARY_NAME=dxhd
 
-GIT_VERSION="$(git rev-parse --short HEAD)"
+GIT_VERSION="master-$(git rev-parse --short HEAD)"
 DIRTY_VERSION="$(git describe --tags --dirty --always)"
 RELEASE_VERSION="$(date '+%d.%m.%Y_%H.%M')"
 
