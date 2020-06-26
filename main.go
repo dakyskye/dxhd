@@ -22,6 +22,10 @@ import (
 
 var usage = `NAME
   dxhd - daky's X11 Hotkey Daemon
+VERSION
+  %s
+SYNOPSIS
+  dxhd [OPTIONS]
 DESCRIPTION
   dxhd is an easy-to-use X11 hotkey daemon, written in Go programming language, and inspired by sxhkd.
   One of the biggest advantages of dxhd is that you can write your configs in different languages,

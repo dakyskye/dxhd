@@ -83,5 +83,5 @@ func init() {
 		}
 	}
 
-	usage = fmt.Sprintf(usage, flags)
+	usage = fmt.Sprintf(usage, version, flags)
 }
