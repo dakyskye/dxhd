@@ -56,6 +56,7 @@ func doAction(err chan<- error, shell, do string) {
 	cmd := exec.Command(shell)
 	cmd.Stdin = strings.NewReader(do)
 	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 	zap.L().Debug("now executing a command", zap.String("command", do))
 	err <- cmd.Run()
 }
