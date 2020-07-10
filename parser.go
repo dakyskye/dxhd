@@ -625,7 +625,7 @@ func extractRanges(bindingVars, actionVars [][]string) (r []ranges, err error) {
 				r[len(r)-1].action.startStr = aStartStr
 				r[len(r)-1].action.end = aEnd
 				r[len(r)-1].action.endStr = aEndStr
-				r[len(r)-1].action.skip = aRangeValidation == false
+				r[len(r)-1].action.skip = !aRangeValidation
 				r[len(r)-1].action.numerical = aNumerical
 			}
 		}
