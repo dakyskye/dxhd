@@ -126,8 +126,8 @@ func main() {
 			since.Milliseconds(),
 			since.Microseconds(),
 		)
-		fmt.Println(fmt.Sprintf("it took %s to parse the config", timeTaken))
-		fmt.Println(fmt.Sprintf("%d parsed keybindins (including replicated variants and ranges)", len(data)))
+		fmt.Printf("it took %s to parse the config\n", timeTaken)
+		fmt.Printf("%d parsed keybindins (including replicated variants and ranges)\n", len(data))
 		exit = true
 	}
 

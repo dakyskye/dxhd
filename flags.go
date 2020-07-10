@@ -61,7 +61,7 @@ func init() {
 			case strings.HasPrefix(opt, "config="):
 				*opts.config = strings.TrimPrefix(opt, "config=")
 			default:
-				fmt.Println(fmt.Sprintf("%s is not a valid option", opt))
+				fmt.Printf("%s is not a valid option\n", opt)
 			}
 		} else if strings.HasPrefix(osArg, "-") {
 			for _, r := range osArg[1:] {
@@ -79,7 +79,7 @@ func init() {
 				case "p":
 					opts.parseTime = true
 				default:
-					fmt.Println(fmt.Sprintf("%s in %s is not a valid option", string(r), osArg))
+					fmt.Printf("%s in %s is not a valid option\n", string(r), osArg)
 				}
 			}
 		}

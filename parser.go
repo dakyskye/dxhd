@@ -133,7 +133,7 @@ func parse(file string, data *[]filedata) (shell string, err error) {
 		// decide whether the line is a keybinding or not
 		if strings.HasPrefix(lineStr, "#") {
 			if isPrefix {
-				err = errors.New(fmt.Sprintf("a keybinding can't be that long, line %d, file %s", lineNumber, file))
+				err = fmt.Errorf("a keybinding can't be that long, line %d, file %s", lineNumber, file)
 				return
 			}
 			// erase spaces for key validation
@@ -281,7 +281,7 @@ func parse(file string, data *[]filedata) (shell string, err error) {
 		if d.hasVariant {
 			replicated, e := replicate(d.binding.String(), d.action.String())
 			if e != nil {
-				err = errors.New(fmt.Sprintf("can't register %s keybinding, error (%s)", strings.TrimPrefix(d.binding.String(), "#"), e.Error()))
+				err = fmt.Errorf("can't register %s keybinding, error (%s)", strings.TrimPrefix(d.binding.String(), "#"), e.Error())
 				return
 			}
 			for _, repl := range replicated {

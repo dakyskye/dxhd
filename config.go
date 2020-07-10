@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -26,7 +25,7 @@ func isPathToConfigValid(path string) (isValid bool, err error) {
 	}
 
 	if !stat.Mode().IsRegular() {
-		err = errors.New(fmt.Sprintf("%s is not a regular file", path))
+		err = fmt.Errorf("%s is not a regular file", path)
 		return
 	}
 
