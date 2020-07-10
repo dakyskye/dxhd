@@ -148,15 +148,11 @@ func main() {
 			zap.L().Fatal("can not get executable", zap.Error(err))
 		}
 
-		cmd := new(exec.Cmd)
-
 		if opts.kill {
-			cmd = exec.Command("pkill", "-INT", "-x", filepath.Base(execName))
+			err = exec.Command("pkill", "-INT", "-x", filepath.Base(execName)).Start()
 		} else {
-			cmd = exec.Command("pkill", "-USR1", "-x", filepath.Base(execName))
+			err = exec.Command("pkill", "-USR1", "-x", filepath.Base(execName)).Start()
 		}
-
-		err = cmd.Start()
 
 		if err != nil {
 			if opts.kill {
