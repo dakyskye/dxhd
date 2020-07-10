@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 	"runtime"
 	"strconv"
-	"strings"
 	"syscall"
 	"time"
 
@@ -187,7 +186,7 @@ func main() {
 
 	// catch these signals
 	signals := make(chan os.Signal, 1)
-	signal.Notify(signals, os.Interrupt, os.Kill, syscall.SIGINT, syscall.SIGTERM, syscall.SIGUSR1, syscall.SIGUSR2)
+	signal.Notify(signals, os.Interrupt, syscall.SIGINT, syscall.SIGTERM, syscall.SIGUSR1, syscall.SIGUSR2)
 
 	// errors channel
 	errs := make(chan error)
@@ -232,7 +231,7 @@ toplevel:
 				keybind.Detach(X, X.RootWin())
 				mousebind.Detach(X, X.RootWin())
 				xevent.Quit(X)
-				if strings.HasPrefix(sig.String(), "user defined signal") {
+				if sig == syscall.SIGUSR1 || sig == syscall.SIGUSR2 {
 					zap.L().Debug("user defined signal received, reloading")
 					continue toplevel
 				}
