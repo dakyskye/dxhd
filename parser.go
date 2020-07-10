@@ -585,10 +585,10 @@ func extractRanges(bindingVars, actionVars [][]string) (r []ranges, err error) {
 						if err != nil {
 							return
 						}
-						for _, a := range []rune(aRange[1]) {
+						for _, a := range aRange[1] {
 							aStartStr += string(a)
 						}
-						for _, a := range []rune(aRange[2]) {
+						for _, a := range aRange[2] {
 							aEndStr += string(a)
 						}
 						aNumerical = true
