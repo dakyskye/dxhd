@@ -30,13 +30,15 @@ make fast
 
 and copy `dxhd` executable file to somewhere in your `$PATH`
 
+or alternatively run `make install`, which builds and copies the built executable to `/usr/bin/` directory.
+
 * From releases
 
 Download the `dxhd` executable file from the latest release, from [releases page](https://github.com/dakyskye/dxhd/releases)
 
 and copy `dxhd` executable file to somewhere in your `$PATH`
 
-**Note:** it is also possible to just `go get github.com/dakyskye/dxhd` and `go install github.com/dakyskye/dxhd`, but we can't know exactly what version it is!
+**Note:** `go get`ting dxhd is possible, but not recommended. Read more [here](https://github.com/dakyskye/dxhd#why-is-go-getting-dxhd-not-recommended)
 
 ## Features (what's inside parentheses, are just minimal example patterns)
 
@@ -170,3 +172,8 @@ However, been using dxhd since the first release and haven't noticed any speed l
 ### Why is the released binary file ~~+8mb~~ +6mb
 
 Because it's statically built, to make sure it will work on any amd64 linux machine!
+
+### Why is go getting dxhd not recommended
+
+hilst `go get`ting dxhd should work fine, it's not recommended, because we can't know what version of dxhd you use in case you want to open a bug report or so.
++It's not like dxhd has any bug issue is not opened for already, since the developer of dxhd himself uses dxhd daily, but still.
