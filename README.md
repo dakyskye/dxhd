@@ -2,7 +2,7 @@
 
 ## daky's X11 hotkey daemon
 
-dxhd is heavily inspired by [sxhkd](https://github.com/baskerville/sxhkd), written in Go, and has quite elegant syntax for configuration files!
+dxhd is heavily inspired by [sxhkd](https://github.com/baskerville/sxhkd), written in Go, and has an elegant syntax for configuration files!
 
 ## Installation
 
@@ -171,9 +171,9 @@ However, been using dxhd since the first release and haven't noticed any speed l
 
 ### Why is the released binary file ~~+8mb~~ +6mb
 
-Because it's statically built, to make sure it will work on any amd64 linux machine!
+Because it's statically built, to make sure it will work on any supported machine!
 
 ### Why is go getting dxhd not recommended
 
-hilst `go get`ting dxhd should work fine, it's not recommended, because we can't know what version of dxhd you use in case you want to open a bug report or so.
+Whilst `go get`ting dxhd should work fine, it's not recommended, because we can't know what version of dxhd you use in case you want to open a bug report or so.
 +It's not like dxhd has any bug issue is not opened for already, since the developer of dxhd himself uses dxhd daily, but still.
