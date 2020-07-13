@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"errors"
 	"os"
 	"os/exec"
@@ -54,14 +55,23 @@ func listenKeybinding(X *xgbutil.XUtil, errs chan<- error, evtType int, shell, k
 
 // do a given shell command
 func doAction(err chan<- error, shell, do string) {
+	writer := new(bytes.Buffer)
 	cmd := exec.Command(shell)
 	cmd.Stdin = strings.NewReader(do)
 	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	cmd.Stderr = writer
 	cmd.SysProcAttr = &syscall.SysProcAttr{
 		Foreground: false,
 		Setsid:     true,
 	}
 	zap.L().Debug("now executing a command", zap.String("command", do))
-	err <- cmd.Run()
+	err <- cmd.Start()
+	if e := cmd.Wait(); e != nil {
+		prefixLen := len(shell) + 2
+		if writer.Len() > prefixLen {
+			err <- errors.New(writer.String()[prefixLen:])
+		} else {
+			err <- e
+		}
+	}
 }
