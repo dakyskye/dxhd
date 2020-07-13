@@ -89,9 +89,7 @@ A dxhd config file should contain a shebang (defaults to `/bin/sh`) on top of a 
 
 By just running `dxhd`, you only get information level logs, however, you can set `DEBUG` environment variable, which will output more information, like what bindings are registered, what command failed etc.
 
-dxhd disowns running processes when you kill it.  It is recommended to send TERM signal to kill dxhd (`kill -15`), however other signals work as well.
-
-To kill every running instance of dxhd, use `dxhd -k` command.
+To kill every running instance of dxhd, you can use built-in `-k` flag, which under the hood uses `pkill` command to kill instances.
 
 ## Daemonisation
 
