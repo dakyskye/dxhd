@@ -61,7 +61,7 @@ release_build() {
 release_push() {
 	[ ! "$(git cherry)" = "" ] && echo "you have commits that are yet not pushed"
 	git status | grep -qi '^untracked files:' && echo "you have untracked files"
-	git status | grep -qi '^changes to be committed:' && echo "you have changes to be commited"
+	git status | grep -qi '^changes to be committed:' && echo "you have changes to be committed"
 
 	echo 'are you sure you want to git tag and push? type "yes I want" in screaming snake case :)'
 	read -r ANS
