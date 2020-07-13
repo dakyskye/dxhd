@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"syscall"
 
 	"github.com/BurntSushi/xgbutil"
 	"github.com/BurntSushi/xgbutil/keybind"
@@ -57,6 +58,10 @@ func doAction(err chan<- error, shell, do string) {
 	cmd.Stdin = strings.NewReader(do)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
+	cmd.SysProcAttr = &syscall.SysProcAttr{
+		Foreground: false,
+		Setsid:     true,
+	}
 	zap.L().Debug("now executing a command", zap.String("command", do))
 	err <- cmd.Run()
 }

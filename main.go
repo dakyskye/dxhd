@@ -220,7 +220,7 @@ toplevel:
 			select {
 			case err = <-errs:
 				if err != nil {
-					zap.L().Info("command resulted into an error", zap.Error(err))
+					zap.L().Info("a command resulted into an error", zap.Error(err))
 				}
 				continue
 			case sig := <-signals:
