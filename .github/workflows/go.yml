@@ -25,11 +25,18 @@ jobs:
     - name: Get dependencies
       run: |
         go get -v -t -d ./...
+        go get -u honnef.co/go/tools/cmd/staticcheck
+        go get -u golang.org/x/lint/golint
+        go get -u github.com/gordonklaus/ineffassign
+        go get -u github.com/client9/misspell/cmd/misspell
 
-    - name: Lint
+    - name: Check
       run: |
-        go get honnef.co/go/tools/cmd/staticcheck
+        misspell .
+        go vet .
+        golint .
         staticcheck .
+        ineffassign .
 
     - name: Build
       run: go build -v .
