@@ -181,17 +181,16 @@ func parse(file string, data *[]filedata) (shell string, err error) {
 				datum[index].evtType = -1
 				for _, key := range strings.Split(lineStr, "+") {
 					if len(key) > 1 {
-						evt := -1
 						if strings.HasPrefix(key, "@mouse") {
-							evt = evtButtonRelease
+							datum[index].evtType = getEventType(datum[index].evtType, evtButtonRelease)
 						} else if strings.HasPrefix(key, "mouse") {
-							evt = evtButtonPress
+							datum[index].evtType = getEventType(datum[index].evtType, evtButtonPress)
 						} else if strings.HasPrefix(key, "@") {
-							evt = evtKeyRelease
+							datum[index].evtType = getEventType(datum[index].evtType, evtKeyRelease)
 						} else {
-							evt = evtKeyPress
+							datum[index].evtType = getEventType(datum[index].evtType, evtKeyPress)
 						}
-						datum[index].evtType = getEventType(datum[index].evtType, evt)
+
 					}
 				}
 				// means a keybinding was the single letter
