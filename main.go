@@ -16,7 +16,7 @@ import (
 	"github.com/BurntSushi/xgbutil/keybind"
 	"github.com/BurntSushi/xgbutil/mousebind"
 	"github.com/BurntSushi/xgbutil/xevent"
-	"go.uber.org/zap"
+	"github.com/sirupsen/logrus"
 )
 
 var usage = `NAME
@@ -83,23 +83,26 @@ func main() {
 
 	if opts.config != nil {
 		if validPath, err = isPathToConfigValid(*opts.config); !(err == nil && validPath) {
-			zap.L().Fatal("path to the config is not valid", zap.String("path", *opts.config), zap.Bool("valid", validPath), zap.Error(err))
+			logger.WithFields(logrus.Fields{
+				"path":  *opts.config,
+				"valid": validPath,
+			}).WithError(err).Fatal("path to the config is not valid")
 		}
 		configFilePath = *opts.config
 	} else {
 		configFilePath, _, err = getDefaultConfigPath()
 		if err != nil {
-			zap.L().Fatal("can not get default config path", zap.Error(err))
+			logger.WithError(err).Fatal("can not get config path")
 		}
 
 		if validPath, err = isPathToConfigValid(configFilePath); !(err == nil && validPath) {
 			if os.IsNotExist(err) {
 				err = createDefaultConfig()
 				if err != nil {
-					zap.L().Fatal("can not create default config", zap.String("path", configFilePath), zap.Error(err))
+					logger.WithField("path", configFilePath).Fatal("can not create default config")
 				}
 			} else {
-				zap.L().Fatal("path to the config is not valid", zap.String("path", configFilePath), zap.Bool("valid", validPath), zap.Error(err))
+				logger.WithFields(logrus.Fields{"path": configFilePath, "valid": validPath}).WithError(err).Fatal("path to the config is not valid")
 			}
 		}
 	}
@@ -116,7 +119,7 @@ func main() {
 
 	shell, err = parse(configFilePath, &data)
 	if err != nil {
-		zap.L().Fatal("failed to parse config", zap.String("file", configFilePath), zap.Error(err))
+		logger.WithField("file", configFilePath).WithError(err).Fatal("failed to parse config")
 	}
 
 	if opts.parseTime {
@@ -145,7 +148,7 @@ func main() {
 	if opts.kill || opts.reload {
 		execName, err := os.Executable()
 		if err != nil {
-			zap.L().Fatal("can not get executable", zap.Error(err))
+			logger.WithError(err).Fatal("can not get executable")
 		}
 
 		if opts.kill {
@@ -177,8 +180,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	zap.L().Debug("starting dxhd", zap.String("version", version))
-	zap.L().Debug("custom path might be provided", zap.String("path", configFilePath))
+	logger.WithFields(logrus.Fields{"version": version, "path": configFilePath}).Debug("starting dxhd")
 
 	// catch these signals
 	signals := make(chan os.Signal, 1)
@@ -193,13 +195,13 @@ toplevel:
 		if len(data) == 0 {
 			shell, err = parse(configFilePath, &data)
 			if err != nil {
-				zap.L().Fatal("failed to parse config", zap.String("file", configFilePath), zap.Error(err))
+				logger.WithField("file", configFilePath).WithError(err).Fatal("failed to parse config")
 			}
 		}
 
 		X, err := xgbutil.NewConn()
 		if err != nil {
-			zap.L().Fatal("can not open connection to Xorg", zap.Error(err))
+			logger.WithError(err).Fatal("can not open connection to Xorg")
 		}
 
 		keybind.Initialize(X)
@@ -208,7 +210,7 @@ toplevel:
 		for _, d := range data {
 			err = listenKeybinding(X, errs, d.evtType, shell, d.binding.String(), d.action.String())
 			if err != nil {
-				zap.L().Info("can not register a keybinding", zap.String("keybinding", d.binding.String()), zap.Error(err))
+				logger.WithField("keybinding", d.binding.String()).WithError(err).Warn("can not register a keybinding")
 			}
 		}
 
@@ -220,7 +222,7 @@ toplevel:
 			select {
 			case err = <-errs:
 				if err != nil {
-					zap.L().Info("a command resulted into an error", zap.Error(err))
+					logger.WithError(err).Warn("a command resulted into an error")
 				}
 				continue
 			case sig := <-signals:
@@ -228,10 +230,10 @@ toplevel:
 				mousebind.Detach(X, X.RootWin())
 				xevent.Quit(X)
 				if sig == syscall.SIGUSR1 || sig == syscall.SIGUSR2 {
-					zap.L().Debug("user defined signal received, reloading")
+					logger.Debug("user defined signal received, reloading")
 					continue toplevel
 				}
-				zap.L().Info("signal received, shutting down", zap.String("signal", sig.String()))
+				logger.WithField("signal", sig.String()).Info("signal received, shutting down")
 				if env, err := strconv.ParseBool(os.Getenv("STACKTRACE")); env && err == nil {
 					buf := make([]byte, 1<<20)
 					stackLen := runtime.Stack(buf, true)

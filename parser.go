@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"strings"
 
-	"go.uber.org/zap"
+	"github.com/sirupsen/logrus"
 )
 
 // event definitions
@@ -79,7 +79,7 @@ func parse(file string, data *[]filedata) (shell string, err error) {
 			if err == nil {
 				err = e
 			} else {
-				zap.L().Debug("failed to close config file", zap.Error(e))
+				logger.WithError(err).Debug("failed to close config file")
 			}
 		}
 	}()
@@ -151,8 +151,8 @@ func parse(file string, data *[]filedata) (shell string, err error) {
 				if wasKeybinding {
 					if datum[index].binding.Len() != 0 {
 						datum[index].binding.Reset()
-						zap.L().Info("overwriting older keybinding", zap.String("file", file), zap.Int("line", lineNumber))
-						zap.L().Debug("overwriting keybinding", zap.String("old", datum[index].binding.String()), zap.String("new", lineStr))
+						logger.WithFields(logrus.Fields{"file": file, "line": lineNumber}).Info("overwriting keybinding")
+						logger.WithFields(logrus.Fields{"old": datum[index].binding.String(), "new": lineStr}).Debug("overwriting keybinding")
 					}
 				}
 

@@ -4,38 +4,22 @@ import (
 	"os"
 	"strconv"
 
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
+	"github.com/sirupsen/logrus"
 )
+
+var logger = logrus.New()
 
 // init the logger before main function
 func init() {
-	var config zap.Config
+	formatter := &logrus.TextFormatter{DisableTimestamp: true, ForceQuote: true}
 
-	doExtra := func(envVar string) bool {
-		if env, err := strconv.ParseBool(os.Getenv(envVar)); env && err == nil {
-			return true
-		}
-		return false
-	}
-
-	if doExtra("DEV") {
-		config = zap.NewDevelopmentConfig()
+	if env, err := strconv.ParseBool(os.Getenv("DEBUG")); env && err == nil {
+		logger.SetLevel(logrus.DebugLevel)
+		logger.ReportCaller = true
+		formatter.DisableTimestamp = false
+		logger.SetFormatter(formatter)
 	} else {
-		config = zap.NewProductionConfig()
+		logger.SetLevel(logrus.InfoLevel)
+		logger.SetFormatter(formatter)
 	}
-
-	if doExtra("DEBUG") {
-		config.Level = zap.NewAtomicLevelAt(zap.DebugLevel)
-	}
-
-	config.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
-	config.DisableStacktrace = true
-
-	logger, err := config.Build()
-	if err != nil {
-		panic(err)
-	}
-
-	zap.ReplaceGlobals(logger)
 }
