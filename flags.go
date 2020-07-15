@@ -56,7 +56,7 @@ func init() {
 				if strings.HasPrefix(osArgs[in+1], "--") || strings.HasPrefix(osArgs[in+1], "-") {
 					continue
 				}
-				*opts.config = osArgs[in+1]
+				opts.config = &osArgs[in+1]
 				skip = true
 			case strings.HasPrefix(opt, "config="):
 				*opts.config = strings.TrimPrefix(opt, "config=")
