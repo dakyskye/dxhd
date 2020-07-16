@@ -167,7 +167,7 @@ Yes! And no.  dxhd has released key events and ranges, but no chords (yet - [wip
 They haven't benchmarked yet, so I don't know.
 However, been using dxhd since the first release and haven't noticed any speed loss!
 
-### Why is the released binary file ~~+8mb~~ +6mb
+### Why is the released binary file ~~+8mb~~ ~~+6mb~~ +3mb
 
 Because it's statically built, to make sure it will work on any supported machine!
 
