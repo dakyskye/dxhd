@@ -85,6 +85,10 @@ toplevel:
 					if in == len(osArgs)-1 {
 						break toplevel
 					}
+					if strings.HasPrefix(osArgs[in+1], "--") || strings.HasPrefix(osArgs[in+1], "-") {
+						continue
+					}
+					opts.config = new(string)
 					opts.config = &osArgs[in+1]
 					skip = true
 				default:
