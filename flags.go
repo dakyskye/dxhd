@@ -19,6 +19,7 @@ type options struct {
 var opts options
 
 var flags = `
+  -h, --help              Prints this help message
   -c, --config            Reads the config from custom path
   -d, --dry-run           Prints bindings and their actions and exits
   -k, --kill	          Gracefully kills every running instances of dxhd
@@ -30,6 +31,7 @@ func init() {
 	osArgs := os.Args[1:]
 
 	skip := false
+toplevel:
 	for in, osArg := range osArgs {
 		if skip {
 			skip = false
@@ -43,8 +45,6 @@ func init() {
 				opts.kill = true
 			case opt == "reload":
 				opts.reload = true
-			case opt == "version":
-				opts.version = true
 			case opt == "dry-run":
 				opts.dryRun = true
 			case opt == "parse-time":
@@ -59,7 +59,10 @@ func init() {
 				opts.config = &osArgs[in+1]
 				skip = true
 			case strings.HasPrefix(opt, "config="):
+				opts.config = new(string)
 				*opts.config = strings.TrimPrefix(opt, "config=")
+			case opt == "version":
+				opts.version = true
 			default:
 				fmt.Printf("%s is not a valid option\n", opt)
 			}
@@ -78,6 +81,12 @@ func init() {
 					opts.dryRun = true
 				case "p":
 					opts.parseTime = true
+				case "c":
+					if in == len(osArgs)-1 {
+						break toplevel
+					}
+					opts.config = &osArgs[in+1]
+					skip = true
 				default:
 					fmt.Printf("%s in %s is not a valid option\n", string(r), osArg)
 				}
