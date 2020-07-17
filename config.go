@@ -7,12 +7,12 @@ import (
 )
 
 func getDefaultConfigPath() (file, directory string, err error) {
-	configDirPath, err := os.UserConfigDir()
+	directory, err = os.UserConfigDir()
 	if err != nil {
 		return
 	}
 
-	directory = filepath.Join(configDirPath, "dxhd")
+	directory = filepath.Join(directory, "dxhd")
 	file = filepath.Join(directory, "dxhd.sh")
 	return
 }
