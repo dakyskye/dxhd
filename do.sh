@@ -92,6 +92,28 @@ release_commits() {
 	echo "$COMMITS" > "$RELEASE_DIR/release_info"
 }
 
+check_ensuredeps() {
+	CUR="$PWD"
+	cd ~
+	echo "downloading required dependencies for checking code"
+	go get -u honnef.co/go/tools/cmd/staticcheck
+	go get -u golang.org/x/lint/golint
+	go get -u github.com/gordonklaus/ineffassign
+	go get -u github.com/client9/misspell/cmd/misspell
+	cd "$CUR"
+	echo "dependencies are downloaded and installed"
+}
+
+check_code() {
+	misspell .
+	go vet .
+	golint .
+	staticcheck .
+	ineffassign .
+}
+
+go get -v -d -t ./
+
 if [ -z "$1" ]; then
 	build dev
 else
@@ -103,10 +125,16 @@ else
 			build dev
 			;;
 		release)
+			check_ensuredeps
+			check_code
 			release_preconfig
 			release_build
 			release_push
 			release_commits
+			;;
+		check)
+			check_ensuredeps
+			check_code
 			;;
 	esac
 fi

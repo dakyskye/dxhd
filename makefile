@@ -9,3 +9,5 @@ install:
 	@sudo mkdir -p /usr/share/licenses/dxhd/
 	@sudo cp LICENSE /usr/share/licenses/dxhd/
 	@echo installed
+check:
+	@./do.sh check
