@@ -15,7 +15,7 @@ import (
 
 // event definitions
 const (
-	evtKeyPress int = iota
+	evtKeyPress int8 = iota
 	evtKeyRelease
 	evtButtonPress
 	evtButtonRelease
@@ -26,7 +26,7 @@ type filedata struct {
 	originalBinding string
 	binding         strings.Builder
 	action          strings.Builder
-	evtType         int
+	evtType         int8
 	hasVariant      bool
 }
 
@@ -62,9 +62,9 @@ var (
 )
 
 // parese function parses a config file, and returns data
-func parse(file string, data *[]filedata) (shell string, err error) {
+func parse(file string, data *[]filedata) (shell, globals string, err error) {
 	if data == nil {
-		return "", errors.New("empty value was passed to parse function")
+		return "", "", errors.New("empty value was passed to parse function")
 	}
 
 	configFile, err := os.Open(file)
@@ -92,6 +92,8 @@ func parse(file string, data *[]filedata) (shell string, err error) {
 	wasPrefix := false
 	datum := []filedata{}
 	index := 0
+	globalsBuilder := new(strings.Builder)
+	globalsEnded := false
 
 	// read file line by line
 	for {
@@ -125,8 +127,16 @@ func parse(file string, data *[]filedata) (shell string, err error) {
 			continue
 		}
 
+		if !strings.HasPrefix(lineStr, "#") && !globalsEnded {
+			globalsBuilder.WriteString(lineStr + "\n")
+			continue
+		}
+
 		// ignore comments (##+)
 		if strings.HasPrefix(lineStr, "##") {
+			if !globalsEnded {
+				globalsEnded = true
+			}
 			continue
 		}
 
@@ -135,6 +145,9 @@ func parse(file string, data *[]filedata) (shell string, err error) {
 			if isPrefix {
 				err = fmt.Errorf("a keybinding can't be that long, line %d, file %s", lineNumber, file)
 				return
+			}
+			if !globalsEnded {
+				globalsEnded = true
 			}
 			// erase spaces for key validation
 			lineStr = strings.ReplaceAll(lineStr, " ", "")
@@ -157,7 +170,7 @@ func parse(file string, data *[]filedata) (shell string, err error) {
 				}
 
 				// getEventType merges two events into one type
-				getEventType := func(old, new int) (evt int) {
+				getEventType := func(old, new int8) (evt int8) {
 					switch old {
 					case evtKeyPress:
 						evt = new
@@ -305,6 +318,9 @@ func parse(file string, data *[]filedata) (shell string, err error) {
 		err = errors.New("config file does not contain any binding/action")
 		return
 	}
+
+	// build string from globalsBuilder
+	globals = globalsBuilder.String()
 
 	return
 }

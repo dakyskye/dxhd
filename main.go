@@ -110,6 +110,7 @@ func main() {
 	var (
 		data      []filedata
 		shell     string
+		globals   string
 		startTime time.Time
 	)
 
@@ -117,7 +118,7 @@ func main() {
 		startTime = time.Now()
 	}
 
-	shell, err = parse(configFilePath, &data)
+	shell, globals, err = parse(configFilePath, &data)
 	if err != nil {
 		logger.WithField("file", configFilePath).WithError(err).Fatal("failed to parse config")
 	}
@@ -193,7 +194,7 @@ func main() {
 toplevel:
 	for {
 		if len(data) == 0 {
-			shell, err = parse(configFilePath, &data)
+			shell, globals, err = parse(configFilePath, &data)
 			if err != nil {
 				logger.WithField("file", configFilePath).WithError(err).Fatal("failed to parse config")
 			}
@@ -208,7 +209,7 @@ toplevel:
 		mousebind.Initialize(X)
 
 		for _, d := range data {
-			err = listenKeybinding(X, errs, d.evtType, shell, d.binding.String(), d.action.String())
+			err = listenKeybinding(X, errs, d.evtType, shell, globals, d.binding.String(), d.action.String())
 			if err != nil {
 				logger.WithField("keybinding", d.binding.String()).WithError(err).Warn("can not register a keybinding")
 			}
