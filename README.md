@@ -51,6 +51,7 @@ and copy `dxhd` executable file to somewhere in your `$PATH`
 * in-place reloading (`dxhd -r`)
 * calculating the time parsing a config file took (`dxhd -p`)
 * support for any shell scripting language (sh, bash, ksh, zsh, python, perl etc.) given as a shebang
+* support for global variable declarations in a config
 * support for scripting, as much as a user wishes!
 
 ### Demo
@@ -74,6 +75,8 @@ A dxhd config file should contain a shebang (defaults to `/bin/sh`) on top of a 
 \* config file *
 ```
 #!/shebang
+
+test=5 # a globally declared variable for each keybinding command
 
 ## a comment
 ######### also a comment
@@ -126,6 +129,7 @@ that was one of the main reasons I started developing dxhd
 
 * dxhd uses shebang to determine which shell to use (so you don't have to set an environment variable)
 * dxhd config file syntax matches shell, python, perl and probably some other languages syntax
+* dxhd config lets you declare global variables for each keybinding command
 * dxhd is great with scripting, because of it's elegant syntax.  multi line scripts do not need `\` at the end of line
 * dxhd allows you to have different range in a keybinding's action, for example, `1-9` in a keybinding, and `11-19` in it's action
 * dxhd has support for mouse bindings out of the box, no patching required!
@@ -161,6 +165,35 @@ echo world
 ### I use ranges, released key events and chords from sxhkd, does dxhd have them
 
 Yes! And no.  dxhd has released key events and ranges, but no chords (yet - [wip](https://github.com/dakyskye/dxhd/issues/8))
+
+### How does global variables inside a config file work
+
+Everything after (if there is) the shebang before the first comment/keybinding is collected and passed to each keybinding command
+
+A shell example:
+
+```sh
+#!/bin/sh
+
+INFO="$(wmctrl -m)"
+
+## print info about my WM
+# super + i
+echo "Info about your WM:"
+echo "$INFO"
+```
+
+A Python example:
+
+```py
+#!/usr/bin/python
+
+foo="foo bar"
+
+## print the value of foo variable
+# super + i
+print(foo)
+```
 
 ### Is dxhd faster than sxhkd
 
