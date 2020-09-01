@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-type Result struct {
+type Options struct {
 	Help      bool
 	Kill      bool
 	Reload    bool
@@ -16,16 +16,16 @@ type Result struct {
 	Config    *string
 }
 
-var Options = `
+var OptionsToPrint = `
   -h, --help              Prints this help message
   -c, --config            Reads the config from custom path
-  -d, --dry-run           Prints bindings and their actions and exits
+  -d, --dry-run           Prints bindings and their commands and exits
   -k, --kill	          Gracefully kills every running instances of dxhd
   -p, --parse-time        Prints how much time parsing a config took
   -r, --reload	          Reloads every running instances of dxhd
   -v, --version	          Prints current version of program`
 
-func Parse() (result Result, err error) {
+func Parse() (opts Options, err error) {
 	osArgs := os.Args[1:]
 
 	skip := false
@@ -39,15 +39,15 @@ toplevel:
 		if strings.HasPrefix(osArg, "--") {
 			switch opt := osArg[2:]; {
 			case opt == "help":
-				result.Help = true
+				opts.Help = true
 			case opt == "kill":
-				result.Kill = true
+				opts.Kill = true
 			case opt == "reload":
-				result.Reload = true
+				opts.Reload = true
 			case opt == "dry-run":
-				result.DryRun = true
+				opts.DryRun = true
 			case opt == "parse-time":
-				result.ParseTime = true
+				opts.ParseTime = true
 			case opt == "config":
 				if in == len(osArgs)-1 {
 					break
@@ -55,13 +55,13 @@ toplevel:
 				if strings.HasPrefix(osArgs[in+1], "--") || strings.HasPrefix(osArgs[in+1], "-") {
 					continue
 				}
-				result.Config = &osArgs[in+1]
+				opts.Config = &osArgs[in+1]
 				skip = true
 			case strings.HasPrefix(opt, "config="):
-				result.Config = new(string)
-				*result.Config = strings.TrimPrefix(opt, "config=")
+				opts.Config = new(string)
+				*opts.Config = strings.TrimPrefix(opt, "config=")
 			case opt == "version":
-				result.Version = true
+				opts.Version = true
 			default:
 				err = fmt.Errorf("%s is not a valid option", err)
 				return
@@ -70,17 +70,17 @@ toplevel:
 			for _, r := range osArg[1:] {
 				switch string(r) {
 				case "h":
-					result.Help = true
+					opts.Help = true
 				case "k":
-					result.Kill = true
+					opts.Kill = true
 				case "r":
-					result.Reload = true
+					opts.Reload = true
 				case "v":
-					result.Version = true
+					opts.Version = true
 				case "d":
-					result.DryRun = true
+					opts.DryRun = true
 				case "p":
-					result.ParseTime = true
+					opts.ParseTime = true
 				case "c":
 					if in == len(osArgs)-1 {
 						break toplevel
@@ -88,11 +88,11 @@ toplevel:
 					if strings.HasPrefix(osArgs[in+1], "--") || strings.HasPrefix(osArgs[in+1], "-") {
 						continue
 					}
-					result.Config = new(string)
-					result.Config = &osArgs[in+1]
+					opts.Config = new(string)
+					opts.Config = &osArgs[in+1]
 					skip = true
 				default:
-					err = fmt.Errorf("%s in %s is not a valid option\n", string(r), osArg)
+					err = fmt.Errorf("%s in %s is not a valid option", string(r), osArg)
 					return
 				}
 			}

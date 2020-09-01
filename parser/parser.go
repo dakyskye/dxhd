@@ -29,15 +29,15 @@ const (
 type FileData struct {
 	OriginalBinding string
 	Binding         strings.Builder
-	Action          strings.Builder
+	Command         strings.Builder
 	EvtType         EventType
 	hasVariant      bool
 }
 
-// ranges hold the data of a keybinding and it's action
+// ranges hold the data of a keybinding and it's command
 type ranges struct {
 	binding rng
-	action  struct {
+	command struct {
 		rng
 		skip      bool
 		numerical bool
@@ -50,7 +50,7 @@ type rng struct {
 }
 
 type variantGroup struct {
-	action, binding []string
+	binding, command []string
 }
 
 // global regular expressions, compiled once at run-time
@@ -58,7 +58,7 @@ var (
 	keybindingPattern   = regexp.MustCompile(`^#(((!?@?)|@?!?)\w+{.*?}|((!?@?)|@?!?){.*?}|((!?@?)|@?!?)\w+)(((\+(((!?@?)|@?!?)\w+{.*?}|((!?@?)|@?!?){.*?}|((!?@?)|@?!?)\w+)))+)?`)
 	variantPattern      = regexp.MustCompile(`{.*?}`)
 	bindingRangePattern = regexp.MustCompile(`([0-9]|[a-z])-([0-9]|[a-z])`)
-	actionRangePattern  = regexp.MustCompile(`(?m)^(([0-9]+)-([0-9]+))|(([a-z])-([a-z]))$`)
+	commandRangePattern = regexp.MustCompile(`(?m)^(([0-9]+)-([0-9]+))|(([a-z])-([a-z]))$`)
 	numericalPattern    = regexp.MustCompile(`([0-9]+)-([0-9]+)`)
 	alphabeticalPattern = regexp.MustCompile(`([a-z])-([a-z])`)
 	mouseBindPattern    = regexp.MustCompile(`mouse([0-9]+)`)
@@ -157,7 +157,7 @@ func Parse(file string, data *[]FileData) (shell, globals string, err error) {
 			lineStr = strings.ReplaceAll(lineStr, " ", "")
 
 			if keybindingPattern.MatchString(lineStr) {
-				if datum[index].Action.Len() != 0 {
+				if datum[index].Command.Len() != 0 {
 					index++
 					datum = append(datum, FileData{})
 				}
@@ -225,25 +225,25 @@ func Parse(file string, data *[]FileData) (shell, globals string, err error) {
 			wasKeybinding = false
 			if isPrefix {
 				if wasPrefix {
-					datum[index].Action.Write(line)
+					datum[index].Command.Write(line)
 				} else {
-					if datum[index].Action.Len() != 0 {
-						datum[index].Action.Write([]byte("\n"))
+					if datum[index].Command.Len() != 0 {
+						datum[index].Command.Write([]byte("\n"))
 					}
-					datum[index].Action.Write(line)
+					datum[index].Command.Write(line)
 					wasPrefix = true
 				}
 				continue
 			}
 
 			if wasPrefix {
-				datum[index].Action.Write(line)
+				datum[index].Command.Write(line)
 				wasPrefix = false
 			} else {
-				if datum[index].Action.Len() != 0 {
-					datum[index].Action.Write([]byte("\n"))
+				if datum[index].Command.Len() != 0 {
+					datum[index].Command.Write([]byte("\n"))
 				}
-				datum[index].Action.Write(line)
+				datum[index].Command.Write(line)
 			}
 		}
 	}
@@ -293,9 +293,9 @@ func Parse(file string, data *[]FileData) (shell, globals string, err error) {
 
 	*data = nil
 	for _, d := range datum {
-		// replicate a keybinding and it's action if it has variants
+		// replicate a keybinding and it's command if it has variants
 		if d.hasVariant {
-			replicated, e := replicate(d.Binding.String(), d.Action.String())
+			replicated, e := replicate(d.Binding.String(), d.Command.String())
 			if e != nil {
 				err = fmt.Errorf("can't register %s keybinding, error (%s)", strings.TrimPrefix(d.Binding.String(), "#"), e.Error())
 				return
@@ -306,20 +306,20 @@ func Parse(file string, data *[]FileData) (shell, globals string, err error) {
 				if err != nil {
 					return
 				}
-				*data = append(*data, FileData{OriginalBinding: repl.OriginalBinding, Binding: repl.Binding, Action: repl.Action, EvtType: d.EvtType})
+				*data = append(*data, FileData{OriginalBinding: repl.OriginalBinding, Binding: repl.Binding, Command: repl.Command, EvtType: d.EvtType})
 			}
 		} else {
 			err = replaceShorthands(&d)
 			if err != nil {
 				return
 			}
-			*data = append(*data, FileData{OriginalBinding: d.OriginalBinding, Binding: d.Binding, Action: d.Action, EvtType: d.EvtType})
+			*data = append(*data, FileData{OriginalBinding: d.OriginalBinding, Binding: d.Binding, Command: d.Command, EvtType: d.EvtType})
 		}
 	}
 
 	// means config file was empty
-	if len(*data) == 1 && ((*data)[0].Action.String() == "" || (*data)[0].Binding.String() == "") {
-		err = errors.New("config file does not contain any binding/action")
+	if len(*data) == 1 && ((*data)[0].Command.String() == "" || (*data)[0].Binding.String() == "") {
+		err = errors.New("config file does not contain any binding")
 		return
 	}
 
@@ -330,17 +330,17 @@ func Parse(file string, data *[]FileData) (shell, globals string, err error) {
 }
 
 // replicate replicates variants
-func replicate(binding, action string) (replicated []*FileData, err error) {
+func replicate(binding, command string) (replicated []*FileData, err error) {
 	// find all the variants
-	bindingVariants, actionVariants := variantPattern.FindAllString(binding, -1), variantPattern.FindAllString(action, -1)
+	bindingVariants, commandVariants := variantPattern.FindAllString(binding, -1), variantPattern.FindAllString(command, -1)
 
 	// make sure the amount of variants do match
-	if len(bindingVariants) != len(actionVariants) {
-		err = errors.New("the amount of variants in a keybinding and it's action do not match")
+	if len(bindingVariants) != len(commandVariants) {
+		err = errors.New("the amount of variants in a keybinding and it's command do not match")
 		return
 	}
 
-	var bindingVars, actionVars [][]string
+	var bindingVars, commandVars [][]string
 
 	// extract variant members
 	extract := func(from []string, where *[][]string) {
@@ -350,27 +350,27 @@ func replicate(binding, action string) (replicated []*FileData, err error) {
 	}
 
 	extract(bindingVariants, &bindingVars)
-	extract(actionVariants, &actionVars)
+	extract(commandVariants, &commandVars)
 
 	// validate the amount of variant memebers do match
 	for i, b := range bindingVars {
-		if len(b) != len(actionVars[i]) {
-			err = errors.New("the amount of variant members in a keybinding and it's action do not match")
+		if len(b) != len(commandVars[i]) {
+			err = errors.New("the amount of variant members in a keybinding and it's command do not match")
 			return
 		}
 	}
 
 	// validate and extract ranges
 	var rngs []ranges
-	rngs, err = extractRanges(bindingVars, actionVars)
+	rngs, err = extractRanges(bindingVars, commandVars)
 	if err != nil {
 		return
 	}
 
-	var expandedBindingRanges, expandedActionRanges []string
+	var expandedBindingRanges, expandedCommandRanges []string
 
 	// expands a range in a keybinding({1-9} -> {1},{2},{3},{...},{9})
-	expandRange := func(r ranges, binding, acton string, bindings, actions *[]string) {
+	expandRange := func(r ranges, binding, acton string, bindings, commands *[]string) {
 		// bindings
 		for bIn := r.binding.start; bIn != r.binding.end+1; bIn++ {
 			*bindings = append(*bindings, strings.Replace(
@@ -379,24 +379,24 @@ func replicate(binding, action string) (replicated []*FileData, err error) {
 				fmt.Sprintf("%c", rune(bIn)),
 				1,
 			))
-			if r.action.skip {
-				*actions = append(*actions, acton)
+			if r.command.skip {
+				*commands = append(*commands, acton)
 			}
 		}
-		// actions
-		if !r.action.skip {
-			for aIn := r.action.start; aIn != r.action.end+1; aIn++ {
-				if r.action.numerical {
-					*actions = append(*actions, strings.Replace(
-						action,
-						fmt.Sprintf("%s-%s", r.action.startStr, r.action.endStr),
+		// commands
+		if !r.command.skip {
+			for aIn := r.command.start; aIn != r.command.end+1; aIn++ {
+				if r.command.numerical {
+					*commands = append(*commands, strings.Replace(
+						command,
+						fmt.Sprintf("%s-%s", r.command.startStr, r.command.endStr),
 						fmt.Sprintf("%d", aIn),
 						1,
 					))
 				} else {
-					*actions = append(*actions, strings.Replace(
-						action,
-						fmt.Sprintf("%s-%s", r.action.startStr, r.action.endStr),
+					*commands = append(*commands, strings.Replace(
+						command,
+						fmt.Sprintf("%s-%s", r.command.startStr, r.command.endStr),
 						fmt.Sprintf("%c", rune(aIn)),
 						1,
 					))
@@ -408,25 +408,25 @@ func replicate(binding, action string) (replicated []*FileData, err error) {
 	// for as long as we have unexpanded ranges, expand them
 	for len(rngs) > 0 {
 		if len(expandedBindingRanges) > 0 {
-			var newBindingRanges, newActionRanges []string
+			var newBindingRanges, newCommandRanges []string
 
-			if len(expandedActionRanges) != len(expandedBindingRanges) {
-				err = errors.New("an unknown error occurred whilst expanding keybinding and action ranges")
+			if len(expandedCommandRanges) != len(expandedBindingRanges) {
+				err = errors.New("an unknown error occurred whilst expanding keybinding and command ranges")
 			}
 
 			for i := 0; i != len(expandedBindingRanges); i++ {
-				expandRange(rngs[0], expandedBindingRanges[i], expandedActionRanges[i], &newBindingRanges, &newActionRanges)
+				expandRange(rngs[0], expandedBindingRanges[i], expandedCommandRanges[i], &newBindingRanges, &newCommandRanges)
 			}
 
-			expandedBindingRanges, expandedActionRanges = newBindingRanges, newActionRanges
+			expandedBindingRanges, expandedCommandRanges = newBindingRanges, newCommandRanges
 		} else {
-			expandRange(rngs[0], binding, action, &expandedBindingRanges, &expandedActionRanges)
+			expandRange(rngs[0], binding, command, &expandedBindingRanges, &expandedCommandRanges)
 		}
 		rngs = rngs[1:]
 	}
 
-	if len(expandedActionRanges) != len(expandedBindingRanges) {
-		err = errors.New("an unknown error occurred whilst expanding keybinding and action ranges")
+	if len(expandedCommandRanges) != len(expandedBindingRanges) {
+		err = errors.New("an unknown error occurred whilst expanding keybinding and command ranges")
 	}
 
 	// replicateVariant replaces pattern with each member of variants group
@@ -450,56 +450,56 @@ func replicate(binding, action string) (replicated []*FileData, err error) {
 		}
 	}
 
-	// in case our keybinding and action had no ranges
+	// in case our keybinding and command had no ranges
 	if len(expandedBindingRanges) == 0 {
 		expandedBindingRanges = append(expandedBindingRanges, binding)
-		expandedActionRanges = append(expandedActionRanges, action)
+		expandedCommandRanges = append(expandedCommandRanges, command)
 	}
 
 	// do replicate every variant member
 	for i, r := 0, 0; i != len(expandedBindingRanges); i++ {
-		var replicatedBindings, replicatedActions []string
+		var replicatedBindings, replicatedCommands []string
 		vGroup := &variantGroup{}
-		vGroup.action = variantPattern.FindAllString(expandedActionRanges[i], -1)
+		vGroup.command = variantPattern.FindAllString(expandedCommandRanges[i], -1)
 		vGroup.binding = variantPattern.FindAllString(expandedBindingRanges[i], -1)
 
-		if !(len(vGroup.action) == len(vGroup.binding) && len(vGroup.action) > 0) {
+		if !(len(vGroup.command) == len(vGroup.binding) && len(vGroup.command) > 0) {
 			err = errors.New("can not extract variant groups")
 			return
 		}
 
-		// for as long as we have binding AND action in a variant group
+		// for as long as we have binding AND command in a variant group
 		for len(vGroup.binding) > 0 {
 			// extract variant members
 			bVariantMembers := strings.Split(strings.TrimSuffix(strings.TrimPrefix(vGroup.binding[0], "{"), "}"), ",")
-			aVariantMembers := strings.Split(strings.TrimSuffix(strings.TrimPrefix(vGroup.action[0], "{"), "}"), ",")
+			aVariantMembers := strings.Split(strings.TrimSuffix(strings.TrimPrefix(vGroup.command[0], "{"), "}"), ",")
 			// if we already replicated a variant, use it
 			if len(replicatedBindings) > 0 {
-				var newBindingVariants, newActionVariants []string
+				var newBindingVariants, newCommandVariants []string
 
 				for _, alreadyR := range replicatedBindings {
 					replicateVariant(alreadyR, vGroup.binding[0], bVariantMembers, &newBindingVariants)
 				}
 
-				for _, alreadyR := range replicatedActions {
-					replicateVariant(alreadyR, vGroup.action[0], aVariantMembers, &newActionVariants)
+				for _, alreadyR := range replicatedCommands {
+					replicateVariant(alreadyR, vGroup.command[0], aVariantMembers, &newCommandVariants)
 				}
 
-				replicatedBindings, replicatedActions = newBindingVariants, newActionVariants
+				replicatedBindings, replicatedCommands = newBindingVariants, newCommandVariants
 			} else {
 				replicateVariant(expandedBindingRanges[i], vGroup.binding[0], bVariantMembers, &replicatedBindings)
-				replicateVariant(expandedActionRanges[i], vGroup.action[0], aVariantMembers, &replicatedActions)
+				replicateVariant(expandedCommandRanges[i], vGroup.command[0], aVariantMembers, &replicatedCommands)
 			}
 			vGroup.binding = vGroup.binding[1:]
-			vGroup.action = vGroup.action[1:]
+			vGroup.command = vGroup.command[1:]
 		}
 
-		if len(replicatedBindings) != len(replicatedActions) {
+		if len(replicatedBindings) != len(replicatedCommands) {
 			err = errors.New("replication went wrong")
 			return
 		}
 
-		// append replicated bindings and actions to the return result
+		// append replicated bindings and command to the return result
 	appender:
 		for i := 0; i != len(replicatedBindings); i++ {
 			// we get ++ when we replace underscore literal with nothing
@@ -517,7 +517,7 @@ func replicate(binding, action string) (replicated []*FileData, err error) {
 			if err != nil {
 				return
 			}
-			_, err = replicated[r].Action.WriteString(replicatedActions[i])
+			_, err = replicated[r].Command.WriteString(replicatedCommands[i])
 			if err != nil {
 				return
 			}
@@ -529,8 +529,8 @@ func replicate(binding, action string) (replicated []*FileData, err error) {
 }
 
 // extracts every range from a config file
-func extractRanges(bindingVars, actionVars [][]string) (r []ranges, err error) {
-	// range patterns for binding and action and range errors
+func extractRanges(bindingVars, commandVars [][]string) (r []ranges, err error) {
+	// range patterns for binding and command and range errors
 	var (
 		rangeParseErr   = errors.New("could not parse a range")
 		invalidRangeErr = errors.New("invalid parse given")
@@ -547,17 +547,17 @@ func extractRanges(bindingVars, actionVars [][]string) (r []ranges, err error) {
 					return
 				}
 				var (
-					aVar             = actionVars[bIn][vIn]
+					aVar             = commandVars[bIn][vIn]
 					aRange           []string
 					aRangeValidation = true
 				)
-				// make sure action variant is also a range (or _)
-				if !actionRangePattern.MatchString(aVar) {
+				// make sure command variant is also a range (or _)
+				if !commandRangePattern.MatchString(aVar) {
 					if aVar == "_" {
 						// in case it's _, skip the range validation
 						aRangeValidation = false
 					} else {
-						err = errors.New("the indexes of ranges for a keybinding and it's action do not match")
+						err = errors.New("the indexes of ranges for a keybinding and it's command do not match")
 						return
 					}
 				}
@@ -630,7 +630,7 @@ func extractRanges(bindingVars, actionVars [][]string) (r []ranges, err error) {
 					// 4-8 compared to a-e is a valid range also
 					// b start-end        a start-end
 					if (bStart - bEnd) != (aStart - aEnd) {
-						err = errors.New("the ranges of a keybinding and it's action do not match")
+						err = errors.New("the ranges of a keybinding and it's command do not match")
 						return
 					}
 				}
@@ -640,12 +640,12 @@ func extractRanges(bindingVars, actionVars [][]string) (r []ranges, err error) {
 				r[len(r)-1].binding.end = bEnd
 				r[len(r)-1].binding.endStr = bEndStr
 
-				r[len(r)-1].action.start = aStart
-				r[len(r)-1].action.startStr = aStartStr
-				r[len(r)-1].action.end = aEnd
-				r[len(r)-1].action.endStr = aEndStr
-				r[len(r)-1].action.skip = !aRangeValidation
-				r[len(r)-1].action.numerical = aNumerical
+				r[len(r)-1].command.start = aStart
+				r[len(r)-1].command.startStr = aStartStr
+				r[len(r)-1].command.end = aEnd
+				r[len(r)-1].command.endStr = aEndStr
+				r[len(r)-1].command.skip = !aRangeValidation
+				r[len(r)-1].command.numerical = aNumerical
 			}
 		}
 	}

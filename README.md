@@ -131,7 +131,7 @@ that was one of the main reasons I started developing dxhd
 * dxhd config file syntax matches shell, python, perl and probably some other languages syntax
 * dxhd config lets you declare global variables for each keybinding command
 * dxhd is great with scripting, because of it's elegant syntax.  multi line scripts do not need `\` at the end of line
-* dxhd allows you to have different range in a keybinding's action, for example, `1-9` in a keybinding, and `11-19` in it's action
+* dxhd allows you to have different range in a keybinding's command, for example, `1-9` in a keybinding, and `11-19` in it's command
 * dxhd has support for mouse bindings out of the box, no patching required!
 
 ### How do I port my sxhkd config to dxhd

@@ -71,7 +71,7 @@ func main() {
 		logger.L().Fatalln(err)
 	}
 
-	usage = fmt.Sprintf(usage, version, options.Options)
+	usage = fmt.Sprintf(usage, version, options.OptionsToPrint)
 
 	exit := false
 
@@ -150,8 +150,8 @@ func main() {
 		fmt.Println("dxhd dry run")
 		for _, d := range data {
 			fmt.Println("binding: " + d.OriginalBinding)
-			fmt.Println("action:")
-			fmt.Println(d.Action.String())
+			fmt.Println("command:")
+			fmt.Println(d.Command.String())
 		}
 		fmt.Println()
 		exit = true
@@ -220,7 +220,7 @@ toplevel:
 		mousebind.Initialize(X)
 
 		for _, d := range data {
-			err = listener.ListenKeybinding(X, errs, d.EvtType, shell, globals, d.Binding.String(), d.Action.String())
+			err = listener.ListenKeybinding(X, errs, d.EvtType, shell, globals, d.Binding.String(), d.Command.String())
 			if err != nil {
 				logger.L().WithField("keybinding", d.Binding.String()).WithError(err).Warn("can not register a keybinding")
 			}
