@@ -1,4 +1,4 @@
-package main
+package parser
 
 import (
 	"bufio"
@@ -10,23 +10,27 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/dakyskye/dxhd/logger"
 	"github.com/sirupsen/logrus"
 )
 
+// event type
+type EventType int8
+
 // event definitions
 const (
-	evtKeyPress int8 = iota
-	evtKeyRelease
-	evtButtonPress
-	evtButtonRelease
+	EvtKeyPress EventType = iota
+	EvtKeyRelease
+	EvtButtonPress
+	EvtButtonRelease
 )
 
-// filedata holds the data of parsed file
-type filedata struct {
-	originalBinding string
-	binding         strings.Builder
-	action          strings.Builder
-	evtType         int8
+// FileData holds the data of parsed file
+type FileData struct {
+	OriginalBinding string
+	Binding         strings.Builder
+	Action          strings.Builder
+	EvtType         EventType
 	hasVariant      bool
 }
 
@@ -62,7 +66,7 @@ var (
 )
 
 // parese function parses a config file, and returns data
-func parse(file string, data *[]filedata) (shell, globals string, err error) {
+func Parse(file string, data *[]FileData) (shell, globals string, err error) {
 	if data == nil {
 		return "", "", errors.New("empty value was passed to parse function")
 	}
@@ -79,7 +83,7 @@ func parse(file string, data *[]filedata) (shell, globals string, err error) {
 			if err == nil {
 				err = e
 			} else {
-				logger.WithError(err).Debug("failed to close config file")
+				logger.L().WithError(err).Debug("failed to close config file")
 			}
 		}
 	}()
@@ -90,7 +94,7 @@ func parse(file string, data *[]filedata) (shell, globals string, err error) {
 	shell = "/bin/sh"
 	wasKeybinding := false
 	wasPrefix := false
-	datum := []filedata{}
+	datum := []FileData{}
 	index := 0
 	globalsBuilder := new(strings.Builder)
 	globalsEnded := false
@@ -111,7 +115,7 @@ func parse(file string, data *[]filedata) (shell, globals string, err error) {
 		}
 
 		if index+1 != len(datum) {
-			datum = append(datum, filedata{})
+			datum = append(datum, FileData{})
 		}
 
 		lineStr := string(line)
@@ -153,37 +157,37 @@ func parse(file string, data *[]filedata) (shell, globals string, err error) {
 			lineStr = strings.ReplaceAll(lineStr, " ", "")
 
 			if keybindingPattern.MatchString(lineStr) {
-				if datum[index].action.Len() != 0 {
+				if datum[index].Action.Len() != 0 {
 					index++
-					datum = append(datum, filedata{})
+					datum = append(datum, FileData{})
 				}
 				// trim # prefix
 				lineStr := lineStr[1:]
 
 				// overwrite previous prefix if needed
 				if wasKeybinding {
-					if datum[index].binding.Len() != 0 {
-						datum[index].binding.Reset()
-						logger.WithFields(logrus.Fields{"file": file, "line": lineNumber}).Info("overwriting keybinding")
-						logger.WithFields(logrus.Fields{"old": datum[index].binding.String(), "new": lineStr}).Debug("overwriting keybinding")
+					if datum[index].Binding.Len() != 0 {
+						datum[index].Binding.Reset()
+						logger.L().WithFields(logrus.Fields{"file": file, "line": lineNumber}).Info("overwriting keybinding")
+						logger.L().WithFields(logrus.Fields{"old": datum[index].Binding.String(), "new": lineStr}).Debug("overwriting keybinding")
 					}
 				}
 
 				// getEventType merges two events into one type
-				getEventType := func(old, new int8) (evt int8) {
+				getEventType := func(old, new EventType) (evt EventType) {
 					switch old {
-					case evtKeyPress:
+					case EvtKeyPress:
 						evt = new
-					case evtKeyRelease:
-						if new != evtKeyPress {
+					case EvtKeyRelease:
+						if new != EvtKeyPress {
 							evt = new
 						}
-					case evtButtonPress:
-						if new == evtKeyRelease || new == evtButtonRelease {
-							evt = evtButtonRelease
+					case EvtButtonPress:
+						if new == EvtKeyRelease || new == EvtButtonRelease {
+							evt = EvtButtonRelease
 						}
-					case evtButtonRelease:
-						evt = evtButtonRelease
+					case EvtButtonRelease:
+						evt = EvtButtonRelease
 					default:
 						evt = new
 					}
@@ -191,26 +195,26 @@ func parse(file string, data *[]filedata) (shell, globals string, err error) {
 				}
 
 				// set to -1, in case a keybinding is a single letter
-				datum[index].evtType = -1
+				datum[index].EvtType = -1
 				for _, key := range strings.Split(lineStr, "+") {
 					if len(key) > 1 {
 						if strings.HasPrefix(key, "@mouse") {
-							datum[index].evtType = getEventType(datum[index].evtType, evtButtonRelease)
+							datum[index].EvtType = getEventType(datum[index].EvtType, EvtButtonRelease)
 						} else if strings.HasPrefix(key, "mouse") {
-							datum[index].evtType = getEventType(datum[index].evtType, evtButtonPress)
+							datum[index].EvtType = getEventType(datum[index].EvtType, EvtButtonPress)
 						} else if strings.HasPrefix(key, "@") {
-							datum[index].evtType = getEventType(datum[index].evtType, evtKeyRelease)
+							datum[index].EvtType = getEventType(datum[index].EvtType, EvtKeyRelease)
 						} else {
-							datum[index].evtType = getEventType(datum[index].evtType, evtKeyPress)
+							datum[index].EvtType = getEventType(datum[index].EvtType, EvtKeyPress)
 						}
 
 					}
 				}
 				// means a keybinding was the single letter
-				if datum[index].evtType == -1 {
-					datum[index].evtType = evtKeyPress
+				if datum[index].EvtType == -1 {
+					datum[index].EvtType = EvtKeyPress
 				}
-				_, err = datum[index].binding.WriteString(lineStr)
+				_, err = datum[index].Binding.WriteString(lineStr)
 				if err != nil {
 					return
 				}
@@ -221,25 +225,25 @@ func parse(file string, data *[]filedata) (shell, globals string, err error) {
 			wasKeybinding = false
 			if isPrefix {
 				if wasPrefix {
-					datum[index].action.Write(line)
+					datum[index].Action.Write(line)
 				} else {
-					if datum[index].action.Len() != 0 {
-						datum[index].action.Write([]byte("\n"))
+					if datum[index].Action.Len() != 0 {
+						datum[index].Action.Write([]byte("\n"))
 					}
-					datum[index].action.Write(line)
+					datum[index].Action.Write(line)
 					wasPrefix = true
 				}
 				continue
 			}
 
 			if wasPrefix {
-				datum[index].action.Write(line)
+				datum[index].Action.Write(line)
 				wasPrefix = false
 			} else {
-				if datum[index].action.Len() != 0 {
-					datum[index].action.Write([]byte("\n"))
+				if datum[index].Action.Len() != 0 {
+					datum[index].Action.Write([]byte("\n"))
 				}
-				datum[index].action.Write(line)
+				datum[index].Action.Write(line)
 			}
 		}
 	}
@@ -252,11 +256,11 @@ func parse(file string, data *[]filedata) (shell, globals string, err error) {
 	}
 
 	// xgb requires these shorthands to be replaced to what they are called internally
-	replaceShorthands := func(data *filedata) (err error) {
-		data.originalBinding = data.binding.String()
-		data.binding.Reset()
+	replaceShorthands := func(data *FileData) (err error) {
+		data.OriginalBinding = data.Binding.String()
+		data.Binding.Reset()
 
-		modified := data.originalBinding
+		modified := data.OriginalBinding
 
 		// extract xf86 keys if any
 		matches := xfKeyPattern.FindAllString(modified, -1)
@@ -274,16 +278,16 @@ func parse(file string, data *[]filedata) (shell, globals string, err error) {
 			modified = strings.Replace(modified, modified[index[0]:index[1]], matches[in], 1)
 		}
 
-		modified = strings.ReplaceAll(data.originalBinding, "+", "-")
+		modified = strings.ReplaceAll(data.OriginalBinding, "+", "-")
 		modified = strings.ReplaceAll(modified, "super", "mod4")
 		modified = strings.ReplaceAll(modified, "alt", "mod1")
 		modified = strings.ReplaceAll(modified, "ctrl", "control")
 		modified = strings.ReplaceAll(strings.ReplaceAll(modified, "@", ""), "!", "")
 		// replace mouseN with N
-		if data.evtType == evtButtonPress || data.evtType == evtButtonRelease {
+		if data.EvtType == EvtButtonPress || data.EvtType == EvtButtonRelease {
 			modified = mouseBindPattern.ReplaceAllString(modified, "$1")
 		}
-		_, err = data.binding.WriteString(modified)
+		_, err = data.Binding.WriteString(modified)
 		return
 	}
 
@@ -291,30 +295,30 @@ func parse(file string, data *[]filedata) (shell, globals string, err error) {
 	for _, d := range datum {
 		// replicate a keybinding and it's action if it has variants
 		if d.hasVariant {
-			replicated, e := replicate(d.binding.String(), d.action.String())
+			replicated, e := replicate(d.Binding.String(), d.Action.String())
 			if e != nil {
-				err = fmt.Errorf("can't register %s keybinding, error (%s)", strings.TrimPrefix(d.binding.String(), "#"), e.Error())
+				err = fmt.Errorf("can't register %s keybinding, error (%s)", strings.TrimPrefix(d.Binding.String(), "#"), e.Error())
 				return
 			}
 			for _, repl := range replicated {
-				repl.evtType = d.evtType
+				repl.EvtType = d.EvtType
 				err = replaceShorthands(repl)
 				if err != nil {
 					return
 				}
-				*data = append(*data, filedata{originalBinding: repl.originalBinding, binding: repl.binding, action: repl.action, evtType: d.evtType})
+				*data = append(*data, FileData{OriginalBinding: repl.OriginalBinding, Binding: repl.Binding, Action: repl.Action, EvtType: d.EvtType})
 			}
 		} else {
 			err = replaceShorthands(&d)
 			if err != nil {
 				return
 			}
-			*data = append(*data, filedata{originalBinding: d.originalBinding, binding: d.binding, action: d.action, evtType: d.evtType})
+			*data = append(*data, FileData{OriginalBinding: d.OriginalBinding, Binding: d.Binding, Action: d.Action, EvtType: d.EvtType})
 		}
 	}
 
 	// means config file was empty
-	if len(*data) == 1 && ((*data)[0].action.String() == "" || (*data)[0].binding.String() == "") {
+	if len(*data) == 1 && ((*data)[0].Action.String() == "" || (*data)[0].Binding.String() == "") {
 		err = errors.New("config file does not contain any binding/action")
 		return
 	}
@@ -326,7 +330,7 @@ func parse(file string, data *[]filedata) (shell, globals string, err error) {
 }
 
 // replicate replicates variants
-func replicate(binding, action string) (replicated []*filedata, err error) {
+func replicate(binding, action string) (replicated []*FileData, err error) {
 	// find all the variants
 	bindingVariants, actionVariants := variantPattern.FindAllString(binding, -1), variantPattern.FindAllString(action, -1)
 
@@ -503,17 +507,17 @@ func replicate(binding, action string) (replicated []*filedata, err error) {
 			if i > 0 {
 				for _, aR := range replicated {
 
-					if aR.binding.String() == replicatedBindings[i] {
+					if aR.Binding.String() == replicatedBindings[i] {
 						continue appender
 					}
 				}
 			}
-			replicated = append(replicated, &filedata{})
-			_, err = replicated[r].binding.WriteString(replicatedBindings[i])
+			replicated = append(replicated, &FileData{})
+			_, err = replicated[r].Binding.WriteString(replicatedBindings[i])
 			if err != nil {
 				return
 			}
-			_, err = replicated[r].action.WriteString(replicatedActions[i])
+			_, err = replicated[r].Action.WriteString(replicatedActions[i])
 			if err != nil {
 				return
 			}

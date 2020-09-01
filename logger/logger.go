@@ -1,4 +1,4 @@
-package main
+package logger
 
 import (
 	"os"
@@ -22,4 +22,8 @@ func init() {
 		logger.SetLevel(logrus.InfoLevel)
 		logger.SetFormatter(formatter)
 	}
+}
+
+func L() *logrus.Logger {
+	return logger
 }

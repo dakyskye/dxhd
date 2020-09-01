@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 )
 
-func getDefaultConfigPath() (file, directory string, err error) {
+func GetDefaultConfigPath() (file, directory string, err error) {
 	directory, err = os.UserConfigDir()
 	if err != nil {
 		return
@@ -17,7 +17,7 @@ func getDefaultConfigPath() (file, directory string, err error) {
 	return
 }
 
-func isPathToConfigValid(path string) (isValid bool, err error) {
+func IsPathToConfigValid(path string) (isValid bool, err error) {
 	stat, err := os.Stat(path)
 
 	if err != nil {
@@ -34,12 +34,12 @@ func isPathToConfigValid(path string) (isValid bool, err error) {
 	return
 }
 
-func createDefaultConfig() (err error) {
+func CreateDefaultConfig() (err error) {
 	var (
 		file, directory string
 	)
 
-	file, directory, err = getDefaultConfigPath()
+	file, directory, err = GetDefaultConfigPath()
 	if err != nil {
 		return
 	}

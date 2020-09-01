@@ -16,6 +16,11 @@ import (
 	"github.com/BurntSushi/xgbutil/keybind"
 	"github.com/BurntSushi/xgbutil/mousebind"
 	"github.com/BurntSushi/xgbutil/xevent"
+	"github.com/dakyskye/dxhd/config"
+	"github.com/dakyskye/dxhd/listener"
+	"github.com/dakyskye/dxhd/logger"
+	"github.com/dakyskye/dxhd/options"
+	"github.com/dakyskye/dxhd/parser"
 	"github.com/sirupsen/logrus"
 )
 
@@ -58,18 +63,25 @@ var version = `master`
 
 func main() {
 	if runtime.GOOS != "linux" {
-		log.Fatal("dxhd is only supported on linux")
+		logger.L().Fatalln("dxhd is only supported on linux")
 	}
+
+	opts, err := options.Parse()
+	if err != nil {
+		logger.L().Fatalln(err)
+	}
+
+	usage = fmt.Sprintf(usage, version, options.Options)
 
 	exit := false
 
-	if opts.help {
+	if opts.Help {
 		fmt.Println(usage)
 		fmt.Println()
 		exit = true
 	}
 
-	if opts.version && !opts.help {
+	if opts.Version && !opts.Help {
 		fmt.Println("you are using dxhd, version " + version)
 		fmt.Println()
 		exit = true
@@ -77,53 +89,52 @@ func main() {
 
 	var (
 		configFilePath string
-		err            error
 		validPath      bool
 	)
 
-	if opts.config != nil {
-		if validPath, err = isPathToConfigValid(*opts.config); !(err == nil && validPath) {
-			logger.WithFields(logrus.Fields{
-				"path":  *opts.config,
+	if opts.Config != nil {
+		if validPath, err = config.IsPathToConfigValid(*opts.Config); !(err == nil && validPath) {
+			logger.L().WithFields(logrus.Fields{
+				"path":  *opts.Config,
 				"valid": validPath,
 			}).WithError(err).Fatal("path to the config is not valid")
 		}
-		configFilePath = *opts.config
+		configFilePath = *opts.Config
 	} else {
-		configFilePath, _, err = getDefaultConfigPath()
+		configFilePath, _, err = config.GetDefaultConfigPath()
 		if err != nil {
-			logger.WithError(err).Fatal("can not get config path")
+			logger.L().WithError(err).Fatal("can not get config path")
 		}
 
-		if validPath, err = isPathToConfigValid(configFilePath); !(err == nil && validPath) {
+		if validPath, err = config.IsPathToConfigValid(configFilePath); !(err == nil && validPath) {
 			if os.IsNotExist(err) {
-				err = createDefaultConfig()
+				err = config.CreateDefaultConfig()
 				if err != nil {
-					logger.WithField("path", configFilePath).Fatal("can not create default config")
+					logger.L().WithField("path", configFilePath).Fatal("can not create default config")
 				}
 			} else {
-				logger.WithFields(logrus.Fields{"path": configFilePath, "valid": validPath}).WithError(err).Fatal("path to the config is not valid")
+				logger.L().WithFields(logrus.Fields{"path": configFilePath, "valid": validPath}).WithError(err).Fatal("path to the config is not valid")
 			}
 		}
 	}
 
 	var (
-		data      []filedata
+		data      []parser.FileData
 		shell     string
 		globals   string
 		startTime time.Time
 	)
 
-	if opts.parseTime {
+	if opts.ParseTime {
 		startTime = time.Now()
 	}
 
-	shell, globals, err = parse(configFilePath, &data)
+	shell, globals, err = parser.Parse(configFilePath, &data)
 	if err != nil {
-		logger.WithField("file", configFilePath).WithError(err).Fatal("failed to parse config")
+		logger.L().WithField("file", configFilePath).WithError(err).Fatal("failed to parse config")
 	}
 
-	if opts.parseTime {
+	if opts.ParseTime {
 		since := time.Since(startTime)
 		timeTaken := fmt.Sprintf("%.0fs%dms%dµs",
 			since.Seconds(),
@@ -135,31 +146,31 @@ func main() {
 		exit = true
 	}
 
-	if opts.dryRun {
+	if opts.DryRun {
 		fmt.Println("dxhd dry run")
 		for _, d := range data {
-			fmt.Println("binding: " + d.originalBinding)
+			fmt.Println("binding: " + d.OriginalBinding)
 			fmt.Println("action:")
-			fmt.Println(d.action.String())
+			fmt.Println(d.Action.String())
 		}
 		fmt.Println()
 		exit = true
 	}
 
-	if opts.kill || opts.reload {
+	if opts.Kill || opts.Reload {
 		execName, err := os.Executable()
 		if err != nil {
-			logger.WithError(err).Fatal("can not get executable")
+			logger.L().WithError(err).Fatal("can not get executable")
 		}
 
-		if opts.kill {
+		if opts.Kill {
 			err = exec.Command("pkill", "-INT", "-x", filepath.Base(execName)).Start()
 		} else {
 			err = exec.Command("pkill", "-USR1", "-x", filepath.Base(execName)).Start()
 		}
 
 		if err != nil {
-			if opts.kill {
+			if opts.Kill {
 				log.Println("can not kill dxhd instances:")
 				log.Fatalln(err)
 			} else {
@@ -168,7 +179,7 @@ func main() {
 			}
 		}
 
-		if opts.kill {
+		if opts.Kill {
 			fmt.Println("killing every running instances of dxhd")
 		} else {
 			fmt.Println("reloading every running instances of dxhd")
@@ -181,7 +192,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	logger.WithFields(logrus.Fields{"version": version, "path": configFilePath}).Debug("starting dxhd")
+	logger.L().WithFields(logrus.Fields{"version": version, "path": configFilePath}).Debug("starting dxhd")
 
 	// catch these signals
 	signals := make(chan os.Signal, 1)
@@ -194,24 +205,24 @@ func main() {
 toplevel:
 	for {
 		if len(data) == 0 {
-			shell, globals, err = parse(configFilePath, &data)
+			shell, globals, err = parser.Parse(configFilePath, &data)
 			if err != nil {
-				logger.WithField("file", configFilePath).WithError(err).Fatal("failed to parse config")
+				logger.L().WithField("file", configFilePath).WithError(err).Fatal("failed to parse config")
 			}
 		}
 
 		X, err := xgbutil.NewConn()
 		if err != nil {
-			logger.WithError(err).Fatal("can not open connection to Xorg")
+			logger.L().WithError(err).Fatal("can not open connection to Xorg")
 		}
 
 		keybind.Initialize(X)
 		mousebind.Initialize(X)
 
 		for _, d := range data {
-			err = listenKeybinding(X, errs, d.evtType, shell, globals, d.binding.String(), d.action.String())
+			err = listener.ListenKeybinding(X, errs, d.EvtType, shell, globals, d.Binding.String(), d.Action.String())
 			if err != nil {
-				logger.WithField("keybinding", d.binding.String()).WithError(err).Warn("can not register a keybinding")
+				logger.L().WithField("keybinding", d.Binding.String()).WithError(err).Warn("can not register a keybinding")
 			}
 		}
 
@@ -223,7 +234,7 @@ toplevel:
 			select {
 			case err = <-errs:
 				if err != nil {
-					logger.WithError(err).Warn("a command resulted into an error")
+					logger.L().WithError(err).Warn("a command resulted into an error")
 				}
 				continue
 			case sig := <-signals:
@@ -231,10 +242,10 @@ toplevel:
 				mousebind.Detach(X, X.RootWin())
 				xevent.Quit(X)
 				if sig == syscall.SIGUSR1 || sig == syscall.SIGUSR2 {
-					logger.Debug("user defined signal received, reloading")
+					logger.L().Debug("user defined signal received, reloading")
 					continue toplevel
 				}
-				logger.WithField("signal", sig.String()).Info("signal received, shutting down")
+				logger.L().WithField("signal", sig.String()).Info("signal received, shutting down")
 				if env, err := strconv.ParseBool(os.Getenv("STACKTRACE")); env && err == nil {
 					buf := make([]byte, 1<<20)
 					stackLen := runtime.Stack(buf, true)

@@ -1,4 +1,4 @@
-package main
+package listener
 
 import (
 	"bytes"
@@ -14,39 +14,41 @@ import (
 	"github.com/BurntSushi/xgbutil/keybind"
 	"github.com/BurntSushi/xgbutil/mousebind"
 	"github.com/BurntSushi/xgbutil/xevent"
+	"github.com/dakyskye/dxhd/logger"
+	"github.com/dakyskye/dxhd/parser"
 	"github.com/sirupsen/logrus"
 )
 
-// listenKeybinding does connect a keybinding/mousebinding to the Xorg server
-func listenKeybinding(X *xgbutil.XUtil, errs chan<- error, evtType int8, shell, globals, keybinding, command string) (err error) {
+// ListenKeybinding does connect a keybinding/mousebinding to the Xorg server
+func ListenKeybinding(X *xgbutil.XUtil, errs chan<- error, evtType parser.EventType, shell, globals, keybinding, command string) (err error) {
 	switch evtType {
-	case evtKeyPress:
+	case parser.EvtKeyPress:
 		binding := keybind.KeyPressFun(func(xu *xgbutil.XUtil, event xevent.KeyPressEvent) {
 			go execCommand(errs, shell, globals, command)
 		})
 
-		logger.WithFields(logrus.Fields{"binding": keybinding, "command": command}).WithError(err).Debug("adding key press event")
+		logger.L().WithFields(logrus.Fields{"binding": keybinding, "command": command}).WithError(err).Debug("adding key press event")
 		err = binding.Connect(X, X.RootWin(), keybinding, true)
-	case evtKeyRelease:
+	case parser.EvtKeyRelease:
 		binding := keybind.KeyReleaseFun(func(xu *xgbutil.XUtil, event xevent.KeyReleaseEvent) {
 			go execCommand(errs, shell, globals, command)
 		})
 
-		logger.WithFields(logrus.Fields{"binding": keybinding, "command": command}).WithError(err).Debug("adding key release event")
+		logger.L().WithFields(logrus.Fields{"binding": keybinding, "command": command}).WithError(err).Debug("adding key release event")
 		err = binding.Connect(X, X.RootWin(), keybinding, true)
-	case evtButtonPress:
+	case parser.EvtButtonPress:
 		binding := mousebind.ButtonPressFun(func(xu *xgbutil.XUtil, event xevent.ButtonPressEvent) {
 			go execCommand(errs, shell, globals, command)
 		})
 
-		logger.WithFields(logrus.Fields{"binding": keybinding, "command": command}).WithError(err).Debug("adding button press event")
+		logger.L().WithFields(logrus.Fields{"binding": keybinding, "command": command}).WithError(err).Debug("adding button press event")
 		err = binding.Connect(X, X.RootWin(), keybinding, false, true)
-	case evtButtonRelease:
+	case parser.EvtButtonRelease:
 		binding := mousebind.ButtonReleaseFun(func(xu *xgbutil.XUtil, event xevent.ButtonReleaseEvent) {
 			go execCommand(errs, shell, globals, command)
 		})
 
-		logger.WithFields(logrus.Fields{"binding": keybinding, "command": command}).WithError(err).Debug("adding button release event")
+		logger.L().WithFields(logrus.Fields{"binding": keybinding, "command": command}).WithError(err).Debug("adding button release event")
 		err = binding.Connect(X, X.RootWin(), keybinding, false, true)
 	default:
 		err = errors.New("wrong event type passed")
@@ -70,7 +72,7 @@ func execCommand(err chan<- error, shell, globals, command string) {
 		Foreground: false,
 		Setsid:     true,
 	}
-	logger.WithTime(time.Now()).WithField("command", command).WithField("globals", globals).Debug("now executing a command")
+	logger.L().WithTime(time.Now()).WithField("command", command).WithField("globals", globals).Debug("now executing a command")
 	err <- cmd.Start()
 	if e := cmd.Wait(); e != nil {
 		prefixLen := len(shell) + 2
