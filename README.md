@@ -166,7 +166,7 @@ echo world
 
 Yes! And no.  dxhd has released key events and ranges, but no chords (yet - [wip](https://github.com/dakyskye/dxhd/issues/8))
 
-### How does global variables inside a config file work
+### How do global variables inside a config file work
 
 Everything after (if there is) the shebang before the first comment/keybinding is collected and passed to each keybinding command
 
