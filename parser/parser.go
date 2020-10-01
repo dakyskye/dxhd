@@ -34,7 +34,7 @@ type FileData struct {
 	hasVariant      bool
 }
 
-// ranges hold the data of a keybinding and it's command
+// ranges hold the data of a keybinding and its command
 type ranges struct {
 	binding rng
 	command struct {
@@ -336,7 +336,7 @@ func replicate(binding, command string) (replicated []*FileData, err error) {
 
 	// make sure the amount of variants do match
 	if len(bindingVariants) != len(commandVariants) {
-		err = errors.New("the amount of variants in a keybinding and it's command do not match")
+		err = errors.New("the amount of variants in a keybinding and its command do not match")
 		return
 	}
 
@@ -355,7 +355,7 @@ func replicate(binding, command string) (replicated []*FileData, err error) {
 	// validate the amount of variant memebers do match
 	for i, b := range bindingVars {
 		if len(b) != len(commandVars[i]) {
-			err = errors.New("the amount of variant members in a keybinding and it's command do not match")
+			err = errors.New("the amount of variant members in a keybinding and its command do not match")
 			return
 		}
 	}
@@ -557,7 +557,7 @@ func extractRanges(bindingVars, commandVars [][]string) (r []ranges, err error) 
 						// in case it's _, skip the range validation
 						aRangeValidation = false
 					} else {
-						err = errors.New("the indexes of ranges for a keybinding and it's command do not match")
+						err = errors.New("the indexes of ranges for a keybinding and its command do not match")
 						return
 					}
 				}
@@ -630,7 +630,7 @@ func extractRanges(bindingVars, commandVars [][]string) (r []ranges, err error) 
 					// 4-8 compared to a-e is a valid range also
 					// b start-end        a start-end
 					if (bStart - bEnd) != (aStart - aEnd) {
-						err = errors.New("the ranges of a keybinding and it's command do not match")
+						err = errors.New("the ranges of a keybinding and its command do not match")
 						return
 					}
 				}
