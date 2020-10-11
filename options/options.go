@@ -1,6 +1,7 @@
 package options
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -14,7 +15,7 @@ type Options struct {
 	DryRun    bool
 	ParseTime bool
 	Config    *string
-	Edit      bool
+	Edit      *string
 }
 
 var OptionsToPrint = `
@@ -28,11 +29,21 @@ var OptionsToPrint = `
   -e, --edit [file]	      Shortcut to edit a file in dxhd's config folder. Opens dxhd.sh if file is empty.`
 
 func Parse() (opts Options, err error) {
-    osArgs := os.Args[1:]
+	osArgs := os.Args[1:]
 
 	skip := false
 
-toplevel:
+	notEnoughArgsErr := errors.New("Not enough arguments given")
+	readNextArg := func(index int, optional bool) (*string, error) {
+		if index == len(osArgs)-1 || strings.HasPrefix(osArgs[index+1], "-") {
+			if optional {
+				return nil, nil
+			}
+			return nil, notEnoughArgsErr
+		}
+		return &osArgs[index+1], nil
+	}
+
 	for in, osArg := range osArgs {
 		if skip {
 			skip = false
@@ -51,13 +62,10 @@ toplevel:
 			case opt == "parse-time":
 				opts.ParseTime = true
 			case opt == "config":
-				if in == len(osArgs)-1 {
+				opts.Config, err = readNextArg(in, false)
+				if err == notEnoughArgsErr {
 					break
 				}
-				if strings.HasPrefix(osArgs[in+1], "--") || strings.HasPrefix(osArgs[in+1], "-") {
-					continue
-				}
-				opts.Config = &osArgs[in+1]
 				skip = true
 			case strings.HasPrefix(opt, "config="):
 				opts.Config = new(string)
@@ -65,7 +73,18 @@ toplevel:
 			case opt == "version":
 				opts.Version = true
 			case opt == "edit":
-				opts.Edit = true
+				opts.Edit, err = readNextArg(in, true)
+				if err != notEnoughArgsErr {
+					skip = true
+					continue
+				}
+				if opts.Edit == nil {
+					// Default value if -e is given but no argument
+					// This allows to differentiate between no edit flag
+					// and wanting to edit the default config
+					opts.Edit = new(string)
+					*opts.Edit = ""
+				}
 			default:
 				err = fmt.Errorf("%s is not a valid option", err)
 				return
@@ -86,17 +105,24 @@ toplevel:
 				case "p":
 					opts.ParseTime = true
 				case "c":
-					if in == len(osArgs)-1 {
-						break toplevel
+					opts.Config, err = readNextArg(in, false)
+					if err == notEnoughArgsErr {
+						break
 					}
-					if strings.HasPrefix(osArgs[in+1], "--") || strings.HasPrefix(osArgs[in+1], "-") {
-						continue
-					}
-					opts.Config = new(string)
-					opts.Config = &osArgs[in+1]
 					skip = true
 				case "e":
-					opts.Edit = true
+					opts.Edit, err = readNextArg(in, true)
+					if err == notEnoughArgsErr {
+						continue
+					}
+					if opts.Edit == nil {
+						// Default value if -e is given but no argument
+						// This allows to differentiate between no edit flag
+						// and wanting to edit the default config
+						opts.Edit = new(string)
+						*opts.Edit = ""
+					}
+					skip = true
 				default:
 					err = fmt.Errorf("%s in %s is not a valid option", string(r), osArg)
 					return

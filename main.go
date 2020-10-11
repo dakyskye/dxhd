@@ -81,7 +81,7 @@ func main() {
 		exit = true
 	}
 
-	if opts.Edit {
+	if opts.Edit != nil {
 		editor_envvar := os.Getenv("EDITOR")
 		if editor_envvar == "" {
 			logger.L().Fatal("The $EDITOR environment variable is not set!")
@@ -92,9 +92,11 @@ func main() {
 			if err != nil {
 				logger.L().WithField("$EDITOR", editor_envvar).Fatal("Value in $EDITOR doesn't translate to an executable.")
 			}
-			file := "dxhd.sh"
 			configDir, _ := os.UserConfigDir()
-			path := filepath.Join(configDir, "dxhd", file)
+			if *opts.Edit == "" {
+				*opts.Edit = "dxhd.sh"
+			}
+			path := filepath.Join(configDir, "dxhd", *opts.Edit)
 			err = syscall.Exec(editor, []string{editor, path}, os.Environ())
 		}
 		exit = true
