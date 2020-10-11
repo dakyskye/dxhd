@@ -81,6 +81,25 @@ func main() {
 		exit = true
 	}
 
+	if opts.Edit {
+		editor_envvar := os.Getenv("EDITOR")
+		if editor_envvar == "" {
+			logger.L().Fatal("The $EDITOR environment variable is not set!")
+		} else {
+			ed, err := exec.Command("which", editor_envvar).Output()
+			editor := string(ed)
+			editor = editor[:len(editor)-1] // Remove the trailing newline char as output from `which`
+			if err != nil {
+				logger.L().WithField("$EDITOR", editor_envvar).Fatal("Value in $EDITOR doesn't translate to an executable.")
+			}
+			file := "dxhd.sh"
+			configDir, _ := os.UserConfigDir()
+			path := filepath.Join(configDir, "dxhd", file)
+			err = syscall.Exec(editor, []string{editor, path}, os.Environ())
+		}
+		exit = true
+	}
+
 	if opts.Version && !opts.Help {
 		fmt.Println("you are using dxhd, version " + version)
 		fmt.Println()

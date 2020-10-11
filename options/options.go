@@ -14,19 +14,21 @@ type Options struct {
 	DryRun    bool
 	ParseTime bool
 	Config    *string
+	Edit      bool
 }
 
 var OptionsToPrint = `
   -h, --help              Prints this help message
-  -c, --config            Reads the config from custom path
+  -c, --config [path]     Reads the config from custom path
   -d, --dry-run           Prints bindings and their commands and exits
   -k, --kill	          Gracefully kills every running instances of dxhd
   -p, --parse-time        Prints how much time parsing a config took
   -r, --reload	          Reloads every running instances of dxhd
-  -v, --version	          Prints current version of program`
+  -v, --version	          Prints current version of program
+  -e, --edit [file]	      Shortcut to edit a file in dxhd's config folder. Opens dxhd.sh if file is empty.`
 
 func Parse() (opts Options, err error) {
-	osArgs := os.Args[1:]
+    osArgs := os.Args[1:]
 
 	skip := false
 
@@ -62,6 +64,8 @@ toplevel:
 				*opts.Config = strings.TrimPrefix(opt, "config=")
 			case opt == "version":
 				opts.Version = true
+			case opt == "edit":
+				opts.Edit = true
 			default:
 				err = fmt.Errorf("%s is not a valid option", err)
 				return
@@ -91,6 +95,8 @@ toplevel:
 					opts.Config = new(string)
 					opts.Config = &osArgs[in+1]
 					skip = true
+				case "e":
+					opts.Edit = true
 				default:
 					err = fmt.Errorf("%s in %s is not a valid option", string(r), osArg)
 					return
