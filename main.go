@@ -97,6 +97,9 @@ func main() {
 			}
 			path := filepath.Join(configDir, "dxhd", *opts.Edit)
 			err = syscall.Exec(editor, []string{editor, path}, os.Environ())
+			if err != nil {
+				logger.L().WithField("Error", err).Fatal("Error while executing editor.")
+			}
 		} else {
 			logger.L().Fatal("Cannot find a suitable editor to open. Please set one in $EDTIOR")
 		}
