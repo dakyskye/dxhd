@@ -52,10 +52,10 @@ EXAMPLE CONFIG
   # super + ctrl + {1-9,0}
   i3-msg -t command workspace {11-19,20}
   ## switch to next/prev workspace
-  # super + mouse{4,5}
+  # super + @mouse{4,5}
   i3-msg -t command workspace {next,prev}
 BUGS
-  report bugs here, if you encounter one - https://github.com/dakyskye/dxhd/issues
+  report a bug here if you find one - https://github.com/dakyskye/dxhd/issues
 AUTHOR
   Lasha Kanteladze <kanteladzelasha339@gmail.com>`
 
