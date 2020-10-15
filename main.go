@@ -98,7 +98,7 @@ func main() {
 			path := filepath.Join(configDir, *opts.Edit)
 			err = syscall.Exec(editor, []string{editor, path}, os.Environ())
 			if err != nil {
-				logger.L().WithError(err).Fatal("cannot invoke editor %s on %s", editor, path)
+				logger.L().WithError(err).WithFields(logrus.Fields{"editor": editor, "path": path}).Fatal("cannot invoke editor %s on %s")
 			}
 		} else {
 			logger.L().Fatal("cannot find a suitable editor to open, please set one in $EDTIOR")
