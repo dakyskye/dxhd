@@ -26,20 +26,19 @@ var OptionsToPrint = `
   -p, --parse-time        Prints how much time parsing a config took
   -r, --reload	          Reloads every running instances of dxhd
   -v, --version	          Prints current version of program
-  -e, --edit [file]	      Shortcut to edit a file in dxhd's config folder. Opens dxhd.sh if file is empty.`
+  -e, --edit [file]	      Shortcut to edit a file in dxhd's config folder. Opens dxhd.sh if file is empty`
 
 func Parse() (opts Options, err error) {
 	osArgs := os.Args[1:]
 
 	skip := false
 
-	notEnoughArgsErr := errors.New("Not enough arguments given")
 	readNextArg := func(index int, optional bool) (*string, error) {
 		if index == len(osArgs)-1 || strings.HasPrefix(osArgs[index+1], "-") {
 			if optional {
 				return nil, nil
 			}
-			return nil, notEnoughArgsErr
+			return nil, errors.New("not enough arguments passed to flags")
 		}
 		return &osArgs[index+1], nil
 	}
@@ -63,7 +62,7 @@ func Parse() (opts Options, err error) {
 				opts.ParseTime = true
 			case opt == "config":
 				opts.Config, err = readNextArg(in, false)
-				if err == notEnoughArgsErr {
+				if err != nil {
 					break
 				}
 				skip = true
@@ -74,17 +73,21 @@ func Parse() (opts Options, err error) {
 				opts.Version = true
 			case opt == "edit":
 				opts.Edit, err = readNextArg(in, true)
-				if err != notEnoughArgsErr {
-					skip = true
+				if err != nil {
 					continue
 				}
 				if opts.Edit == nil {
-					// Default value if -e is given but no argument
+					// Default value if --edit is given but no argument
 					// This allows to differentiate between no edit flag
 					// and wanting to edit the default config
 					opts.Edit = new(string)
 					*opts.Edit = ""
+				} else {
+					skip = true
 				}
+			case strings.HasPrefix(opt, "edit="):
+				opts.Edit = new(string)
+				*opts.Edit = strings.TrimPrefix(opt, "edit=")
 			default:
 				err = fmt.Errorf("%s is not a valid option", err)
 				return
@@ -106,13 +109,13 @@ func Parse() (opts Options, err error) {
 					opts.ParseTime = true
 				case "c":
 					opts.Config, err = readNextArg(in, false)
-					if err == notEnoughArgsErr {
-						break
+					if err != nil {
+						continue
 					}
 					skip = true
 				case "e":
 					opts.Edit, err = readNextArg(in, true)
-					if err == notEnoughArgsErr {
+					if err != nil {
 						continue
 					}
 					if opts.Edit == nil {
@@ -121,8 +124,9 @@ func Parse() (opts Options, err error) {
 						// and wanting to edit the default config
 						opts.Edit = new(string)
 						*opts.Edit = ""
+					} else {
+						skip = true
 					}
-					skip = true
 				default:
 					err = fmt.Errorf("%s in %s is not a valid option", string(r), osArg)
 					return
