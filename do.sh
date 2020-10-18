@@ -12,7 +12,7 @@ RELEASE_VERSION="$(date '+%d.%m.%Y_%H.%M')"
 
 RELEASE_DIR="$(readlink -f "$(dirname "$0")")/releases"
 
-GOOS=linux
+export GOOS=linux
 
 build() {
 	case "$1" in
@@ -39,7 +39,7 @@ release_preconfig() {
 }
 
 release_build() {
-	CGO_ENABLED=0
+	export CGO_ENABLED=0
 
 	echo "building for 386"
 	GOARCH=386 go build -a -ldflags "-s -w -X main.version=$RELEASE_VERSION" -o "$RELEASE_DIR/386/$BINARY_NAME"_386 .
