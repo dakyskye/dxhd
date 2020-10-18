@@ -96,10 +96,10 @@ check_ensuredeps() {
 	CUR="$PWD"
 	cd ~
 	echo "downloading required dependencies for checking code"
-	go get -u honnef.co/go/tools/cmd/staticcheck
-	go get -u golang.org/x/lint/golint
-	go get -u github.com/gordonklaus/ineffassign
-	go get -u github.com/client9/misspell/cmd/misspell
+	go get honnef.co/go/tools/cmd/staticcheck
+	go get golang.org/x/lint/golint
+	go get github.com/gordonklaus/ineffassign
+	go get github.com/client9/misspell/cmd/misspell
 	cd "$CUR"
 	echo "dependencies are downloaded and installed"
 }
