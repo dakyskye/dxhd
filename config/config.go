@@ -17,7 +17,6 @@ func GetDefaultConfigPath() (file, directory string, err error) {
 	return
 }
 
-
 func IsPathToConfigValid(path string) (isValid bool, err error) {
 	stat, err := os.Stat(path)
 

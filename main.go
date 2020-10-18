@@ -79,6 +79,10 @@ func main() {
 		fmt.Println(usage)
 		fmt.Println()
 		exit = true
+	} else if opts.Version {
+		fmt.Println("you are using dxhd, version " + version)
+		fmt.Println()
+		exit = true
 	}
 
 	if opts.Edit != nil {
@@ -103,12 +107,6 @@ func main() {
 		} else {
 			logger.L().Fatal("cannot find a suitable editor to open, please set one in $EDTIOR")
 		}
-		exit = true
-	}
-
-	if opts.Version && !opts.Help {
-		fmt.Println("you are using dxhd, version " + version)
-		fmt.Println()
 		exit = true
 	}
 
