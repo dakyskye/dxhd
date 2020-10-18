@@ -50,6 +50,7 @@ and copy `dxhd` executable file to somewhere in your `$PATH`
 * ranges (`{1-9}`, `{a-z}`, `{1-3,5-9,i-k,o-z}`)
 * in-place reloading (`dxhd -r`)
 * calculating the time parsing a config file took (`dxhd -p`)
+* editing config files quickly (`dxhd -e i3.py`)
 * support for any shell scripting language (sh, bash, ksh, zsh, python, perl etc.) given as a shebang
 * support for global variable declarations in a config
 * support for scripting, as much as a user wishes!
