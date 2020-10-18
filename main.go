@@ -81,6 +81,31 @@ func main() {
 		exit = true
 	}
 
+	if opts.Edit != nil {
+		editor := os.Getenv("EDITOR")
+		editors := []string{editor, "nano", "nvim", "vim", "vi"}
+		for _, ed := range editors {
+			editor, err = exec.LookPath(ed)
+			if err == nil {
+				break
+			}
+		}
+		if editor != "" {
+			_, configDir, _ := config.GetDefaultConfigPath()
+			if *opts.Edit == "" {
+				*opts.Edit = "dxhd.sh"
+			}
+			path := filepath.Join(configDir, *opts.Edit)
+			err = syscall.Exec(editor, []string{editor, path}, os.Environ())
+			if err != nil {
+				logger.L().WithError(err).WithFields(logrus.Fields{"editor": editor, "path": path}).Fatal("cannot invoke editor")
+			}
+		} else {
+			logger.L().Fatal("cannot find a suitable editor to open, please set one in $EDTIOR")
+		}
+		exit = true
+	}
+
 	if opts.Version && !opts.Help {
 		fmt.Println("you are using dxhd, version " + version)
 		fmt.Println()

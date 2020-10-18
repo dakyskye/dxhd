@@ -1,6 +1,7 @@
 package options
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -14,23 +15,34 @@ type Options struct {
 	DryRun    bool
 	ParseTime bool
 	Config    *string
+	Edit      *string
 }
 
 var OptionsToPrint = `
   -h, --help              Prints this help message
-  -c, --config            Reads the config from custom path
+  -c, --config [path]     Reads the config from custom path
   -d, --dry-run           Prints bindings and their commands and exits
   -k, --kill	          Gracefully kills every running instances of dxhd
   -p, --parse-time        Prints how much time parsing a config took
   -r, --reload	          Reloads every running instances of dxhd
-  -v, --version	          Prints current version of program`
+  -v, --version	          Prints current version of program
+  -e, --edit [file]	      Shortcut to edit a file in dxhd's config folder. Opens dxhd.sh if file is empty`
 
 func Parse() (opts Options, err error) {
 	osArgs := os.Args[1:]
 
 	skip := false
 
-toplevel:
+	readNextArg := func(index int, optional bool) (*string, error) {
+		if index == len(osArgs)-1 || strings.HasPrefix(osArgs[index+1], "-") {
+			if optional {
+				return nil, nil
+			}
+			return nil, errors.New("not enough arguments passed to flags")
+		}
+		return &osArgs[index+1], nil
+	}
+
 	for in, osArg := range osArgs {
 		if skip {
 			skip = false
@@ -49,19 +61,33 @@ toplevel:
 			case opt == "parse-time":
 				opts.ParseTime = true
 			case opt == "config":
-				if in == len(osArgs)-1 {
+				opts.Config, err = readNextArg(in, false)
+				if err != nil {
 					break
 				}
-				if strings.HasPrefix(osArgs[in+1], "--") || strings.HasPrefix(osArgs[in+1], "-") {
-					continue
-				}
-				opts.Config = &osArgs[in+1]
 				skip = true
 			case strings.HasPrefix(opt, "config="):
 				opts.Config = new(string)
 				*opts.Config = strings.TrimPrefix(opt, "config=")
 			case opt == "version":
 				opts.Version = true
+			case opt == "edit":
+				opts.Edit, err = readNextArg(in, true)
+				if err != nil {
+					continue
+				}
+				if opts.Edit == nil {
+					// Default value if --edit is given but no argument
+					// This allows to differentiate between no edit flag
+					// and wanting to edit the default config
+					opts.Edit = new(string)
+					*opts.Edit = ""
+				} else {
+					skip = true
+				}
+			case strings.HasPrefix(opt, "edit="):
+				opts.Edit = new(string)
+				*opts.Edit = strings.TrimPrefix(opt, "edit=")
 			default:
 				err = fmt.Errorf("%s is not a valid option", err)
 				return
@@ -82,15 +108,25 @@ toplevel:
 				case "p":
 					opts.ParseTime = true
 				case "c":
-					if in == len(osArgs)-1 {
-						break toplevel
-					}
-					if strings.HasPrefix(osArgs[in+1], "--") || strings.HasPrefix(osArgs[in+1], "-") {
+					opts.Config, err = readNextArg(in, false)
+					if err != nil {
 						continue
 					}
-					opts.Config = new(string)
-					opts.Config = &osArgs[in+1]
 					skip = true
+				case "e":
+					opts.Edit, err = readNextArg(in, true)
+					if err != nil {
+						continue
+					}
+					if opts.Edit == nil {
+						// Default value if -e is given but no argument
+						// This allows to differentiate between no edit flag
+						// and wanting to edit the default config
+						opts.Edit = new(string)
+						*opts.Edit = ""
+					} else {
+						skip = true
+					}
 				default:
 					err = fmt.Errorf("%s in %s is not a valid option", string(r), osArg)
 					return
