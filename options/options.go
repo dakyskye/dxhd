@@ -8,20 +8,22 @@ import (
 )
 
 type Options struct {
-	Help      bool
-	Kill      bool
-	Reload    bool
-	Version   bool
-	DryRun    bool
-	ParseTime bool
-	Config    *string
-	Edit      *string
+	Help       bool
+	Kill       bool
+	Reload     bool
+	Version    bool
+	DryRun     bool
+	ParseTime  bool
+	Background bool
+	Config     *string
+	Edit       *string
 }
 
 var OptionsToPrint = `
   -h, --help              Prints this help message
   -c, --config [path]     Reads the config from custom path
   -d, --dry-run           Prints bindings and their commands and exits
+  -b, --background        Runs dxhd in the background
   -k, --kill	          Gracefully kills every running instances of dxhd
   -p, --parse-time        Prints how much time parsing a config took
   -r, --reload	          Reloads every running instances of dxhd
@@ -60,6 +62,10 @@ func Parse() (opts Options, err error) {
 				opts.DryRun = true
 			case opt == "parse-time":
 				opts.ParseTime = true
+			case opt == "background":
+				opts.Background = true
+				os.Args[1+in] = ""
+				return
 			case opt == "config":
 				opts.Config, err = readNextArg(in, false)
 				if err != nil {
@@ -93,7 +99,7 @@ func Parse() (opts Options, err error) {
 				return
 			}
 		} else if strings.HasPrefix(osArg, "-") {
-			for _, r := range osArg[1:] {
+			for i, r := range osArg[1:] {
 				switch string(r) {
 				case "h":
 					opts.Help = true
@@ -107,6 +113,14 @@ func Parse() (opts Options, err error) {
 					opts.DryRun = true
 				case "p":
 					opts.ParseTime = true
+				case "b":
+					opts.Background = true
+					if len(osArg) == 2 {
+						os.Args[1+in] = ""
+					} else {
+						os.Args[1+in] = os.Args[1+in][0:1+i] + os.Args[1+in][2+i:]
+					}
+					return
 				case "c":
 					opts.Config, err = readNextArg(in, false)
 					if err != nil {

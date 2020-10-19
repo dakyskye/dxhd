@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strconv"
+	"strings"
 	"syscall"
 	"time"
 
@@ -83,6 +84,23 @@ func main() {
 		fmt.Println("you are using dxhd, version " + version)
 		fmt.Println()
 		exit = true
+	}
+
+	if opts.Background {
+		cmd := exec.Command("/bin/sh")
+		cmd.Stdin = strings.NewReader(strings.Join(os.Args, " "))
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		cmd.SysProcAttr = &syscall.SysProcAttr{
+			Foreground: false,
+			Setsid:     true,
+		}
+		err = cmd.Start()
+		if err != nil {
+			logger.L().WithError(err).Fatal("can not run dxhd in the background")
+		}
+		time.Sleep(time.Microsecond * 10)
+		os.Exit(0)
 	}
 
 	if opts.Edit != nil {
