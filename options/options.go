@@ -64,7 +64,7 @@ func Parse() (opts Options, err error) {
 				opts.ParseTime = true
 			case opt == "background":
 				opts.Background = true
-				os.Args[1+in] = ""
+				os.Args[1+in] = "" // remove --background
 				return
 			case opt == "config":
 				opts.Config, err = readNextArg(in, false)
@@ -115,10 +115,10 @@ func Parse() (opts Options, err error) {
 					opts.ParseTime = true
 				case "b":
 					opts.Background = true
-					if len(osArg) == 2 {
+					if len(osArg) == 2 { // means b is the only flag with dash prefix
 						os.Args[1+in] = ""
-					} else {
-						os.Args[1+in] = os.Args[1+in][0:1+i] + os.Args[1+in][2+i:]
+					} else { // means it's a flag combo
+						os.Args[1+in] = os.Args[1+in][0:1+i] + os.Args[1+in][2+i:] // remove b from the combo
 					}
 					return
 				case "c":
