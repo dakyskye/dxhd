@@ -95,7 +95,7 @@ func Parse() (opts Options, err error) {
 				opts.Edit = new(string)
 				*opts.Edit = strings.TrimPrefix(opt, "edit=")
 			default:
-				err = fmt.Errorf("%s is not a valid option", err)
+				err = fmt.Errorf("%s is not a valid option", osArg)
 				return
 			}
 		} else if strings.HasPrefix(osArg, "-") {
