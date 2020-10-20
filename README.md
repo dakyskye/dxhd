@@ -56,12 +56,6 @@ and copy `dxhd` executable file to somewhere in your `$PATH`
 * support for global variable declarations in a config
 * support for scripting, as much as a user wishes!
 
-### Demo
-
-! outdated gif !
-
-![demo gif](./dxhd_demo.gif)
-
 ## Configuration
 
 The default config file is located at `~/.config/dxhd/dxhd.sh`, however, dxhd can read a file from any path, by passing it to `-c`:
@@ -98,11 +92,9 @@ To kill every running instance of dxhd, you can use built-in `-k` flag, which un
 
 ## Daemonisation
 
-Rather then dxhd self daemonising itself, let other programs do their job.
+~~Rather than dxhd self daemonising itself, let other programs do their job.~~
 
-Use `systemd`, `runit`, `openrc` or other Linux init system to start dxhd on system startup,
-or let your DE/WM start it by adding an ampersand at the end `dxhd -c path/to/config &`,
-optionally, use `disown` keyword to make it not owned by the DE/WM process.
+The `--background` (`-b`) flag is a simple workaround for *daemonising* dxhd. It uses `/usr/sh` shell to achieve it, as Go does not allow forking a process without executing it.
 
 ### For further help, join the developer's Discord guild
 
