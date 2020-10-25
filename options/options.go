@@ -24,11 +24,11 @@ var OptionsToPrint = `
   -c, --config [path]     Reads the config from custom path
   -d, --dry-run           Prints bindings and their commands and exits
   -b, --background        Runs dxhd in the background
-  -k, --kill	          Gracefully kills every running instances of dxhd
+  -k, --kill              Gracefully kills every running instances of dxhd
   -p, --parse-time        Prints how much time parsing a config took
-  -r, --reload	          Reloads every running instances of dxhd
-  -v, --version	          Prints current version of program
-  -e, --edit [file]	      Shortcut to edit a file in dxhd's config folder. Opens dxhd.sh if file is empty`
+  -r, --reload            Reloads every running instances of dxhd
+  -v, --version           Prints current version of program
+  -e, --edit [file]       Shortcut to edit a file in dxhd's config folder. Opens dxhd.sh if file is empty`
 
 func Parse() (opts Options, err error) {
 	osArgs := os.Args[1:]
