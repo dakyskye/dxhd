@@ -2,6 +2,7 @@ package parser
 
 import (
 	"bufio"
+	"bytes"
 	"errors"
 	"fmt"
 	"io"
@@ -65,30 +66,39 @@ var (
 	xfKeyPattern        = regexp.MustCompile(`XF86\w+`)
 )
 
-// parese function parses a config file, and returns data
-func Parse(file string, data *[]FileData) (shell, globals string, err error) {
+func Parse(what interface{}, data *[]FileData) (shell, globals string, err error) {
 	if data == nil {
 		return "", "", errors.New("empty value was passed to parse function")
 	}
 
-	configFile, err := os.Open(file)
+	var reader *bufio.Reader
 
-	if err != nil {
-		return
-	}
+	switch what.(type) {
+	case string:
+		configFile, e := os.Open(what.(string))
 
-	defer func() {
-		e := configFile.Close()
 		if e != nil {
-			if err == nil {
-				err = e
-			} else {
-				logger.L().WithError(err).Debug("failed to close config file")
-			}
+			err = e
+			return
 		}
-	}()
 
-	reader := bufio.NewReader(configFile)
+		defer func() {
+			e := configFile.Close()
+			if e != nil {
+				if err == nil {
+					err = e
+				} else {
+					logger.L().WithError(err).Debug("failed to close config file")
+				}
+			}
+		}()
+
+		reader = bufio.NewReader(configFile)
+	case []byte:
+		reader = bufio.NewReader(bytes.NewReader(what.([]byte)))
+	default:
+		err = errors.New("invalid type was passed to Parse function")
+	}
 
 	lineNumber := 0
 	shell = "/bin/sh"
@@ -147,7 +157,7 @@ func Parse(file string, data *[]FileData) (shell, globals string, err error) {
 		// decide whether the line is a keybinding or not
 		if strings.HasPrefix(lineStr, "#") {
 			if isPrefix {
-				err = fmt.Errorf("a keybinding can't be that long, line %d, file %s", lineNumber, file)
+				err = fmt.Errorf("a keybinding can't be that long, line %d, file %s", lineNumber, what)
 				return
 			}
 			if !globalsEnded {
@@ -168,7 +178,7 @@ func Parse(file string, data *[]FileData) (shell, globals string, err error) {
 				if wasKeybinding {
 					if datum[index].Binding.Len() != 0 {
 						datum[index].Binding.Reset()
-						logger.L().WithFields(logrus.Fields{"file": file, "line": lineNumber}).Info("overwriting keybinding")
+						logger.L().WithFields(logrus.Fields{"file": what, "line": lineNumber}).Info("overwriting keybinding")
 						logger.L().WithFields(logrus.Fields{"old": datum[index].Binding.String(), "new": lineStr}).Debug("overwriting keybinding")
 					}
 				}

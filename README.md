@@ -52,13 +52,14 @@ and copy `dxhd` executable file to somewhere in your `$PATH`
 * calculating the time parsing a config file took (`dxhd -p`)
 * editing config files quickly (`dxhd -e i3.py`)
 * running as a daemon (`dxhd -b`)
+* running interactively (`dxhd -i`)
 * support for any shell scripting language (sh, bash, ksh, zsh, python, perl etc.) given as a shebang
 * support for global variable declarations in a config
 * support for scripting, as much as a user wishes!
 
 ## Configuration
 
-The default config file is located at `~/.config/dxhd/dxhd.sh`, however, dxhd can read a file from any path, by passing it to `-c`:
+The default config file is `~/.config/dxhd/dxhd.sh`, however, dxhd can read a file from any path, by passing it to `-c`:
 
 ```sh
 dxhd -c /my/custom/path/to/a/config/file
