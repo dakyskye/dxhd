@@ -8,15 +8,16 @@ import (
 )
 
 type Options struct {
-	Help       bool
-	Kill       bool
-	Reload     bool
-	Version    bool
-	DryRun     bool
-	ParseTime  bool
-	Background bool
-	Config     *string
-	Edit       *string
+	Help        bool
+	Kill        bool
+	Reload      bool
+	Version     bool
+	DryRun      bool
+	ParseTime   bool
+	Background  bool
+	Interactive bool
+	Config      *string
+	Edit        *string
 }
 
 var OptionsToPrint = `
@@ -28,7 +29,8 @@ var OptionsToPrint = `
   -p, --parse-time        Prints how much time parsing a config took
   -r, --reload            Reloads every running instances of dxhd
   -v, --version           Prints current version of program
-  -e, --edit [file]       Shortcut to edit a file in dxhd's config folder. Opens dxhd.sh if file is empty`
+  -e, --edit [file]       Shortcut to edit a file in dxhd's config folder. Opens dxhd.sh if file is empty
+  -i, --interactive       Opens a temporary file for temporary bindings to run`
 
 func Parse() (opts Options, err error) {
 	osArgs := os.Args[1:]
@@ -64,8 +66,7 @@ func Parse() (opts Options, err error) {
 				opts.ParseTime = true
 			case opt == "background":
 				opts.Background = true
-				os.Args[1+in] = ""
-				return
+				os.Args[1+in] = "" // remove --background
 			case opt == "config":
 				opts.Config, err = readNextArg(in, false)
 				if err != nil {
@@ -77,6 +78,8 @@ func Parse() (opts Options, err error) {
 				*opts.Config = strings.TrimPrefix(opt, "config=")
 			case opt == "version":
 				opts.Version = true
+			case opt == "interactive":
+				opts.Interactive = true
 			case opt == "edit":
 				opts.Edit, err = readNextArg(in, true)
 				if err != nil {
@@ -115,12 +118,11 @@ func Parse() (opts Options, err error) {
 					opts.ParseTime = true
 				case "b":
 					opts.Background = true
-					if len(osArg) == 2 {
+					if len(osArg) == 2 { // means b is the only flag with dash prefix
 						os.Args[1+in] = ""
-					} else {
-						os.Args[1+in] = os.Args[1+in][0:1+i] + os.Args[1+in][2+i:]
+					} else { // means it's a flag combo
+						os.Args[1+in] = os.Args[1+in][0:1+i] + os.Args[1+in][2+i:] // remove b from the combo
 					}
-					return
 				case "c":
 					opts.Config, err = readNextArg(in, false)
 					if err != nil {
@@ -141,6 +143,8 @@ func Parse() (opts Options, err error) {
 					} else {
 						skip = true
 					}
+				case "i":
+					opts.Interactive = true
 				default:
 					err = fmt.Errorf("%s in %s is not a valid option", string(r), osArg)
 					return

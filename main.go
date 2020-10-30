@@ -1,7 +1,10 @@
 package main
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -9,7 +12,6 @@ import (
 	"path/filepath"
 	"runtime"
 	"strconv"
-	"strings"
 	"syscall"
 	"time"
 
@@ -67,6 +69,21 @@ func main() {
 		logger.L().Fatalln("dxhd is only supported on linux")
 	}
 
+	stdin := new([]byte)
+
+	stat, err := os.Stdin.Stat()
+	if err != nil {
+		logger.L().WithError(err).Fatal("can not stat stdin")
+	}
+	if stat.Mode()&os.ModeCharDevice == 0 {
+		*stdin, err = ioutil.ReadAll(os.Stdin)
+		if err != nil {
+			logger.L().WithError(err).Fatal("can not read the stdin")
+		}
+	} else {
+		stdin = nil
+	}
+
 	opts, err := options.Parse()
 	if err != nil {
 		logger.L().Fatalln(err)
@@ -86,9 +103,15 @@ func main() {
 		exit = true
 	}
 
-	if opts.Background {
-		cmd := exec.Command("/bin/sh")
-		cmd.Stdin = strings.NewReader(strings.Join(os.Args, " "))
+	runInBackground := func(data *[]byte) (err error) {
+		exc, err := os.Executable()
+		if err != nil {
+			logger.L().WithError(err).Fatal("can not get the executable")
+		}
+		cmd := exec.Command(exc, os.Args...)
+		if data != nil {
+			cmd.Stdin = bytes.NewReader(*data)
+		}
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 		cmd.SysProcAttr = &syscall.SysProcAttr{
@@ -100,30 +123,49 @@ func main() {
 			logger.L().WithError(err).Fatal("can not run dxhd in the background")
 		}
 		time.Sleep(time.Microsecond * 10)
+		return
+	}
+
+	if opts.Background && !opts.Interactive {
+		os.Exit(1)
+		err = runInBackground(stdin)
+		if err != nil {
+			logger.L().WithError(err).Fatal("can not run dxhd in the background")
+		}
 		os.Exit(0)
 	}
 
-	if opts.Edit != nil {
+	findEditor := func() (ed string, e error) {
 		editor := os.Getenv("EDITOR")
-		editors := []string{editor, "nano", "nvim", "vim", "vi"}
-		for _, ed := range editors {
-			editor, err = exec.LookPath(ed)
-			if err == nil {
+		editors := [5]string{editor, "nano", "nvim", "vim", "vi"}
+		for _, ed = range editors {
+			ed, e = exec.LookPath(ed)
+			if e == nil {
 				break
 			}
 		}
-		if editor != "" {
-			_, configDir, _ := config.GetDefaultConfigPath()
-			if *opts.Edit == "" {
-				*opts.Edit = "dxhd.sh"
-			}
-			path := filepath.Join(configDir, *opts.Edit)
-			err = syscall.Exec(editor, []string{editor, path}, os.Environ())
-			if err != nil {
-				logger.L().WithError(err).WithFields(logrus.Fields{"editor": editor, "path": path}).Fatal("cannot invoke editor")
-			}
-		} else {
-			logger.L().Fatal("cannot find a suitable editor to open, please set one in $EDTIOR")
+		if e != nil {
+			e = errors.New("no text editor was found installed")
+		}
+		return
+	}
+
+	if opts.Edit != nil {
+		editor, err := findEditor()
+		if err != nil {
+			logger.L().WithError(err).Fatal("can not find a suitable editor to use")
+		}
+		_, configDir, _ := config.GetDefaultConfigPath()
+		if *opts.Edit == "" {
+			*opts.Edit = "dxhd.sh"
+		}
+		path := filepath.Join(configDir, *opts.Edit)
+		cmd := exec.Command(editor, path)
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		err = cmd.Run()
+		if err != nil {
+			logger.L().WithError(err).WithFields(logrus.Fields{"editor": editor, "path": path}).Fatal("cannot invoke editor")
 		}
 		exit = true
 	}
@@ -133,28 +175,71 @@ func main() {
 		validPath      bool
 	)
 
-	if opts.Config != nil {
-		if validPath, err = config.IsPathToConfigValid(*opts.Config); !(err == nil && validPath) {
-			logger.L().WithFields(logrus.Fields{
-				"path":  *opts.Config,
-				"valid": validPath,
-			}).WithError(err).Fatal("path to the config is not valid")
-		}
-		configFilePath = *opts.Config
-	} else {
-		configFilePath, _, err = config.GetDefaultConfigPath()
-		if err != nil {
-			logger.L().WithError(err).Fatal("can not get config path")
-		}
+	if stdin == nil {
+		if opts.Interactive && opts.Config == nil {
+			editor, err := findEditor()
+			if err != nil {
+				logger.L().WithError(err).Fatal("can not find a suitable editor to use")
+			}
+			tmp, err := ioutil.TempFile("/tmp", "dxhd")
+			if err != nil {
+				logger.L().WithError(err).Fatal("can not create a temp file for interactive l")
+			}
 
-		if validPath, err = config.IsPathToConfigValid(configFilePath); !(err == nil && validPath) {
-			if os.IsNotExist(err) {
-				err = config.CreateDefaultConfig()
+			_, err = tmp.WriteString("#!/bin/sh")
+			if err != nil {
+				logger.L().WithError(err).WithField("file", tmp.Name()).Warn("can not write default shebang to temp file")
+			}
+
+			cmd := exec.Command(editor, tmp.Name())
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+			err = cmd.Run()
+			if err != nil {
+				logger.L().WithError(err).WithFields(logrus.Fields{"editor": editor, "path": tmp.Name()}).Fatal("cannot invoke editor")
+			}
+
+			stdin = new([]byte)
+			*stdin, err = ioutil.ReadFile(tmp.Name()) // ioutil.ReadAll(tmp) omits the shebang
+			if err != nil {
+				logger.L().WithError(err).WithField("file", tmp).Fatal("can not read file")
+			}
+
+			err = os.Remove(tmp.Name())
+			if err != nil {
+				logger.L().WithError(err).Warn("can not delete temp file dxhd created")
+			}
+
+			if opts.Background {
+				err = runInBackground(stdin)
 				if err != nil {
-					logger.L().WithField("path", configFilePath).Fatal("can not create default config")
+					logger.L().WithError(err).Fatal("can not run dxhd in the background")
 				}
-			} else {
-				logger.L().WithFields(logrus.Fields{"path": configFilePath, "valid": validPath}).WithError(err).Fatal("path to the config is not valid")
+				os.Exit(0)
+			}
+		} else if opts.Config != nil {
+			if validPath, err = config.IsPathToConfigValid(*opts.Config); !(err == nil && validPath) {
+				logger.L().WithFields(logrus.Fields{
+					"path":  *opts.Config,
+					"valid": validPath,
+				}).WithError(err).Fatal("path to the config is not valid")
+			}
+			configFilePath = *opts.Config
+		} else {
+			configFilePath, _, err = config.GetDefaultConfigPath()
+			if err != nil {
+				logger.L().WithError(err).Fatal("can not get config path")
+			}
+
+			if validPath, err = config.IsPathToConfigValid(configFilePath); !(err == nil && validPath) {
+				if os.IsNotExist(err) {
+					err = config.CreateDefaultConfig()
+					if err != nil {
+						logger.L().WithField("path", configFilePath).Fatal("can not create default config")
+					}
+				} else {
+					logger.L().WithFields(logrus.Fields{"path": configFilePath, "valid": validPath}).WithError(err).Fatal("path to the config is not valid")
+				}
 			}
 		}
 	}
@@ -170,7 +255,12 @@ func main() {
 		startTime = time.Now()
 	}
 
-	shell, globals, err = parser.Parse(configFilePath, &data)
+	if stdin != nil {
+		shell, globals, err = parser.Parse(*stdin, &data)
+		*stdin = []byte("")
+	} else {
+		shell, globals, err = parser.Parse(configFilePath, &data)
+	}
 	if err != nil {
 		logger.L().WithField("file", configFilePath).WithError(err).Fatal("failed to parse config")
 	}
@@ -245,7 +335,7 @@ func main() {
 	// infinite loop - if user sends USR signal, reload configration (so, continue loop), otherwise, exit
 toplevel:
 	for {
-		if len(data) == 0 {
+		if len(data) == 0 && stdin == nil {
 			shell, globals, err = parser.Parse(configFilePath, &data)
 			if err != nil {
 				logger.L().WithField("file", configFilePath).WithError(err).Fatal("failed to parse config")
@@ -279,10 +369,14 @@ toplevel:
 				}
 				continue
 			case sig := <-signals:
+				if (sig == syscall.SIGUSR1 || sig == syscall.SIGUSR2) && stdin != nil {
+					logger.L().Debug("user defined signal received, but not reloading, as dxhd's using memory config")
+					continue
+				}
 				keybind.Detach(X, X.RootWin())
 				mousebind.Detach(X, X.RootWin())
 				xevent.Quit(X)
-				if sig == syscall.SIGUSR1 || sig == syscall.SIGUSR2 {
+				if (sig == syscall.SIGUSR1 || sig == syscall.SIGUSR2) && stdin == nil {
 					logger.L().Debug("user defined signal received, reloading")
 					continue toplevel
 				}
