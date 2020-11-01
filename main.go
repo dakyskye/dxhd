@@ -127,7 +127,6 @@ func main() {
 	}
 
 	if opts.Background && !opts.Interactive {
-		os.Exit(1)
 		err = runInBackground(stdin)
 		if err != nil {
 			logger.L().WithError(err).Fatal("can not run dxhd in the background")
