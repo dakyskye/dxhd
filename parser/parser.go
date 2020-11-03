@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"regexp"
+
 	"strconv"
 	"strings"
 
@@ -15,7 +16,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// event type
+// EventType is a custom int8 type
 type EventType int8
 
 // event definitions
@@ -66,6 +67,7 @@ var (
 	xfKeyPattern        = regexp.MustCompile(`XF86\w+`)
 )
 
+// Parse function parses given data
 func Parse(what interface{}, data *[]FileData) (shell, globals string, err error) {
 	if data == nil {
 		return "", "", errors.New("empty value was passed to parse function")
@@ -73,9 +75,9 @@ func Parse(what interface{}, data *[]FileData) (shell, globals string, err error
 
 	var reader *bufio.Reader
 
-	switch what.(type) {
+	switch w := what.(type) {
 	case string:
-		configFile, e := os.Open(what.(string))
+		configFile, e := os.Open(w)
 
 		if e != nil {
 			err = e
@@ -95,7 +97,7 @@ func Parse(what interface{}, data *[]FileData) (shell, globals string, err error
 
 		reader = bufio.NewReader(configFile)
 	case []byte:
-		reader = bufio.NewReader(bytes.NewReader(what.([]byte)))
+		reader = bufio.NewReader(bytes.NewReader(w))
 	default:
 		err = errors.New("invalid type was passed to Parse function")
 	}
@@ -343,11 +345,13 @@ func Parse(what interface{}, data *[]FileData) (shell, globals string, err error
 func replicate(binding, command string) (replicated []*FileData, err error) {
 	// find all the variants
 	bindingVariants, commandVariants := variantPattern.FindAllString(binding, -1), variantPattern.FindAllString(command, -1)
-
-	// make sure the amount of variants do match
-	if len(bindingVariants) != len(commandVariants) {
-		err = errors.New("the amount of variants in a keybinding and its command do not match")
+	// check if we need to populate command with variants
+	populateAmount := len(bindingVariants) - len(commandVariants)
+	if populateAmount < 0 {
+		err = errors.New("a command has more variants than its binding")
 		return
+	} else if populateAmount != 0 {
+		logger.L().WithField("binding", binding).Debug("adding blank variants to command is required")
 	}
 
 	var bindingVars, commandVars [][]string
@@ -363,10 +367,24 @@ func replicate(binding, command string) (replicated []*FileData, err error) {
 	extract(commandVariants, &commandVars)
 
 	// validate the amount of variant memebers do match
-	for i, b := range bindingVars {
-		if len(b) != len(commandVars[i]) {
-			err = errors.New("the amount of variant members in a keybinding and its command do not match")
-			return
+	if populateAmount == 0 {
+		for i, b := range bindingVars {
+			if len(b) != len(commandVars[i]) {
+				err = errors.New("the amounts of variant members in a keybinding and its command do not match")
+				return
+			}
+		}
+	} else {
+		for i, b := range bindingVars[populateAmount:] {
+			commandVars = append(commandVars, []string{})
+			variant := "{"
+			for range b {
+				commandVars[i] = append(commandVars[i], "_")
+				variant += "_,"
+			}
+			variant = strings.TrimSuffix(variant, ",")
+			variant += "}"
+			command += variant
 		}
 	}
 
