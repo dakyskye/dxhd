@@ -24,6 +24,7 @@ func init() {
 	}
 }
 
+// L just returns our internal logger
 func L() *logrus.Logger {
 	return logger
 }
