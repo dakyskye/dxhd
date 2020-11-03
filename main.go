@@ -236,6 +236,8 @@ func main() {
 					if err != nil {
 						logger.L().WithField("path", configFilePath).Fatal("can not create default config")
 					}
+					logger.L().WithField("path", configFilePath).Info("created the default config")
+					os.Exit(0)
 				} else {
 					logger.L().WithFields(logrus.Fields{"path": configFilePath, "valid": validPath}).WithError(err).Fatal("path to the config is not valid")
 				}
