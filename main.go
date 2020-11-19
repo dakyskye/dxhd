@@ -162,6 +162,7 @@ func main() {
 		cmd := exec.Command(editor, path)
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
+		cmd.Stdin = os.Stdin
 		err = cmd.Run()
 		if err != nil {
 			logger.L().WithError(err).WithFields(logrus.Fields{"editor": editor, "path": path}).Fatal("cannot invoke editor")
@@ -193,6 +194,7 @@ func main() {
 			cmd := exec.Command(editor, tmp.Name())
 			cmd.Stdout = os.Stdout
 			cmd.Stderr = os.Stderr
+			cmd.Stdin = os.Stdin
 			err = cmd.Run()
 			if err != nil {
 				logger.L().WithError(err).WithFields(logrus.Fields{"editor": editor, "path": tmp.Name()}).Fatal("cannot invoke editor")
