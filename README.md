@@ -2,6 +2,8 @@
 
 ## daky's X11 hotkey daemon
 
+⚠️ [#39](https://github.com/dakyskye/dxhd/issues/39) ⚠️
+
 dxhd is heavily inspired by [sxhkd](https://github.com/baskerville/sxhkd), written in Go, and has an elegant syntax for configuration files!
 
 ## Installation
