@@ -6,6 +6,8 @@
 
 dxhd is heavily inspired by [sxhkd](https://github.com/baskerville/sxhkd), written in Go, and has an elegant syntax for configuration files!
 
+Thanks [JetBrains](https://jetbrains.com) for providing dxhd with free licenses.
+
 ## Installation
 
 **NOTE:** the git version, a.k.a. the master version is usually more bug free than the released, binary ones, since introduced bugs first get fixed in this version.
@@ -102,7 +104,7 @@ The `--background` (`-b`) flag is a simple workaround for *daemonising* dxhd. It
 ### For further help, join the developer's Discord guild
 
 <a target="_blank" href="https://discord.gg/x5RuZCN">
-	<img src="https://img.shields.io/discord/627168403005767711?color=%238577ce&label=dakyskye%27s%20discord%20guild&logo=discord&logoColor=%23FFFFFF&style=plastic">
+	<img src="https://img.shields.io/discord/627168403005767711?color=%238577ce&label=dakycord&logo=discord&logoColor=%23FFFFFF&style=plastic" alt="dakycord">
 </a>
 
 ## Examples
