@@ -62,7 +62,7 @@ func Init() (c CLI) {
 	c.Options.Config = c.app.Flag("config", "Parses the given config (defaults to dxhd.sh).").Short('c').Action(c.config).String()
 	c.Options.Config = c.app.Flag("edit", "Starts an editor on the given config file (defaults to dxhd.sh).").Short('e').Action(c.edit).String()
 
-	logger.L().Debugln("initialised the app")
+	logger.L().Debug("initialised the app")
 
 	return
 }
