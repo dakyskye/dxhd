@@ -1,8 +1,10 @@
 package cli
 
 import (
-	"gopkg.in/alecthomas/kingpin.v2"
 	"os"
+
+	"github.com/dakyskye/dxhd/logger"
+	"gopkg.in/alecthomas/kingpin.v2"
 )
 
 var version = `master`
@@ -58,6 +60,8 @@ func Init() (c CLI) {
 	c.Options.Interactive = c.app.Flag("interactive", "Runs dxhd interactively").Short('i').Action(c.interactive).Bool()
 	c.Options.Config = c.app.Flag("config", "Parses the given config (defaults to dxhd.sh)").Short('c').Action(c.config).String()
 	c.Options.Config = c.app.Flag("edit", "Starts an editor on the given config file (defaults to dxhd.sh)").Short('e').Action(c.edit).String()
+
+	logger.L().Debugln("initialised the app")
 
 	return
 }
