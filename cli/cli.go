@@ -3,6 +3,8 @@ package cli
 import (
 	"os"
 
+	"github.com/dakyskye/dxhd/config"
+
 	"github.com/dakyskye/dxhd/logger"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
@@ -44,7 +46,12 @@ BUGS
   Report a bug here if you find one - https://github.com/dakyskye/dxhd/issues
 `
 
-func Init() (c CLI) {
+func Init() (c CLI, err error) {
+	configFile, err := config.GetConfigFile()
+	if err != nil {
+		return
+	}
+
 	c.app = kingpin.New("dxhd", "daky's X11 Hotkey Daemon")
 
 	c.app.Version(version)
@@ -59,9 +66,10 @@ func Init() (c CLI) {
 	c.Options.Background = c.app.Flag("background", "Runs dxhd as a background process.").Short('b').Action(c.background).Bool()
 	c.Options.Interactive = c.app.Flag("interactive", "Runs dxhd interactively.").Short('i').Action(c.interactive).Bool()
 	c.Options.Verbose = c.app.Flag("verbose", "Enables verbosity (logs everything).").Short('v').Action(c.verbose).Bool()
-	c.Options.Config = c.app.Flag("config", "Parses the given config (defaults to dxhd.sh).").Short('c').Action(c.config).String()
-	c.Options.Config = c.app.Flag("edit", "Starts an editor on the given config file (defaults to dxhd.sh).").Short('e').Action(c.edit).String()
+	c.Options.Config = c.app.Flag("config", "Parses the given config (defaults to dxhd.sh).").Short('c').Default(configFile).Action(c.config).String()
+	c.Options.Config = c.app.Flag("edit", "Starts an editor on the given config file (defaults to dxhd.sh).").Short('e').Default(configFile).Action(c.edit).String()
 
+	logger.L().WithField("file", configFile).Debug("set default file for -c and -e flags")
 	logger.L().Debug("initialised the app")
 
 	return
