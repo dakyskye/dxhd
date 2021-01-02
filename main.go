@@ -10,6 +10,6 @@ func main() {
 	app := cli.Init()
 	err := app.Parse()
 	if err != nil {
-		logger.L().WithError(err).Fatalln("can not parse commndline arguments")
+		logger.L().WithError(err).Fatalln("something went wrong")
 	}
 }
