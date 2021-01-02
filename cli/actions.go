@@ -1,8 +1,14 @@
 package cli
 
 import (
-	"gopkg.in/alecthomas/kingpin.v2"
+	"os"
+	"os/exec"
+	"path/filepath"
 	"sync"
+
+	"github.com/dakyskye/dxhd/logger"
+
+	"gopkg.in/alecthomas/kingpin.v2"
 )
 
 // functions add themselves to this waitgroup
@@ -10,52 +16,83 @@ import (
 // their call order is dependant on a user
 var wg sync.WaitGroup
 
-func (c *CLI) kill(ctx *kingpin.ParseContext) (err error) {
+func (c *CLI) kill(_ *kingpin.ParseContext) (err error) {
 	wg.Wait()
 	wg.Add(1)
 	defer wg.Done()
-	// kill stuff
+	logger.L().Debugln("added self to the waitgroup")
+
+	execName, err := os.Executable()
+	if err != nil {
+		return
+	}
+
+	err = exec.Command("pkill", "-INT", "-x", filepath.Base(execName)).Start()
+
 	return
 }
-func (c *CLI) reload(ctx *kingpin.ParseContext) (err error) {
+func (c *CLI) reload(_ *kingpin.ParseContext) (err error) {
 	wg.Wait()
 	wg.Add(1)
 	defer wg.Done()
-	// reload stuff
+	logger.L().Debugln("added self to the waitgroup")
+
+	execName, err := os.Executable()
+	if err != nil {
+		return
+	}
+
+	err = exec.Command("pkill", "-USR1", "-x", filepath.Base(execName)).Start()
+
 	return
 }
-func (c *CLI) dryrun(ctx *kingpin.ParseContext) (err error) {
+func (c *CLI) dryrun(_ *kingpin.ParseContext) (err error) {
 	wg.Wait()
 	wg.Add(1)
 	defer wg.Done()
-	// dryrun stuff
+	logger.L().Debugln("added self to the waitgroup")
+
 	return
 }
-func (c *CLI) background(ctx *kingpin.ParseContext) (err error) {
+func (c *CLI) background(_ *kingpin.ParseContext) (err error) {
 	wg.Wait()
 	wg.Add(1)
 	defer wg.Done()
-	// background stuff
+	logger.L().Debugln("added self to the waitgroup")
+
 	return
 }
-func (c *CLI) interactive(ctx *kingpin.ParseContext) (err error) {
+func (c *CLI) interactive(_ *kingpin.ParseContext) (err error) {
 	wg.Wait()
 	wg.Add(1)
 	defer wg.Done()
-	// interactive stuff
+	logger.L().Debugln("added self to the waitgroup")
+
 	return
 }
-func (c *CLI) config(ctx *kingpin.ParseContext) (err error) {
+func (c *CLI) verbose(_ *kingpin.ParseContext) (err error) {
 	wg.Wait()
 	wg.Add(1)
 	defer wg.Done()
-	// config stuff
+	logger.L().Debugln("added self to the waitgroup")
+
+	logger.SetLevel(logger.Debug)
+
 	return
 }
-func (c *CLI) edit(ctx *kingpin.ParseContext) (err error) {
+func (c *CLI) config(_ *kingpin.ParseContext) (err error) {
 	wg.Wait()
 	wg.Add(1)
 	defer wg.Done()
-	// edit stuff
+	logger.L().Debugln("added self to the waitgroup")
+
+	return
+}
+func (c *CLI) edit(_ *kingpin.ParseContext) (err error) {
+	wg.Wait()
+	wg.Add(1)
+	defer wg.Done()
+	logger.L().Debugln("added self to the waitgroup")
+
 	return
 }
