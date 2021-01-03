@@ -30,11 +30,11 @@ func SetLevel(level Level) {
 	switch level {
 	case Info:
 		logger.SetLevel(logrus.InfoLevel)
-		logger.SetFormatter(&logrus.TextFormatter{DisableTimestamp: true, ForceQuote: true})
+		logger.SetFormatter(&logrus.TextFormatter{DisableTimestamp: true, DisableColors: false, DisableLevelTruncation: true, ForceQuote: true})
 	case Debug:
 		logger.SetLevel(logrus.DebugLevel)
 		logger.ReportCaller = true
-		logger.SetFormatter(&logrus.TextFormatter{DisableTimestamp: false, ForceQuote: true})
+		logger.SetFormatter(&logrus.TextFormatter{DisableTimestamp: false, DisableColors: false, DisableLevelTruncation: true, ForceQuote: true})
 	}
 }
 
