@@ -16,7 +16,7 @@ import (
 // their call order is dependant on a user
 var wg sync.WaitGroup
 
-func (c *CLI) kill(_ *kingpin.ParseContext) (err error) {
+func (a *App) kill(_ *kingpin.ParseContext) (err error) {
 	wg.Wait()
 	wg.Add(1)
 	defer wg.Done()
@@ -31,7 +31,7 @@ func (c *CLI) kill(_ *kingpin.ParseContext) (err error) {
 
 	return
 }
-func (c *CLI) reload(_ *kingpin.ParseContext) (err error) {
+func (a *App) reload(_ *kingpin.ParseContext) (err error) {
 	wg.Wait()
 	wg.Add(1)
 	defer wg.Done()
@@ -46,7 +46,7 @@ func (c *CLI) reload(_ *kingpin.ParseContext) (err error) {
 
 	return
 }
-func (c *CLI) dryrun(_ *kingpin.ParseContext) (err error) {
+func (a *App) dryrun(_ *kingpin.ParseContext) (err error) {
 	wg.Wait()
 	wg.Add(1)
 	defer wg.Done()
@@ -54,7 +54,7 @@ func (c *CLI) dryrun(_ *kingpin.ParseContext) (err error) {
 
 	return
 }
-func (c *CLI) background(_ *kingpin.ParseContext) (err error) {
+func (a *App) background(_ *kingpin.ParseContext) (err error) {
 	wg.Wait()
 	wg.Add(1)
 	defer wg.Done()
@@ -62,7 +62,7 @@ func (c *CLI) background(_ *kingpin.ParseContext) (err error) {
 
 	return
 }
-func (c *CLI) interactive(_ *kingpin.ParseContext) (err error) {
+func (a *App) interactive(_ *kingpin.ParseContext) (err error) {
 	wg.Wait()
 	wg.Add(1)
 	defer wg.Done()
@@ -70,7 +70,7 @@ func (c *CLI) interactive(_ *kingpin.ParseContext) (err error) {
 
 	return
 }
-func (c *CLI) verbose(_ *kingpin.ParseContext) (err error) {
+func (a *App) verbose(_ *kingpin.ParseContext) (err error) {
 	wg.Wait()
 	wg.Add(1)
 	defer wg.Done()
@@ -80,7 +80,7 @@ func (c *CLI) verbose(_ *kingpin.ParseContext) (err error) {
 
 	return
 }
-func (c *CLI) config(_ *kingpin.ParseContext) (err error) {
+func (a *App) config(_ *kingpin.ParseContext) (err error) {
 	wg.Wait()
 	wg.Add(1)
 	defer wg.Done()
@@ -88,7 +88,7 @@ func (c *CLI) config(_ *kingpin.ParseContext) (err error) {
 
 	return
 }
-func (c *CLI) edit(_ *kingpin.ParseContext) (err error) {
+func (a *App) edit(_ *kingpin.ParseContext) (err error) {
 	wg.Wait()
 	wg.Add(1)
 	defer wg.Done()

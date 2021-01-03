@@ -1,13 +1,22 @@
 package app
 
 import (
+	"context"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
+	"gopkg.in/alecthomas/kingpin.v2"
+
 	"github.com/dakyskye/dxhd/logger"
 )
+
+type App struct {
+	ctx    context.Context
+	cancel context.CancelFunc
+	cli    *kingpin.Application
+}
 
 type serverResponse string
 
@@ -16,17 +25,17 @@ const (
 	shutoff serverResponse = "shutoff"
 )
 
-func (c *CLI) Start() (err error) {
+func (a *App) Start() (err error) {
 	logger.L().Debug("trying to start the server")
 	for {
-		go c.init()
+		go a.init()
 
 		server := make(chan serverResponse, 1)
-		go c.serve(server)
+		go a.serve(server)
 
 		command := <-server
 		if command == shutoff {
-			c.app.cancel()
+			a.cancel()
 		}
 		logger.L().WithField("command", command).Debug("received a command")
 
@@ -35,12 +44,12 @@ func (c *CLI) Start() (err error) {
 	return
 }
 
-func (c *CLI) init() {
+func (a *App) init() {
 	time.Sleep(time.Second * 5)
-	c.app.cancel()
+	a.cancel()
 }
 
-func (c *CLI) serve(res chan<- serverResponse) {
+func (a *App) serve(res chan<- serverResponse) {
 	logger.L().Debug("serving os signals")
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, os.Interrupt, syscall.SIGINT, syscall.SIGTERM, syscall.SIGUSR1, syscall.SIGUSR2)
@@ -55,8 +64,8 @@ func (c *CLI) serve(res chan<- serverResponse) {
 		default:
 			res <- shutoff
 		}
-	case <-c.app.ctx.Done():
-		logger.L().WithError(c.app.ctx.Err()).Debug("context done")
+	case <-a.ctx.Done():
+		logger.L().WithError(a.ctx.Err()).Debug("context done")
 		res <- shutoff
 	}
 }
