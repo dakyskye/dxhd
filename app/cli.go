@@ -48,6 +48,9 @@ func Init() (a App, err error) {
 		return
 	}
 
+	a.opts.edit = configFile
+	a.opts.config = configFile
+
 	a.ctx, a.cancel = context.WithCancel(context.Background())
 
 	a.cli = kingpin.New("dxhd", "daky's X11 Hotkey Daemon")
