@@ -12,9 +12,11 @@ import (
 )
 
 type App struct {
-	ctx    context.Context
-	cancel context.CancelFunc
-	cli    *kingpin.Application
+	execName string
+	ctx      context.Context
+	cancel   context.CancelFunc
+	cli      *kingpin.Application
+	opts     options
 }
 
 type serverResponse string
@@ -46,8 +48,8 @@ func (a *App) Start() (err error) {
 	return
 }
 
-func (a *App) init() {
-	a.cancel()
+func (a *App) init() (err error) {
+	return
 }
 
 func (a *App) serve(res chan<- serverResponse) {
@@ -67,7 +69,7 @@ func (a *App) serve(res chan<- serverResponse) {
 			res <- shutoff
 		}
 	case <-a.ctx.Done():
-		logger.L().WithError(a.ctx.Err()).Debug("context done")
+		logger.L().WithError(a.ctx.Err()).Debug("main app context done")
 		res <- shutoff
 	}
 }
