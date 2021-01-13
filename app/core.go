@@ -5,7 +5,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"gopkg.in/alecthomas/kingpin.v2"
 
@@ -27,6 +26,7 @@ const (
 
 func (a *App) Start() (err error) {
 	logger.L().Debug("trying to start the server")
+
 	for {
 		go a.init()
 
@@ -37,22 +37,24 @@ func (a *App) Start() (err error) {
 		if command == shutoff {
 			a.cancel()
 		}
+
 		logger.L().WithField("command", command).Debug("received a command")
 
-		break // for now
+		break
 	}
+
 	return
 }
 
 func (a *App) init() {
-	time.Sleep(time.Second * 5)
 	a.cancel()
 }
 
 func (a *App) serve(res chan<- serverResponse) {
-	logger.L().Debug("serving os signals")
 	signals := make(chan os.Signal, 1)
+
 	signal.Notify(signals, os.Interrupt, syscall.SIGINT, syscall.SIGTERM, syscall.SIGUSR1, syscall.SIGUSR2)
+	logger.L().Debug("serving os signals")
 
 	select {
 	case sig := <-signals:

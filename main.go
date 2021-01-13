@@ -10,10 +10,12 @@ func main() {
 	if err != nil {
 		logger.L().WithError(err).Fatalln("can not initialise the app")
 	}
+
 	err = a.Parse()
 	if err != nil {
 		logger.L().WithError(err).Fatalln("something went wrong")
 	}
+
 	err = a.Start()
 	if err != nil {
 		logger.L().WithError(err).Fatal("something went wrong")

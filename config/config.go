@@ -13,6 +13,7 @@ func GetConfigDirectory() (directory string, err error) {
 		return
 	}
 	directory = filepath.Join(directory, "dxhd")
+
 	return
 }
 
@@ -23,6 +24,7 @@ func GetConfigFile() (file string, err error) {
 		return
 	}
 	file = filepath.Join(file, "dxhd.sh")
+
 	return
 }
 
@@ -35,6 +37,7 @@ func IsPathToConfigValid(path string) (err error) {
 	if !stat.Mode().IsRegular() {
 		err = fmt.Errorf("%s is not a regular file", path)
 	}
+
 	return
 }
 
@@ -50,7 +53,7 @@ func CreateDefaultConfig() (err error) {
 		if !os.IsNotExist(err) {
 			return
 		}
-		err = os.Mkdir(dir, 0744)
+		err = os.Mkdir(dir, 0o744)
 		if err != nil {
 			return
 		}

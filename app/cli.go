@@ -12,7 +12,7 @@ import (
 
 var version = `master`
 
-// we use custom usage template
+// we use custom usage template.
 var usageTemplate = `NAME
   {{.App.Name}} - {{.App.Help}}
 VERSION
@@ -64,5 +64,6 @@ func Init() (a App, err error) {
 
 func (a *App) Parse() (err error) {
 	_, err = a.cli.Parse(os.Args[1:])
+
 	return
 }
