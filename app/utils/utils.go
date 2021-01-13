@@ -33,7 +33,7 @@ type Command struct {
 	cmd *exec.Cmd
 }
 
-// Cmd returns a Command struct
+// Cmd returns a Command struct.
 func Cmd(program string, args ...string) *Command {
 	cmd := exec.Command(program, args...)
 	cmd.Stdout = os.Stdout
@@ -43,12 +43,16 @@ func Cmd(program string, args ...string) *Command {
 	return &Command{cmd}
 }
 
-// Run runs a command and waits for it to finish its execution
+// Run runs a command and waits for it to finish its execution.
 func (cmd *Command) Run() error {
+	logger.L().WithField("program", cmd.cmd.String()).Debugln("running a program")
+
 	return cmd.cmd.Run()
 }
 
-// Quick runs a command but does not wait for it to finish its execution
+// Quick runs a command but does not wait for it to finish its execution.
 func (cmd *Command) Quick() error {
+	logger.L().WithField("program", cmd.cmd.String()).Debugln("quickly running a program")
+
 	return cmd.cmd.Start()
 }
