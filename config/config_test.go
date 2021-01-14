@@ -121,3 +121,44 @@ func TestCreateDefaultConfig(t *testing.T) { //nolint:paralleltest
 		t.Fatal("unexpected data was written to the file")
 	}
 }
+
+func TestIsPathToConfigValid(t *testing.T) { //nolint:paralleltest
+	tmpDir, err := ioutil.TempDir("", "dxhd")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	defer func() {
+		_ = os.RemoveAll(tmpDir)
+	}()
+
+	tmpFile1, err := ioutil.TempFile(tmpDir, "dxhd")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	defer func() {
+		_ = tmpFile1.Close()
+	}()
+
+	testCases := []struct {
+		path  string
+		valid bool
+	}{
+		{
+			path:  tmpDir,
+			valid: false,
+		},
+		{
+			path:  tmpFile1.Name(),
+			valid: true,
+		},
+	}
+
+	for _, c := range testCases {
+		err := config.IsPathToConfigValid(c.path)
+		if c.valid && err != nil {
+			t.Errorf("expected path - %s - to be valid but got an error: %v", c.path, err)
+		}
+	}
+}
