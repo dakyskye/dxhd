@@ -45,7 +45,7 @@ func Cmd(program string, args ...string) *Command {
 
 // Run runs a command and waits for it to finish its execution.
 func (cmd *Command) Run() error {
-	logger.L().WithField("program", cmd.cmd.String()).Debugln("running a program")
+	logger.L().WithField("program", cmd.cmd.Args).Debugln("running a program")
 
 	return cmd.cmd.Run()
 }
