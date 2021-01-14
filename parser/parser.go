@@ -10,10 +10,11 @@ import (
 
 // Parser holds everything our parser needs to work.
 type Parser struct {
-	fileName string
-	reader   *bufio.Reader
-	res      ParseResult
-	finished bool
+	fileName    string
+	reader      *bufio.Reader
+	res         ParseResult
+	finalResult ParseResult
+	finished    bool
 }
 
 // ParseResult is where our parser packs the parsed data.
@@ -39,5 +40,5 @@ func (p *Parser) Collect() (ParseResult, error) {
 	if !p.finished {
 		return ParseResult{}, ErrParsingNotFinished
 	}
-	return p.res, nil
+	return p.finalResult, nil
 }
