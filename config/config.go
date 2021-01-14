@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 )
 
-// GetConfigDirectory returns path to the config directory
+// GetConfigDirectory returns path to the config directory.
 func GetConfigDirectory() (directory string, err error) {
 	directory, err = os.UserConfigDir()
 	if err != nil {
@@ -17,7 +17,7 @@ func GetConfigDirectory() (directory string, err error) {
 	return
 }
 
-// GetConfigFile returns path to the config file
+// GetConfigFile returns path to the config file.
 func GetConfigFile() (file string, err error) {
 	file, err = GetConfigDirectory()
 	if err != nil {
@@ -28,7 +28,7 @@ func GetConfigFile() (file string, err error) {
 	return
 }
 
-// IsPathToConfigFileValid returns whether given path is valid
+// IsPathToConfigFileValid returns whether given path is valid.
 func IsPathToConfigValid(path string) (err error) {
 	stat, err := os.Stat(path)
 	if err != nil {
@@ -41,7 +41,7 @@ func IsPathToConfigValid(path string) (err error) {
 	return
 }
 
-// CreateDefaultConfig creates the default config file if it doesn't exist
+// CreateDefaultConfig creates the default config file if it doesn't exist.
 func CreateDefaultConfig() (err error) {
 	dir, err := GetConfigDirectory()
 	if err != nil {
