@@ -29,11 +29,13 @@ const (
 func (a *App) Start() (err error) {
 	logger.L().Debug("trying to start the server")
 
+	// * parse config file
+	// * start signal handler
+	// * set up X11 connection
+	// * listen for keybindings
 	for {
-		go a.init()
-
 		server := make(chan serverResponse, 1)
-		go a.serve(server)
+		go a.serveSignals(server)
 
 		command := <-server
 		if command == shutoff {
@@ -48,11 +50,7 @@ func (a *App) Start() (err error) {
 	return
 }
 
-func (a *App) init() (err error) {
-	return
-}
-
-func (a *App) serve(res chan<- serverResponse) {
+func (a *App) serveSignals(server chan<- serverResponse) {
 	signals := make(chan os.Signal, 1)
 
 	signal.Notify(signals, os.Interrupt, syscall.SIGINT, syscall.SIGTERM, syscall.SIGUSR1, syscall.SIGUSR2)
@@ -64,12 +62,12 @@ func (a *App) serve(res chan<- serverResponse) {
 		case syscall.SIGUSR1:
 			fallthrough
 		case syscall.SIGUSR2:
-			res <- reload
+			server <- reload
 		default:
-			res <- shutoff
+			server <- shutoff
 		}
 	case <-a.ctx.Done():
 		logger.L().WithError(a.ctx.Err()).Debug("main app context done")
-		res <- shutoff
+		server <- shutoff
 	}
 }
