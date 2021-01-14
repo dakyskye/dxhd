@@ -28,19 +28,6 @@ func GetConfigFile() (file string, err error) {
 	return
 }
 
-// IsPathToConfigFileValid returns whether given path is valid.
-func IsPathToConfigValid(path string) (err error) {
-	stat, err := os.Stat(path)
-	if err != nil {
-		return
-	}
-	if !stat.Mode().IsRegular() {
-		err = fmt.Errorf("%s is not a regular file", path)
-	}
-
-	return
-}
-
 // CreateDefaultConfig creates the default config file if it doesn't exist.
 func CreateDefaultConfig() (err error) {
 	dir, err := GetConfigDirectory()
@@ -79,6 +66,19 @@ func CreateDefaultConfig() (err error) {
 		return
 	}
 	err = f.Close()
+
+	return
+}
+
+// IsPathToConfigFileValid returns whether given path is valid.
+func IsPathToConfigValid(path string) (err error) {
+	stat, err := os.Stat(path)
+	if err != nil {
+		return
+	}
+	if !stat.Mode().IsRegular() {
+		err = fmt.Errorf("%s is not a regular file", path)
+	}
 
 	return
 }
