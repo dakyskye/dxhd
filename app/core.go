@@ -53,7 +53,7 @@ func (a *App) Start() (err error) {
 func (a *App) serveSignals(server chan<- serverResponse) {
 	signals := make(chan os.Signal, 1)
 
-	signal.Notify(signals, os.Interrupt, syscall.SIGINT, syscall.SIGTERM, syscall.SIGUSR1, syscall.SIGUSR2)
+	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM, syscall.SIGUSR1, syscall.SIGUSR2)
 	logger.L().Debug("serving os signals")
 
 	select {
