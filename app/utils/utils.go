@@ -8,6 +8,7 @@ import (
 	"github.com/dakyskye/dxhd/logger"
 )
 
+// ErrNoTextEditorFound is returned when no suitable editor was found installed.
 var ErrNoTextEditorFound = errors.New("no text editor was found installed")
 
 // FindEditor takes a list of some cmdline text editors and tries to find paths to them.
@@ -28,7 +29,7 @@ func FindEditor() (editor string, err error) {
 	return
 }
 
-// Command is just a custom exec.Cmd type for additional stuff.
+// Command is just a custom exec.Cmd type for custom stuff.
 type Command struct {
 	cmd *exec.Cmd
 }
@@ -45,14 +46,14 @@ func Cmd(program string, args ...string) *Command {
 
 // Run runs a command and waits for it to finish its execution.
 func (cmd *Command) Run() error {
-	logger.L().WithField("program", cmd.cmd.Args).Debugln("running a program")
+	logger.L().WithField("program", cmd.cmd.Args).Debugln("running a program and serving it")
 
 	return cmd.cmd.Run()
 }
 
 // Quick runs a command but does not wait for it to finish its execution.
 func (cmd *Command) Quick() error {
-	logger.L().WithField("program", cmd.cmd.String()).Debugln("quickly running a program")
+	logger.L().WithField("program", cmd.cmd.String()).Debugln("running a program")
 
 	return cmd.cmd.Start()
 }

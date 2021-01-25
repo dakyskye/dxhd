@@ -18,15 +18,14 @@ type Parser struct {
 }
 
 // ParseResult is where our parser packs the parsed data.
-type ParseResult struct {
-}
+type ParseResult struct{}
 
 var (
 	ErrParsingNotFinished = errors.New("the parser has not finished the job yet")
 	ErrParsingHasFinished = errors.New("the parser has already finished the job")
 )
 
-// New returns a new parser a given file.
+// New returns a new parser for a given file.
 func New(file io.Reader, fileName string) Parser {
 	logger.L().WithField("file", fileName).Debugln("made a new parser")
 	return Parser{

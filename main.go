@@ -13,11 +13,11 @@ func main() {
 
 	err = a.Parse()
 	if err != nil {
-		logger.L().WithError(err).Fatalln("something went wrong")
+		logger.L().WithError(err).Fatalln("something went wrong while parsing the app arguments")
 	}
 
 	err = a.Start()
 	if err != nil {
-		logger.L().WithError(err).Fatal("something went wrong")
+		logger.L().WithError(err).Fatal("something went wrong while running the app")
 	}
 }

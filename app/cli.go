@@ -42,12 +42,12 @@ var (
 	once sync.Once
 )
 
-// Init initialises a new app.
+// Init initialises a new app as a singleton.
 func Init() (App, error) {
 	var err error
 
 	logger.L().Debugln("app initialisation requested")
-	once.Do(func() {
+	once.Do(func() { // INFO: we might need to get rid of singleton, depending on future changes
 		configFile, e := config.GetConfigFile()
 		if e != nil {
 			err = e

@@ -16,7 +16,6 @@ const (
 	Debug       = iota
 )
 
-// init the logger before main function
 func init() {
 	if env, err := strconv.ParseBool(os.Getenv("DEBUG")); env && err == nil {
 		SetLevel(Debug)
@@ -25,7 +24,7 @@ func init() {
 	}
 }
 
-// SetLevel sets logging level
+// SetLevel sets logging level, Info level by default.
 func SetLevel(level Level) {
 	switch level {
 	case Info:
@@ -38,7 +37,7 @@ func SetLevel(level Level) {
 	}
 }
 
-// L just returns our internal logger
+// L just returns our logger.
 func L() *logrus.Logger {
 	return logger
 }
