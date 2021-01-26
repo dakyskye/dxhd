@@ -21,7 +21,9 @@ type Parser struct {
 type ParseResult struct{}
 
 var (
+	// ErrParsingNotFinished is returned collection of parser results is requested before it finishes the job.
 	ErrParsingNotFinished = errors.New("the parser has not finished the job yet")
+	// ErrParsingHasFinished is returned when re-parse is requested, instead Collect should be requested.
 	ErrParsingHasFinished = errors.New("the parser has already finished the job")
 )
 
