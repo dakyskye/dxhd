@@ -2,11 +2,40 @@
 
 ## daky's X11 hotkey daemon
 
-⚠️ [#39](https://github.com/dakyskye/dxhd/issues/39) ⚠️
-
 dxhd is heavily inspired by [sxhkd](https://github.com/baskerville/sxhkd), written in Go, and has an elegant syntax for configuration files!
 
 Thanks [JetBrains](https://jetbrains.com) for providing dxhd with free licenses.
+
+## READ THIS FIRST
+
+Issue [#39](https://github.com/dakyskye/dxhd/issues/39) was opened to track the rewrite process of dxhd
+The reason why [rewrite](https://github.com/dakyskye/dxhd/tree/rewrite) is required is that current codebase is terrible (but the app works well, does not matter for an end-user).
+I've hardly read [XGB](https://github.com/BurntSushi/xgb) was abandoned when I lost my motivation to finish the rewrite.
+
+What now? Nothing to worry about, there is only one bug in the parser which I will document here. dxhd is being rewritten in Rust!
+
+**the bug**:
+
+```sh
+#!/bin/sh
+
+# super + {a,b}
+echo it was either {aaaaa,bbbbbbb}
+echo I want to print {aaaaa,bbbbbbb}
+echo I can print anything {tho, though}
+```
+
+Parser will error on this. There is a workaround you can use (for some cases):
+
+```sh
+#!/bin/sh
+
+# super + {a,b}
+what={aaaaa,bbbbbbb}
+echo it was either "$what"
+echo I want to print "$what"
+# echo I can print anything {tho, though} <-- good luck
+```
 
 ## Installation
 
