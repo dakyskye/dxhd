@@ -8,9 +8,9 @@ Thanks [JetBrains](https://jetbrains.com) for providing dxhd with free licenses.
 
 ## READ THIS FIRST
 
-Issue [#39](https://github.com/dakyskye/dxhd/issues/39) was opened to track the rewrite process of dxhd
-The reason why [rewrite](https://github.com/dakyskye/dxhd/tree/rewrite) is required is that current codebase is terrible (but the app works well, does not matter for an end-user).
-I've hardly read [XGB](https://github.com/BurntSushi/xgb) was abandoned when I lost my motivation to finish the rewrite.
+Issue [#39](https://github.com/dakyskye/dxhd/issues/39) was opened to track the rewrite process of dxhd.
+The reason why [rewrite](https://github.com/dakyskye/dxhd/tree/rewrite) is required is that the current codebase is terrible (but the app works well, does not matter for an end-user).
+I'd hardly read [XGB](https://github.com/BurntSushi/xgb) was abandoned when I lost my motivation to finish the rewrite.
 
 What now? Nothing to worry about, there is only one bug in the parser which I will document here. dxhd is being rewritten in Rust!
 
