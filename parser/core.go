@@ -3,6 +3,10 @@ package parser
 import (
 	"io"
 	"strings"
+
+	"github.com/sirupsen/logrus"
+
+	"github.com/dakyskye/dxhd/logger"
 )
 
 // Parse reads a file line-by-line and parses it.
@@ -47,6 +51,7 @@ func (p *Parser) parse() (err error) {
 
 		if p.res.isShebang() {
 			p.res.parseRes.Shell = strings.TrimPrefix(p.res.line, "#!")
+			logger.L().WithField("shebang", p.res.parseRes.Shell).Debug("found a shebang")
 		}
 
 		if p.res.isEmptyLine() {
@@ -57,6 +62,10 @@ func (p *Parser) parse() (err error) {
 	if err == io.EOF {
 		err = nil
 		p.finished = true
+		logger.L().WithFields(logrus.Fields{
+			"file":        p.fileName,
+			"total lines": p.res.lineNumber,
+		}).Debug("finished reading config file")
 	}
 
 	return
