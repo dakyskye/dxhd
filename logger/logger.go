@@ -9,13 +9,13 @@ import (
 
 var logger = logrus.New()
 
-// Level is just custom int8 type for deciding what to log.
+// Level is just custom int8 type for deciding log level.
 type Level int8
 
 const (
 	// Info Level logs basic information to stdout.
 	Info Level = iota
-	// Debug Level logs extra information as well as basic one to stdout
+	// Debug Level logs extra information as well as basic one to stdout.
 	Debug = iota
 )
 
@@ -27,7 +27,7 @@ func init() {
 	}
 }
 
-// SetLevel sets logging level, Info level by default.
+// SetLevel sets the logging level, Info by default.
 func SetLevel(level Level) {
 	switch level {
 	case Info:

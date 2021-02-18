@@ -29,7 +29,7 @@ func FindEditor() (editor string, err error) {
 	return
 }
 
-// Command is just a custom exec.Cmd type for custom stuff.
+// Command is just a custom exec.Cmd type for additional stuff.
 type Command struct {
 	cmd *exec.Cmd
 }
