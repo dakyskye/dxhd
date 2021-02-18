@@ -11,11 +11,6 @@ func main() {
 		logger.L().WithError(err).Fatalln("can not initialise the app")
 	}
 
-	err = a.Parse()
-	if err != nil {
-		logger.L().WithError(err).Fatalln("something went wrong while parsing the app arguments")
-	}
-
 	err = a.Start()
 	if err != nil {
 		logger.L().WithError(err).Fatal("something went wrong while running the app")
