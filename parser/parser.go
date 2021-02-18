@@ -40,7 +40,7 @@ var (
 
 // New returns a new parser for a given file.
 func New(fileName string) (Parser, error) {
-	logger.L().WithField("file", fileName).Debugln("made a new parser")
+	logger.L().WithField("file", fileName).Debug("made a new parser")
 
 	file, err := os.Open(fileName)
 	if err != nil {

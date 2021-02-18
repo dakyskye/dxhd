@@ -16,7 +16,7 @@ func FindEditor() (editor string, err error) {
 	editor = os.Getenv("EDITOR")
 	editors := [5]string{editor, "nano", "nvim", "vim", "vi"}
 	for _, ed := range editors {
-		logger.L().WithField("editor", ed).Debugln("looking for an editor")
+		logger.L().WithField("editor", ed).Debug("looking for an editor")
 		_, err = exec.LookPath(ed)
 		if err == nil {
 			break
@@ -46,14 +46,14 @@ func Cmd(program string, args ...string) *Command {
 
 // Run runs a command and waits for it to finish its execution.
 func (cmd *Command) Run() error {
-	logger.L().WithField("program", cmd.cmd.Args).Debugln("running a program and serving it")
+	logger.L().WithField("program", cmd.cmd.Args).Debug("running a program and serving it")
 
 	return cmd.cmd.Run()
 }
 
 // Quick runs a command but does not wait for it to finish its execution.
 func (cmd *Command) Quick() error {
-	logger.L().WithField("program", cmd.cmd.String()).Debugln("running a program")
+	logger.L().WithField("program", cmd.cmd.String()).Debug("running a program")
 
 	return cmd.cmd.Start()
 }

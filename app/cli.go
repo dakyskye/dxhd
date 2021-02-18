@@ -46,7 +46,7 @@ var (
 func Init() (App, error) {
 	var err error
 
-	logger.L().Debugln("app initialisation requested")
+	logger.L().Debug("app initialisation requested")
 	once.Do(func() { // INFO: we might need to get rid of singleton
 		configFile, e := config.GetConfigFile()
 		if e != nil {

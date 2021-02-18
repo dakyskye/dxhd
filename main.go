@@ -8,7 +8,7 @@ import (
 func main() {
 	a, err := app.Init()
 	if err != nil {
-		logger.L().WithError(err).Fatalln("can not initialise the app")
+		logger.L().WithError(err).Fatal("can not initialise the app")
 	}
 
 	err = a.Start()
