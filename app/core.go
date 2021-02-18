@@ -22,8 +22,8 @@ type App struct {
 type serverResponse string
 
 const (
-	reload  serverResponse = "reload"
 	shutoff serverResponse = "shutoff"
+	reload  serverResponse = "reload"
 )
 
 func (a *App) Start() (err error) {
@@ -38,8 +38,10 @@ func (a *App) Start() (err error) {
 		go a.serveSignals(server)
 
 		command := <-server
-		if command == shutoff {
+		switch command {
+		case shutoff:
 			a.cancel()
+		case reload:
 		}
 
 		logger.L().WithField("command", command).Debug("received a command")
