@@ -1,0 +1,27 @@
+version: '3'
+
+env:
+    GOOS: linux
+    GOARCH: amd64
+
+vars:
+    OUT: dxhd
+
+tasks:
+    fast:
+        vars:
+            VERSION:
+                sh: git describe --always
+        cmds:
+            - go build -v -ldflags "-s -w -X github.com/dakyskye/dxhd/app.version={{.VERSION}}" -o {{.OUT}}
+    dev:
+        vars:
+            VERSION:
+                sh: git describe --tags --dirty --always
+        cmds:
+            - go build -v -ldflags "-X github.com/dakyskye/dxhd/app.version={{.VERSION}}" -o {{.OUT}}
+    rel:
+        env:
+            CGO_ENABLED: 0
+        cmds:
+            - go build -v -a -ldflags "-s -w" -o {{.OUT}}
