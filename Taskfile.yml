@@ -25,3 +25,6 @@ tasks:
             CGO_ENABLED: 0
         cmds:
             - go build -v -a -ldflags "-s -w" -o {{.OUT}}
+    test:
+        cmds:
+            - go test -v -cover ./...
