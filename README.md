@@ -8,11 +8,9 @@ Thanks [JetBrains](https://jetbrains.com) for providing dxhd with free licenses.
 
 ## READ THIS FIRST
 
-Issue [#39](https://github.com/dakyskye/dxhd/issues/39) was opened to track the rewrite process of dxhd.
+Issue [#39](https://github.com/dakyskye/dxhd/issues/39) is opened to track the rewrite process of dxhd.
 The reason why [rewrite](https://github.com/dakyskye/dxhd/tree/rewrite) is required is that the current codebase is terrible (but the app works well, does not matter for an end-user).
-I'd hardly read [XGB](https://github.com/BurntSushi/xgb) was abandoned when I lost my motivation to finish the rewrite.
-
-What now? Nothing to worry about, there is only one bug in the parser which I will document here. dxhd is being rewritten in Rust!
+There is only one known bug in the parser which I have documented here. dxhd is being rewritten and it will be resolved!
 
 **the bug**:
 
@@ -89,6 +87,7 @@ and copy `dxhd` executable file to somewhere in your `$PATH`
 * support for any shell scripting language (sh, bash, ksh, zsh, python, perl etc.) given as a shebang
 * support for global variable declarations in a config
 * support for scripting, as much as a user wishes!
+* support for running as many dxhd instances simultaneously as you want, to logically separate your keybindings.
 
 ## Configuration
 
