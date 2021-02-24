@@ -83,9 +83,7 @@ func (a *App) serveSignals(server chan<- serverResponse) {
 	select {
 	case sig := <-signals:
 		switch sig {
-		case syscall.SIGUSR1:
-			fallthrough
-		case syscall.SIGUSR2:
+		case syscall.SIGUSR1, syscall.SIGUSR2:
 			server <- reload
 		default:
 			server <- shutoff
