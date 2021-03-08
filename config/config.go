@@ -52,7 +52,7 @@ func CreateDefaultConfigFile() (err error) {
 	}
 
 	_, err = os.Stat(file)
-	if os.IsExist(err) {
+	if !os.IsNotExist(err) {
 		return
 	}
 
