@@ -28,8 +28,8 @@ func GetConfigFile() (file string, err error) {
 	return
 }
 
-// CreateDefaultConfig creates the default config file if it doesn't exist.
-func CreateDefaultConfig() (err error) {
+// CreateDefaultConfigFile creates the default config file if it doesn't exist.
+func CreateDefaultConfigFile() (err error) {
 	dir, err := GetConfigDirectory()
 	if err != nil {
 		return

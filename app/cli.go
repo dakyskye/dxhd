@@ -54,7 +54,7 @@ func Init() (App, error) {
 			return
 		}
 
-		err = config.CreateDefaultConfig()
+		err = config.CreateDefaultConfigFile()
 		if err != nil {
 			err = fmt.Errorf("error creating default config: %w", err)
 			return

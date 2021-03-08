@@ -96,7 +96,7 @@ func TestCreateDefaultConfig(t *testing.T) { //nolint:paralleltest
 		t.Fatal(err)
 	}
 
-	err = config.CreateDefaultConfig()
+	err = config.CreateDefaultConfigFile()
 	if err != nil {
 		t.Fatal(err)
 	}
