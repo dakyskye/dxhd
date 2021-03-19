@@ -10,7 +10,7 @@ install:
 	@sudo cp LICENSE /usr/share/licenses/dxhd/
 	@test -d /usr/lib/systemd/user \
 		&& sudo cp systemd/dxhd.service /usr/lib/systemd/user/ \
-		||echo Systemd not found and user service unit not installed!
+		|| true
 	@echo installed
 check:
 	@./do.sh check
