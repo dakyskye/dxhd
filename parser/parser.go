@@ -2,64 +2,146 @@ package parser
 
 import (
 	"bufio"
-	"errors"
-	"os"
-
-	"github.com/dakyskye/dxhd/logger"
+	"bytes"
+	"fmt"
+	"io"
+	"regexp"
 )
-
-// Parser holds everything our parser needs to work.
-type Parser struct {
-	fileName    string
-	reader      *bufio.Reader
-	res         parser
-	finalResult ParseResult
-	finished    bool
-}
 
 type parser struct {
-	lineNumber int
-	line       string
-	isPrefix   bool
-	parseRes   ParseResult
+	bufReader *bufio.Reader
+	state     state
+	tokens    tokens
 }
 
-// ParseResult is where our parser packs the parsed data.
-type ParseResult struct {
-	Shell string
+type state struct {
+	line          []byte
+	isPrefix      bool
+	lineNumber    int
+	kbIndex       int
+	hasKBAppeared bool
+	skipScan      bool
+	globals       *bytes.Buffer
 }
 
-var (
-	// ErrParsingNotFinished is returned collection of parser results is requested before it finishes the job.
-	ErrParsingNotFinished = errors.New("the parser has not finished the job yet")
-	// ErrParsingHasFinished is returned when re-parse is requested, instead Collect should be requested.
-	ErrParsingHasFinished = errors.New("the parser has already finished the job")
-	// ErrParserHasNoReader is likely to be returned when New is not used to initialise a parser.
-	ErrParserHasNoReader = errors.New("the parser does not have any data to parse")
-)
+type tokens struct {
+	shebang    string
+	globals    string
+	keybinding []keybinding
+}
 
-// New returns a new parser for a given file.
-func New(fileName string) (Parser, error) {
-	logger.L().WithField("file", fileName).Debug("made a new parser")
+type keybinding struct {
+	keybinding string
+	action     string
+}
 
-	file, err := os.Open(fileName)
+// Parse parses given stream
+func Parse(reader io.Reader) (err error) {
+	var p = parser{
+		bufReader: bufio.NewReader(reader),
+	}
+
+	err = p.tokenise()
 	if err != nil {
-		return Parser{}, err
+		err = fmt.Errorf("tokeniser resulted into an error: %v", err)
+		return
 	}
 
-	p := Parser{
-		fileName: fileName,
-		reader:   bufio.NewReader(file),
-	}
-	err = file.Close()
+	//p.parse()
 
-	return p, err
+	return
 }
 
-// Collect returns the parsed result.
-func (p *Parser) Collect() (ParseResult, error) {
-	if !p.finished {
-		return ParseResult{}, ErrParsingNotFinished
+// DIRTY regex but it's temporary
+var keybindingPattern = regexp.MustCompile(`^#(((!?@?)|@?!?)\w+{.*?}|((!?@?)|@?!?){.*?}|((!?@?)|@?!?)\w+)(((\+(((!?@?)|@?!?)\w+{.*?}|((!?@?)|@?!?){.*?}|((!?@?)|@?!?)\w+)))+)?`)
+
+func (p *parser) tokenise() (err error) {
+	p.state = state{
+		lineNumber:    0,
+		kbIndex:       -1,
+		hasKBAppeared: false,
+		globals:       new(bytes.Buffer),
 	}
-	return p.finalResult, nil
+
+	for {
+		if p.state.skipScan {
+			p.state.skipScan = false
+		} else {
+			p.state.lineNumber++
+			p.state.line, p.state.isPrefix, err = p.bufReader.ReadLine()
+			if err != nil {
+				break
+			}
+		}
+
+		if p.isShebang() {
+			p.tokens.shebang = string(p.state.line)
+			continue
+		}
+
+		if p.isEmptyLine() {
+			continue
+		}
+
+		p.state.line = bytes.ReplaceAll(p.state.line, []byte(" "), []byte(""))
+
+		if !p.isAKeybinding() {
+			if !p.state.hasKBAppeared {
+				p.appendGlobals()
+			}
+			continue
+		}
+
+		// okay, we finally got a keybinding!
+		err = p.captureKeybinding()
+		if err != nil {
+			break
+		}
+	}
+
+	if err == io.EOF {
+		err = nil
+	}
+
+	return
+}
+
+func (p *parser) captureKeybinding() (err error) {
+	p.state.kbIndex++
+	p.tokens.keybinding = append(p.tokens.keybinding, keybinding{})
+	p.tokens.keybinding[p.state.kbIndex].keybinding = string(bytes.TrimPrefix(p.state.line, []byte("#")))
+
+	actions := new(bytes.Buffer)
+
+	for {
+		p.state.lineNumber++
+
+		p.state.line, p.state.isPrefix, err = p.bufReader.ReadLine()
+		if err != nil {
+			break
+		}
+
+		if p.isEmptyLine() {
+			continue
+		}
+
+		if p.isAKeybinding() {
+			p.state.skipScan = true
+			break
+		}
+
+		if p.state.isPrefix {
+			actions.Write(p.state.line)
+		} else {
+			actions.Write(append(p.state.line, []byte("\n")...))
+		}
+	}
+
+	p.tokens.keybinding[p.state.kbIndex].action = actions.String()
+
+	if err == io.EOF {
+		err = nil
+	}
+
+	return
 }

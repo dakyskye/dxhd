@@ -6,8 +6,6 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/dakyskye/dxhd/parser"
-
 	"gopkg.in/alecthomas/kingpin.v2"
 
 	"github.com/dakyskye/dxhd/logger"
@@ -60,15 +58,15 @@ func (a *App) Start() (err error) {
 }
 
 func (a *App) start() (err error) {
-	p, err := parser.New(a.opts.config)
-	if err != nil {
-		return
-	}
+	// p, err := parser.New(a.opts.config)
+	// if err != nil {
+	// 	return
+	// }
 
-	err = p.Parse()
-	if err != nil {
-		return
-	}
+	// err = p.Parse()
+	// if err != nil {
+	// 	return
+	// }
 
 	// TODO: data, err := p.Collect()
 	return
