@@ -35,16 +35,10 @@ SYNOPSIS
   dxhd [OPTIONS]
 DESCRIPTION
   dxhd is an easy-to-use X11 hotkey daemon, written in Go programming language, and inspired by sxhkd.
-  One of the biggest advantages of dxhd is that you can write your configs in different languages,
-  for example: sh, bash, ksh, zsh, Python, Perl.
-  A config file is meant to have quite easy layout:
-    First line starting with #! is treated as a shebang
-    Lines having ##+ prefix are treated as comments (get ignored)
-    Lines having one # and then a keybinding are parsed as keybindings
-    Lines under a keybinding are executed when keybinding is triggered
+  More can be read here - https://github.com/dakyskye/dxhd#readme
 OPTIONS%s
 EXAMPLE CONFIG
-  #!/bin/sh
+  #!/usr/bin/bash
   ## restart i3
   # super + shift + r
   i3-msg -t command restart
