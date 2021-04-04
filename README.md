@@ -197,7 +197,7 @@ will get it)
 * remove every end-line backslash (`echo bar \` to `echo bar`)
   (probably optional, unsure)
 
-So you'd end up with:
+So you'd end up with from:
 
 ```sh
 # print hello world
