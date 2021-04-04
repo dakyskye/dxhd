@@ -99,7 +99,7 @@ executable file somewhere in your `$PATH`.
 | editing config files quickly                                                                                   | `dxhd -e i3.py`                                                          |
 | running as a daemon                                                                                            | `dxhd -b`                                                                |
 | running interactively                                                                                          | `dxhd -i`                                                                |
-| support for any shell scripting language                                                                       | sh, bash, ksh, zsh, python, perl, etc.) given as a shebang               |
+| support for any shell scripting language                                                                       | sh, bash, ksh, zsh, python, perl, etc. given as a shebang                |
 | support for global variable declarations in a config                                                           | -                                                                        |
 | support for scripting, as much as a user wishes!                                                               | -                                                                        |
 | support for running as many dxhd instances simultaneously as you want, to logically separate your keybindings. | -                                                                        |
