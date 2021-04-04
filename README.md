@@ -49,7 +49,13 @@ cd dxhd-git
 makepkg -si
 ```
 
-or use an AUR helper like yay - `yay -S dxhd`
+* Using an [AUR helper](https://wiki.archlinux.org/index.php/AUR_helpers)
+
+| AUR helper                                  | Command        |
+|---------------------------------------------|----------------|
+| [paru](https://github.com/morganamilo/paru) | `paru -S dxhd` |
+| [yay](https://github.com/Jguer/yay)         | `yay -S dxhd`  |
+
 
 * From the source
 
