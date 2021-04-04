@@ -103,7 +103,7 @@ func Parse(what interface{}, data *[]FileData) (shell, globals string, err error
 	}
 
 	lineNumber := 0
-	shell = "/bin/sh"
+	shell = "/usr/bin/bash"
 	wasKeybinding := false
 	wasPrefix := false
 	datum := []FileData{}
