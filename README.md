@@ -102,7 +102,7 @@ executable file somewhere in your `$PATH`.
 | support for any shell scripting language                                                                       | sh, bash, ksh, zsh, python, perl, etc. given as a shebang                |
 | support for global variable declarations in a config                                                           | -                                                                        |
 | support for scripting, as much as a user wishes!                                                               | -                                                                        |
-| support for running as many dxhd instances simultaneously as you want, to logically separate your keybindings. | -                                                                        |
+| support for running as many dxhd instances simultaneously as you want, to logically separate your keybindings  | -                                                                        |
 
 ## Configuration
 
