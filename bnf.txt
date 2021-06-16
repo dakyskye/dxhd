@@ -1,0 +1,5 @@
+syntax      ::= term | term + syntax
+term        ::= word | {option}
+option      ::= syntax | syntax, option
+word        ::= terminal | range
+range       ::= terminal-terminal
