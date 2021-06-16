@@ -1,3 +1,5 @@
+use std::option;
+
 // # shift + print
 // flameshot printscreen
 
@@ -16,7 +18,55 @@ fn main() {
     println!("We'll parse: {:?}", output);
 
     let tokens = tokenize(&output);
-    println!("Tried to Lex: {:?}", tokens);
+    println!("Tried to tokenize: {:?}", tokens);
+
+    let lexed = split_till_plus(&tokens);
+    println!("Tried to tokenize: {:?}", lexed);
+}
+    
+fn split_till_plus(vec: &Vec<Token>) -> Result<Vec<Vec<Token>>, String> {
+    let mut split: Vec<Vec<Token>> = Vec::new();
+    let mut option_depth: i32 = 0;
+    let index: i32 = 0;
+
+    for (idx, value) in vec.iter().enumerate() {
+        match *value {
+            Token::Plus => {
+                if option_depth == 0 {
+                    split.push(vec[0..idx].to_vec());
+                    match split_till_plus(&vec[idx+1..].to_vec()) {
+                        Ok(mut series) => {
+                            split.append(&mut series);
+                            return Ok(split)
+                        }
+                        Err(e) => return Err(e)
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+    split.push(vec[..].to_vec());
+    Ok(split)
+}
+
+fn lex(vec: &Vec<Token>) -> Result<Vec<LexNode>, String> {
+    let mut result: Vec<LexNode> = Vec::new();
+
+    Ok(result)
+}
+
+#[derive(Debug, Clone)]
+struct LexNode {
+    content: Vec<LexNode>,
+    of_type: LexItem
+}
+
+#[derive(Debug, Clone)]
+enum LexItem {
+    Range,
+    Text,
+    Option
 }
 
 
@@ -32,7 +82,7 @@ enum Token {
 }
 
 
-fn tokenize(input: &String) -> Result<Vec<Token>, String> {
+fn tokenize(input: &String) -> Vec<Token> {
     let mut result: Vec<Token> = Vec::new();
     let mut it = input.chars().peekable();
     let mut text = String::new();
@@ -79,5 +129,5 @@ fn tokenize(input: &String) -> Result<Vec<Token>, String> {
     if text.len() != 0 {
         result.push(Token::Text(String::from(text)));
     }
-    return Ok(result)
+    return result
 }
