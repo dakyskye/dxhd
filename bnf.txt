@@ -1,5 +1,7 @@
-syntax      ::= term | term + syntax
-term        ::= word | {option}
-option      ::= syntax | syntax, option
-word        ::= terminal | range
-range       ::= terminal-terminal
+syntax          ::= term | term + syntax
+term            ::= word | {optionSyntax}
+optionSyntax    ::= syntax | syntax, optionSyntax
+word            ::= terminal | range
+range           ::= char-char
+terminal        ::= char | char terminal (typed aside each other)
+char            ::= <any alphanumeric characters>
