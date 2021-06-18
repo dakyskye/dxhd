@@ -9,12 +9,17 @@ Thanks [JetBrains](https://jetbrains.com) for providing dxhd with free licenses.
 
 ## READ THIS FIRST
 
-Issue [#39](https://github.com/dakyskye/dxhd/issues/39) is opened to track the
-rewrite process of _dxhd_.  The reason why
-[rewrite](https://github.com/dakyskye/dxhd/tree/rewrite) is required is that the
-current codebase is terrible (but the app works well, does not matter for an
-end-user).  There is only one known bug in the parser which I have documented
-here. dxhd is being rewritten and it will be resolved!
+dxhd is being rewritten in the [Rust](https://rust-lang.org/) programming language.
+The two main collaborators, [dakyskye](https://github.com/dakyskye) and
+[NotUnlikeTheWaves](https://github.com/NotUnlikeTheWaves), are working on it.
+
+Follow [issue #39](https://github.com/dakyskye/dxhd/issues/39) for more information
+regarding the rewrite.
+
+The reason why a rewrite is required is that the current codebase is terrible (but
+the app works well so it does not matter for an end-user). There is only one known
+bug in the parser which I have documented here. It will be resolved, as well as
+many things will be improved, after releasing the rewritten dxhd.
 
 **the bug**:
 
