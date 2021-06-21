@@ -90,6 +90,7 @@ fn lex_part(vec: &Vec<Token>) -> Result<LexNode, String> {
 
 fn lex_closure(vec: &Vec<Token>) -> Result<LexNode, String>
 {
+
     fn split_till_comma(vec: &Vec<Token>) -> Result<Vec<Vec<Token>>, String> {
         let mut option_depth = 0;
         let mut split = Vec::new();

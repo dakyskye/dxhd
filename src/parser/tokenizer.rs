@@ -6,9 +6,8 @@ pub enum Token {
     RangeEnd,
     Plus,
     Text(String),
-    // Whitespace
+    //Whitespace
 }
-
 
 pub fn tokenize(input: &String) -> Vec<Token> {
     let mut result: Vec<Token> = Vec::new();
@@ -58,4 +57,32 @@ pub fn tokenize(input: &String) -> Vec<Token> {
         result.push(Token::Text(String::from(text)));
     }
     return result
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn equals(a: &[Token], b: &[Token]) -> bool {
+        if a.len() > 0 && b.len() > 0 {
+            return a[0] == b[0] && equals(&a[1..], &b[1..])
+        } else {
+            return a.len() == b.len()
+        }
+    }
+
+    #[test]
+    fn test_blank() {
+        let tokens = tokenize(&String::from(""));
+        assert!(tokens.is_empty())
+    }
+
+    #[test]
+    fn test_text() {
+        let tokens = tokenize(&String::from("hello"));
+
+        let expected = &[Token::Text(String::from("hello"))];
+
+        assert!(equals(&tokens[..], expected));
+    }
 }
