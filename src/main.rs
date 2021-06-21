@@ -35,6 +35,7 @@ fn split_till_plus(vec: &Vec<Token>) -> Result<Vec<Vec<Token>>, String> {
             Token::Plus => {
                 if option_depth == 0 {
                     split.push(vec[0..idx].to_vec());
+                    // Recursion step
                     match split_till_plus(&vec[idx+1..].to_vec()) {
                         Ok(mut series) => {
                             split.append(&mut series);
@@ -115,9 +116,31 @@ fn lex_part(vec: &Vec<Token>) -> Result<LexNode, String> {
 
 fn lex_closure(vec: &Vec<Token>) -> Result<LexNode, String>
 {
-    fn split_till_comma(vec: &Vec<Token>) -> Vec<Vec<Token>> {
+    fn split_till_comma(vec: &Vec<Token>) -> Result<Vec<Vec<Token>>, String> {
+        let mut option_depth = 0;
         let mut split = Vec::new();
-        return split;
+
+        for (idx, value) in vec.iter().enumerate() {
+            match *value {
+                Token::Comma => {
+                    if option_depth == 0 {
+                        split.push(vec[0..idx].to_vec());
+                        match split_till_comma(&vec[idx+1..].to_vec()) {
+                            Ok(mut series) => {
+                                split.append(&mut series);
+                                return Ok(split);
+                            }
+                            Err(e) => return Err(e)
+                        }
+                    }
+                }
+                Token::RangeStart   => option_depth += 1,
+                Token::RangeEnd     => option_depth -= 1,
+                _ => {}
+            }
+        }
+
+        Ok(split)
     }
     Err(String::from("Unknown error"))
 }
