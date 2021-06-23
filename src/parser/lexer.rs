@@ -19,8 +19,8 @@ pub fn split_till_plus(vec: &Vec<Token>) -> Result<Vec<Vec<Token>>, String> {
                     }
                 }
             }
-            Token::RangeStart   => option_depth += 1,
-            Token::RangeEnd     => option_depth -= 1,
+            Token::OptionStart   => option_depth += 1,
+            Token::OptionEnd     => option_depth -= 1,
             _ => {}
         }
     }
@@ -68,10 +68,10 @@ fn lex_part(vec: &Vec<Token>) -> Result<LexNode, String> {
                 content: content
             })
         }
-        Token::RangeStart => {
+        Token::OptionStart => {
             // Wrong check! Go deep down til you find range end at same depth
             // Use that instead
-            if *(vec.last().unwrap()) == Token::RangeEnd {
+            if *(vec.last().unwrap()) == Token::OptionEnd {
                 let closure = match lex_closure(&vec[1..vec.len()-1].to_vec()) {
                     Ok(closure) => closure,
                     Err(err) => return Err(err)
@@ -109,8 +109,8 @@ fn lex_closure(vec: &Vec<Token>) -> Result<LexNode, String>
                         }
                     }
                 }
-                Token::RangeStart   => option_depth += 1,
-                Token::RangeEnd     => option_depth -= 1,
+                Token::OptionStart   => option_depth += 1,
+                Token::OptionEnd     => option_depth -= 1,
                 _ => {}
             }
         }

@@ -1,9 +1,9 @@
 #[derive(Debug, Clone, PartialEq)]
 pub enum Token {
-    RangeStart,
+    OptionStart,
     RangeSeparator,
     Comma,
-    RangeEnd,
+    OptionEnd,
     Plus,
     Text(String),
     //Whitespace
@@ -25,11 +25,11 @@ pub fn tokenize(input: &String) -> Vec<Token> {
         match c {
             '{' => {
                 push_text(&mut text, &mut result);
-                result.push(Token::RangeStart)
+                result.push(Token::OptionStart)
             }
             '}' => {
                 push_text(&mut text, &mut result);
-                result.push(Token::RangeEnd)
+                result.push(Token::OptionEnd)
             }
             '+' => {
                 push_text(&mut text, &mut result);
@@ -79,9 +79,52 @@ mod tests {
 
     #[test]
     fn test_text() {
-        let tokens = tokenize(&String::from("hello"));
+        let tokens = tokenize(&String::from("x"));
 
-        let expected = &[Token::Text(String::from("hello"))];
+        let expected = &[Token::Text(String::from("x"))];
+
+        assert!(equals(&tokens[..], expected));
+    }
+
+    #[test]
+    fn test_addition() {
+        let tokens = tokenize(&String::from("x + y"));
+
+        let expected = &[
+            Token::Text(String::from("x")),
+            Token::Plus,
+            Token::Text(String::from("y"))
+        ];
+
+        assert!(equals(&tokens[..], expected));
+    }
+
+    #[test]
+    fn test_option() {
+        let tokens = tokenize(&String::from("{x, y}"));
+
+        let expected = &[
+            Token::OptionStart,
+            Token::Text(String::from("x")),
+            Token::Comma,
+            Token::Text(String::from("y")),
+            Token::OptionEnd
+        ];
+
+        assert!(equals(&tokens[..], expected));
+    }
+
+    #[test]
+    fn test_range() {
+        let tokens = tokenize(&String::from("{0-9}"));
+
+        let expected = &[
+            Token::OptionStart,
+            Token::Text(String::from("0")),
+            Token::RangeSeparator,
+            Token::Text(String::from("9")),
+            Token::OptionEnd
+        ];
 
         assert!(equals(&tokens[..], expected));
     }
