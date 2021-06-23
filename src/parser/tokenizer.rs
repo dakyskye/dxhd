@@ -63,14 +63,6 @@ pub fn tokenize(input: &String) -> Vec<Token> {
 mod tests {
     use super::*;
 
-    fn equals(a: &[Token], b: &[Token]) -> bool {
-        if a.len() > 0 && b.len() > 0 {
-            return a[0] == b[0] && equals(&a[1..], &b[1..])
-        } else {
-            return a.len() == b.len()
-        }
-    }
-
     #[test]
     fn test_blank() {
         let tokens = tokenize(&String::from(""));
@@ -81,29 +73,29 @@ mod tests {
     fn test_text() {
         let tokens = tokenize(&String::from("x"));
 
-        let expected = &[Token::Text(String::from("x"))];
+        let expected = [Token::Text(String::from("x"))];
 
-        assert!(equals(&tokens[..], expected));
+        assert_eq!(tokens, expected);
     }
 
     #[test]
     fn test_addition() {
         let tokens = tokenize(&String::from("x + y"));
 
-        let expected = &[
+        let expected = [
             Token::Text(String::from("x")),
             Token::Plus,
             Token::Text(String::from("y"))
         ];
 
-        assert!(equals(&tokens[..], expected));
+        assert_eq!(tokens, expected);
     }
 
     #[test]
     fn test_option() {
         let tokens = tokenize(&String::from("{x, y}"));
 
-        let expected = &[
+        let expected = [
             Token::OptionStart,
             Token::Text(String::from("x")),
             Token::Comma,
@@ -111,14 +103,14 @@ mod tests {
             Token::OptionEnd
         ];
 
-        assert!(equals(&tokens[..], expected));
+        assert_eq!(tokens, expected);
     }
 
     #[test]
     fn test_range() {
         let tokens = tokenize(&String::from("{0-9}"));
 
-        let expected = &[
+        let expected = [
             Token::OptionStart,
             Token::Text(String::from("0")),
             Token::RangeSeparator,
@@ -126,6 +118,6 @@ mod tests {
             Token::OptionEnd
         ];
 
-        assert!(equals(&tokens[..], expected));
+        assert_eq!(tokens, expected);
     }
 }
