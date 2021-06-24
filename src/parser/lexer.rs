@@ -81,7 +81,7 @@ fn lex_part(vec: &Vec<Token>) -> Result<LexNode, String> {
                 return Err(String::from("No matching ending brace (}) to a starting brace ({)"))
             }
         }
-        _ => return Err(String::from("Bad expression!"))
+        _ => return Err(format!("Bad expression! {:?}\nFull vector:\n{:?}", token, vec))
     }
 }
 
@@ -350,6 +350,134 @@ mod tests {
         ];
 
         assert!(nodes.is_err() == false);
+
+        let unwrapped = nodes.unwrap();
+        assert_eq!(unwrapped, expected);
+    }
+
+
+
+    #[test]
+    fn test_complex_1() {
+        let nodes = lex(&tokenize(&String::from("a + {{0-9}, x + y + {k, l, m + 4}, 4} + XF86{Play,Pause}")));
+
+        let expected = [
+            LexNode{
+                of_type: LexItem::Text(String::from("a")),
+                content: None
+            },
+            LexNode{
+                of_type: LexItem::OptionGroup,
+                content: Some(vec![
+                    LexNode{
+                        of_type: LexItem::Option,
+                        content: Some(vec![
+                            LexNode{
+                                of_type: LexItem::Range,
+                                content: Some(vec![
+                                    LexNode{
+                                        of_type: LexItem::Text(String::from("0")),
+                                        content: None
+                                    },
+                                    LexNode{
+                                        of_type: LexItem::Text(String::from("9")),
+                                        content: None
+                                    }
+                                ])
+                            }
+                        ])
+                    },
+                    LexNode{
+                        of_type: LexItem::Option,
+                        content: Some(vec![
+                            LexNode{
+                                of_type: LexItem::Text(String::from("x")),
+                                content: None
+                            },
+                            LexNode{
+                                of_type: LexItem::Text(String::from("y")),
+                                content: None
+                            },
+                            LexNode{
+                                of_type: LexItem::OptionGroup,
+                                content: Some(vec![
+                                    LexNode{
+                                        of_type: LexItem::Option,
+                                        content: Some(vec![
+                                            LexNode{
+                                                of_type: LexItem::Text(String::from("k")),
+                                                content: None
+                                            }
+                                        ])
+                                    },
+                                    LexNode{
+                                        of_type: LexItem::Option,
+                                        content: Some(vec![
+                                            LexNode{
+                                                of_type: LexItem::Text(String::from("l")),
+                                                content: None
+                                            }
+                                        ])
+                                    },
+                                    LexNode{
+                                        of_type: LexItem::Option,
+                                        content: Some(vec![
+                                            LexNode{
+                                                of_type: LexItem::Text(String::from("m")),
+                                                content: None
+                                            },
+                                            LexNode{
+                                                of_type: LexItem::Text(String::from("4")),
+                                                content: None
+                                            }
+                                        ])
+                                    }
+                                ])
+                            }
+                        ])
+                    },
+                    LexNode{
+                        of_type: LexItem::Option,
+                        content: Some(vec![
+                            LexNode{
+                                of_type: LexItem::Text(String::from("4")),
+                                content: None
+                            }
+                        ])
+                    }
+                ])
+            },
+            LexNode{
+                of_type: LexItem::Text(String::from("XF86")),
+                content: Some(vec![
+                    LexNode{
+                        of_type: LexItem::OptionGroup,
+                        content: Some(vec![
+                            LexNode{
+                                of_type: LexItem::Option,
+                                content: Some(vec![
+                                    LexNode{
+                                        of_type: LexItem::Text(String::from("Play")),
+                                        content: None
+                                    }
+                                ])
+                            },
+                            LexNode{
+                                of_type: LexItem::Option,
+                                content: Some(vec![
+                                    LexNode{
+                                        of_type: LexItem::Text(String::from("Pause")),
+                                        content: None
+                                    }
+                                ])
+                            }
+                        ])
+                    }
+                ])
+            }
+        ];
+
+        assert!(nodes.is_err() == false, "{:?}", nodes.unwrap());
 
         let unwrapped = nodes.unwrap();
         assert_eq!(unwrapped, expected);
