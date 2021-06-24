@@ -126,7 +126,21 @@ fn lex_option(vec: &Vec<Token>) -> Result<LexNode, String>
         };
     }
 
-    Err(String::from("Unknown error"))
+    let mut results: Vec<LexNode> = Vec::with_capacity(options.len());
+    for (_, option_tokens) in options.iter().enumerate() {
+        match lex(option_tokens) {
+            Ok(node) => results.push(LexNode{
+                of_type: LexItem::Option,
+                content: Some(node)
+            }),
+            Err(err) => return Err(err)
+        }
+    }
+    let node = LexNode{
+        of_type: LexItem::OptionGroup,
+        content: Some(results)
+    };
+    Ok(node)
 }
 
 fn try_find_range(slice: &[Token]) -> Option<LexNode> {
@@ -161,6 +175,7 @@ pub struct LexNode {
 #[derive(Debug, Clone, PartialEq)]
 pub enum LexItem {
     Text(String),
+    OptionGroup,
     Option,
     Range,
 }
@@ -221,24 +236,88 @@ mod tests {
     }
 
     #[test]
-    fn test_option() {
+    fn test_option_simple() {
         let nodes = lex(&tokenize(&String::from("{a,b,c}")));
 
         let expected = [
             LexNode{
-                of_type: LexItem::Option,
+                of_type: LexItem::OptionGroup,
                 content: Some(vec![
                     LexNode{
-                        of_type: LexItem::Text(String::from("a")),
-                        content: None
+                        of_type: LexItem::Option,
+                        content: Some(vec![LexNode{
+                            of_type: LexItem::Text(String::from("a")),
+                            content: None
+                        }])
                     },
                     LexNode{
-                        of_type: LexItem::Text(String::from("b")),
-                        content: None
+                        of_type: LexItem::Option,
+                        content: Some(vec![LexNode{
+                            of_type: LexItem::Text(String::from("b")),
+                            content: None
+                        }])
                     },
                     LexNode{
-                        of_type: LexItem::Text(String::from("c")),
-                        content: None
+                        of_type: LexItem::Option,
+                        content: Some(vec![LexNode{
+                            of_type: LexItem::Text(String::from("c")),
+                            content: None
+                        }])
+                    },
+                ])
+            }
+        ];
+
+        assert!(nodes.is_err() == false);
+
+        let unwrapped = nodes.unwrap();
+        assert_eq!(unwrapped, expected);
+    }
+
+    #[test]
+    fn test_option_complex() {
+        let nodes = lex(&tokenize(&String::from("{a+x,b+y+z,c}")));
+
+        let expected = [
+            LexNode{
+                of_type: LexItem::OptionGroup,
+                content: Some(vec![
+                    LexNode{
+                        of_type: LexItem::Option,
+                        content: Some(vec![
+                            LexNode{
+                                of_type: LexItem::Text(String::from("a")),
+                                content: None
+                            },
+                            LexNode{
+                                of_type: LexItem::Text(String::from("x")),
+                                content: None
+                            }
+                        ])
+                    },
+                    LexNode{
+                        of_type: LexItem::Option,
+                        content: Some(vec![
+                            LexNode{
+                                of_type: LexItem::Text(String::from("b")),
+                                content: None
+                            },
+                            LexNode{
+                                of_type: LexItem::Text(String::from("y")),
+                                content: None
+                            },
+                            LexNode{
+                                of_type: LexItem::Text(String::from("z")),
+                                content: None
+                            }
+                        ])
+                    },
+                    LexNode{
+                        of_type: LexItem::Option,
+                        content: Some(vec![LexNode{
+                            of_type: LexItem::Text(String::from("c")),
+                            content: None
+                        }])
                     },
                 ])
             }
