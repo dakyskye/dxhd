@@ -18,7 +18,7 @@ pub fn split_till_plus(vec: &Vec<Token>) -> Result<Vec<Vec<Token>>, String> {
                         Err(e) => return Err(e)
                     }
                 }
-            }
+            },
             Token::OptionStart   => option_depth += 1,
             Token::OptionEnd     => option_depth -= 1,
             _ => {}
@@ -56,7 +56,7 @@ fn lex_part(vec: &Vec<Token>) -> Result<LexNode, String> {
     match token {
         Token::Text(str) => {
             let content = if vec.len() > 1 {
-                    match lex_part(&vec[1..].to_vec()) {
+                match lex_part(&vec[1..].to_vec()) {
                     Ok(content) => Some([content].to_vec()),
                     Err(err) => return Err(err)
                 }
@@ -168,8 +168,8 @@ fn try_find_range(slice: &[Token]) -> Option<LexNode> {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct LexNode {
-    content: Option<Vec<LexNode>>,
-    of_type: LexItem
+    pub content: Option<Vec<LexNode>>,
+    pub of_type: LexItem
 }
 
 #[derive(Debug, Clone, PartialEq)]
