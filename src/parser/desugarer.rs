@@ -7,11 +7,11 @@ use crate::parser::lexer::LexItem;
 pub fn desugar(vec: &Vec<LexNode>) -> Result<Vec<LexNode>, String> {
     let mut result: Vec<LexNode> = Vec::new();
     for(_, value) in vec.iter().enumerate() {
-        let local:Result<LexNode, String> = match value {
+        let local: LexNode = match value {
             // Case we're looking for: Ranges
             LexNode { content: Some(children), of_type: LexItem::Range } => {
                 match split_range(&children[..]) {
-                    Ok(node) => Ok(node),
+                    Ok(node) => node,
                     Err(err) => return Err(err)
                 }
             },
@@ -19,23 +19,20 @@ pub fn desugar(vec: &Vec<LexNode>) -> Result<Vec<LexNode>, String> {
             LexNode{
                 of_type: _,
                 content: None
-            } => Ok(value.clone()),
+            } => value.clone(),
             // Types with children: Themselves with children desugared.
             LexNode{
                 of_type: T,
                 content: Some(children)
             } => match desugar(&children) {
-                Ok(nodes) => Ok(LexNode{
+                Ok(nodes) => LexNode{
                     of_type: T.clone(),
                     content: Some(nodes)
-                }),
+                },
                 Err(err) => return Err(err)
             }
         };
-        match local {
-            Err(err) => return Err(err),
-            Ok(vec) => result.push(vec)
-        };
+        result.push(local);
     }
     Ok(result)
 }
