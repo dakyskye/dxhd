@@ -1,9 +1,9 @@
 use crate::parser::tokenizer::Token;
-
 pub fn split_till_plus(vec: &Vec<Token>) -> Result<Vec<Vec<Token>>, String> {
     let mut split: Vec<Vec<Token>> = Vec::new();
+    let vec = delim_token(vec);
     let mut option_depth: i32 = 0;
-
+    
     for (idx, value) in vec.iter().enumerate() {
         match *value {
             Token::Plus => {
@@ -27,27 +27,66 @@ pub fn split_till_plus(vec: &Vec<Token>) -> Result<Vec<Vec<Token>>, String> {
     split.push(vec[..].to_vec());
     Ok(split)
 }
-
+/// delim_token converts delimed elements in token array
+/// back to the original text form
+/// [Text("shift"), Plus, TokenDelimiters, Plus] -> [Text("shift"), Plus, Text("plus")]
+pub fn delim_token(vec: &Vec<Token>) -> Vec<Token> {
+    let mut skipnext = false;
+    let mut ret:Vec<Token>= Vec::new();
+    for(idx, value) in vec.iter().enumerate(){
+        if skipnext {
+            skipnext = false;
+            continue;
+        }
+        else{
+            match value{
+                Token::Delimiters=> {
+                    let  newstring:Result<Token,&str>={
+                        if vec.len() <= idx+1 {
+                            Err("Using backslash at end of keybinding is invalid")
+                        }
+                        else{
+                            match &vec[idx+1]{
+                                Token::OptionStart => Ok(Token::Text("bracketleft".to_string())),
+                                Token::RangeSeparator => Ok(Token::Text("minus".to_string())),
+                                Token::Comma => Ok(Token::Text("comma".to_string())),
+                                Token::OptionEnd => Ok(Token::Text("bracketright".to_string())),
+                                Token::Plus => Ok(Token::Text("optionplus".to_string())),
+                                Token::Delimiters => Ok(Token::Text("backslash".to_string())),
+                                Token::Text(_) => Err("Using a backslash with regular is invalid"),
+                            }
+                        }
+                    };
+                    ret.push(newstring.unwrap());
+                    skipnext = true;
+                    
+                },
+                Token::OptionStart=>ret.push(Token::OptionStart),
+                Token::RangeSeparator=>ret.push(Token::RangeSeparator),
+                Token::Comma=>ret.push(Token::Comma),
+                Token::OptionEnd=>ret.push(Token::OptionEnd),
+                Token::Plus=>ret.push(Token::Plus),
+                Token::Text(x)=>ret.push(Token::Text(x.to_string())),
+            }
+        }
+    }
+    return ret;
+}
 pub fn lex(vec: &Vec<Token>) -> Result<Vec<LexNode>, String> {
     let mut result: Vec<LexNode> = Vec::new();
-
     let split_result = split_till_plus(vec);
-
     let parts = match split_result {
         Ok(parts) => parts,
         Err(error) => return Err(error)
     };
-
     for (_, part) in parts.iter().enumerate() {
         match lex_part(part) {
             Ok(node) => result.push(node),
             Err(err) => return Err(err)
         }
     }
-
     Ok(result)
 }
-
 fn lex_part(vec: &Vec<Token>) -> Result<LexNode, String> {
     if vec.len() == 0 {
         return Err(String::from("lex_part: vector size is 0"));
@@ -476,9 +515,24 @@ mod tests {
                 ])
             }
         ];
-
         assert!(nodes.is_err() == false, "{:?}", nodes.unwrap());
-
+        let unwrapped = nodes.unwrap();
+        assert_eq!(unwrapped, expected);
+    }
+    #[test]
+    fn test_delim(){
+        let nodes = lex(&tokenize(&String::from("y + \\+ + \\- + \\{ + \\} + \\, + \\\\ + x")));
+        let expected = [
+            LexNode{of_type: LexItem::Text(String::from("y")), content: None},
+            LexNode{of_type: LexItem::Text(String::from("optionplus")), content: None},
+            LexNode{of_type: LexItem::Text(String::from("minus")), content: None},
+            LexNode{of_type: LexItem::Text(String::from("bracketleft")), content: None},
+            LexNode{of_type: LexItem::Text(String::from("bracketright")), content: None},
+            LexNode{of_type: LexItem::Text(String::from("comma")), content: None},
+            LexNode{of_type: LexItem::Text(String::from("backslash")), content: None},
+            LexNode{of_type: LexItem::Text(String::from("x")), content: None}
+        ];
+        assert!(nodes.is_err() == false);
         let unwrapped = nodes.unwrap();
         assert_eq!(unwrapped, expected);
     }
