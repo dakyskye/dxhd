@@ -6,6 +6,7 @@ pub enum Token {
     OptionEnd,
     Plus,
     Text(String),
+    Delimiters,
     //Whitespace
 }
 
@@ -46,6 +47,10 @@ pub fn tokenize(input: &String) -> Vec<Token> {
             '-' => {
                 push_text(&mut text, &mut result);
                 result.push(Token::RangeSeparator)
+            }
+            '\\' =>{
+                push_text(&mut text, &mut result);
+                result.push(Token::Delimiters)
             }
             a => {
                 text.push(a);
