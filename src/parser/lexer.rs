@@ -81,22 +81,6 @@ fn lex_part(vec: &Vec<Token>) -> Result<LexNode, String> {
                 return Err(String::from("No matching ending brace (}) to a starting brace ({)"))
             }
         }
-        Token::TokenDelimter =>{
-            // println!("{:?}", vec);
-            let newstring = match &vec[1]{
-                Token::OptionStart=> Ok("bracketleft"),
-                Token::RangeSeparator => Ok("minus"),
-                Token::Comma => Ok("comma"),
-                Token::OptionEnd => Ok("bracketright"),
-                Token::Plus => Ok("optionplus"),
-                Token::TokenDelimter => Ok("backslash"),
-                Token::Text(x) => Err("Using a backslash with backslash is pretty dumb")
-            };
-            // return Err(format!("{:?}", newstring));
-            let mut tmp: Vec<Token> = Vec::new();
-            tmp.push(Token::Text(newstring.unwrap().to_string()));
-            return lex_part(&tmp);
-        }
         _ => return Err(format!("Bad expression! {:?}\nFull vector:\n{:?}", token, vec))
     }
 }
