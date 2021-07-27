@@ -126,6 +126,7 @@ mod tests {
             ])
         }];
 
+        assert!(result.is_err() == false, "{:?}", result.unwrap());
         assert_eq!(result.unwrap(), expected);
     }
 
@@ -189,6 +190,7 @@ mod tests {
             ])
         }];
 
+        assert!(result.is_err() == false, "{:?}", result.unwrap());
         assert_eq!(result.unwrap(), expected);
     }
 
@@ -257,6 +259,7 @@ mod tests {
             ])
         }];
 
+        assert!(result.is_err() == false, "{:?}", result.unwrap());
         assert_eq!(result.unwrap(), expected);
     }
 }
