@@ -236,6 +236,43 @@ mod tests {
     }
 
     #[test]
+    fn test_text_with_option_concatenation() {
+        let nodes = lex(&tokenize(&String::from("a{b,c}")));
+
+        let expected = [
+            LexNode{
+                of_type: LexItem::Text(String::from("a")), 
+                content: Some(vec![
+                    LexNode{
+                        of_type: LexItem::OptionGroup,
+                        content: Some(vec![
+                            LexNode{
+                                of_type: LexItem::Option,
+                                content: Some(vec![LexNode{
+                                    of_type: LexItem::Text(String::from("b")),
+                                    content: None
+                                }])
+                            },
+                            LexNode{
+                                of_type: LexItem::Option,
+                                content: Some(vec![LexNode{
+                                    of_type: LexItem::Text(String::from("c")),
+                                    content: None
+                                }])
+                            },
+                        ])
+                    }
+                ])
+            },
+        ];
+
+        assert!(nodes.is_err() == false);
+
+        let unwrapped = nodes.unwrap();
+        assert_eq!(unwrapped, expected);
+    }
+
+    #[test]
     fn test_option_simple() {
         let nodes = lex(&tokenize(&String::from("{a,b,c}")));
 

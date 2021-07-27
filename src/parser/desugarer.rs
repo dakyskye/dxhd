@@ -97,7 +97,7 @@ mod tests {
                         LexNode{
                             of_type: LexItem::Text(String::from("0")),
                             content: None
-                        }])
+                    }])
                 },
                 LexNode{
                     of_type: LexItem::Option,
@@ -105,7 +105,7 @@ mod tests {
                         LexNode{
                             of_type: LexItem::Text(String::from("1")),
                             content: None
-                        }])
+                    }])
                 },
                 LexNode{
                     of_type: LexItem::Option,
@@ -113,7 +113,7 @@ mod tests {
                         LexNode{
                             of_type: LexItem::Text(String::from("2")),
                             content: None
-                        }])
+                    }])
                 },
                 LexNode{
                     of_type: LexItem::Option,
@@ -121,8 +121,139 @@ mod tests {
                         LexNode{
                             of_type: LexItem::Text(String::from("3")),
                             content: None
+                    }])
+                },
+            ])
+        }];
+
+        assert_eq!(result.unwrap(), expected);
+    }
+
+    #[test]
+    fn test_range_in_option_expands_to_more_options() {
+        let result = desugar(&lex(&tokenize(&String::from("{a, {0-3}}"))).unwrap());
+
+        let expected = vec![LexNode{
+            of_type: LexItem::OptionGroup,
+            content: Some(vec![
+                LexNode{
+                    of_type: LexItem::Option,
+                    content: Some(vec![
+                        LexNode{
+                            of_type: LexItem::Text(String::from("a")),
+                            content: None
                         }])
                 },
+                LexNode{
+                    of_type: LexItem::Option,
+                    content: Some(vec![
+                        LexNode{
+                            of_type:LexItem::OptionGroup,
+                            content: Some(vec![
+                                LexNode{
+                                    of_type: LexItem::Option,
+                                    content: Some(vec![
+                                        LexNode{
+                                            of_type: LexItem::Text(String::from("0")),
+                                            content: None
+                                    }])
+                                },
+                                LexNode{
+                                    of_type: LexItem::Option,
+                                    content: Some(vec![
+                                        LexNode{
+                                            of_type: LexItem::Text(String::from("1")),
+                                            content: None
+                                    }])
+                                },
+                                LexNode{
+                                    of_type: LexItem::Option,
+                                    content: Some(vec![
+                                        LexNode{
+                                            of_type: LexItem::Text(String::from("2")),
+                                            content: None
+                                    }])
+                                },
+                                LexNode{
+                                    of_type: LexItem::Option,
+                                    content: Some(vec![
+                                        LexNode{
+                                            of_type: LexItem::Text(String::from("3")),
+                                            content: None
+                                    }])
+                                }
+                            ])
+                        },
+                    ])
+                },                
+            ])
+        }];
+
+        assert_eq!(result.unwrap(), expected);
+    }
+
+    #[test]
+    fn test_text_attached_to_range_results_in_right_result() {
+        let result = desugar(&lex(&tokenize(&String::from("{a, mouse{0-3}}"))).unwrap());
+
+        let expected = vec![LexNode{
+            of_type: LexItem::OptionGroup,
+            content: Some(vec![
+                LexNode{
+                    of_type: LexItem::Option,
+                    content: Some(vec![
+                        LexNode{
+                            of_type: LexItem::Text(String::from("a")),
+                            content: None
+                        }])
+                },
+                LexNode{
+                    of_type: LexItem::Option,
+                    content: Some(vec![
+                        LexNode{
+                            of_type: LexItem::Text(String::from("mouse")),
+                            content: Some(vec![
+                                LexNode{
+                                    of_type:LexItem::OptionGroup,
+                                    content: Some(vec![
+                                        LexNode{
+                                            of_type: LexItem::Option,
+                                            content: Some(vec![
+                                                LexNode{
+                                                    of_type: LexItem::Text(String::from("0")),
+                                                    content: None
+                                            }])
+                                        },
+                                        LexNode{
+                                            of_type: LexItem::Option,
+                                            content: Some(vec![
+                                                LexNode{
+                                                    of_type: LexItem::Text(String::from("1")),
+                                                    content: None
+                                            }])
+                                        },
+                                        LexNode{
+                                            of_type: LexItem::Option,
+                                            content: Some(vec![
+                                                LexNode{
+                                                    of_type: LexItem::Text(String::from("2")),
+                                                    content: None
+                                            }])
+                                        },
+                                        LexNode{
+                                            of_type: LexItem::Option,
+                                            content: Some(vec![
+                                                LexNode{
+                                                    of_type: LexItem::Text(String::from("3")),
+                                                    content: None
+                                            }])
+                                        }
+                                    ])
+                                },
+                            ])
+                        },
+                    ])
+                },                
             ])
         }];
 
