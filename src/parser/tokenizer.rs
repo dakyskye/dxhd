@@ -47,6 +47,22 @@ pub fn tokenize(input: &String) -> Vec<Token> {
                 push_text(&mut text, &mut result);
                 result.push(Token::RangeSeparator)
             }
+            '\\' => {
+                it.next();
+                let result = match it.peek(){
+                    Some('{') =>  Ok('{') ,
+                    Some('}') =>  Ok('}') ,
+                    Some(',') =>  Ok(','),
+                    Some('+') =>  Ok('+'),
+                    Some('-') =>  Ok('-') ,
+                    Some('\\') => Ok('\\') ,
+                    None =>       Err(String::from("Delim cannot be last character")),
+                    _ =>          Err(String::from(format!("Character \\{} is not valid", it.peek().unwrap())))
+                    
+                };
+                text.push(result.unwrap());
+            }
+
             a => {
                 text.push(a);
             }
@@ -120,4 +136,23 @@ mod tests {
 
         assert_eq!(tokens, expected);
     }
+    #[test]
+    fn test_delim(){
+        let tokens = tokenize(&String::from("\\+ +  \\- - \\, , \\{ { \\} } \\\\"));
+        let expected = [
+            Token::Text(String::from("+")),
+            Token::Plus,
+            Token::Text(String::from("-")),
+            Token::RangeSeparator,
+            Token::Text(String::from(",")),
+            Token::Comma,
+            Token::Text(String::from("{")),
+            Token::OptionStart,
+            Token::Text(String::from("}")),
+            Token::OptionEnd,
+            Token::Text(String::from("\\"))
+        ];
+        assert_eq!(tokens, expected);
+    }
+
 }
