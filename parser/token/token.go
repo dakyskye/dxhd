@@ -3,11 +3,11 @@ package token
 type TokenType int8
 
 const (
-	TokenError TokenType = iota
-	TokenEOF
-	TokenShebang
-	TokenKeybinding
-	TokenAction
+	ERROR TokenType = iota
+	EOF
+	SHEBANG
+	KEYBINDING
+	ACTION
 )
 
 type Token struct {
@@ -17,15 +17,15 @@ type Token struct {
 
 func (t *Token) String() (res string) {
 	switch t.Type {
-	case TokenError:
+	case ERROR:
 		res = "ERROR"
-	case TokenEOF:
+	case EOF:
 		res = "EOF"
-	case TokenShebang:
+	case SHEBANG:
 		res = "SHEBANG"
-	case TokenKeybinding:
+	case KEYBINDING:
 		res = "KEYBINDING"
-	case TokenAction:
+	case ACTION:
 		res = "ACTION"
 	default:
 		res = "UNKNOWN"
