@@ -1,9 +1,9 @@
 package token
 
-type TokenType int8
+type Type int8
 
 const (
-	ERROR TokenType = iota
+	ERROR Type = iota
 	EOF
 	SHEBANG
 	KEYBINDING
@@ -11,7 +11,7 @@ const (
 )
 
 type Token struct {
-	Type  TokenType
+	Type  Type
 	Value string
 }
 
