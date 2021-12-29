@@ -33,7 +33,7 @@ func TestLexAction(t *testing.T) {
 	l := &lexer{input: lexerInputAction, start: 90, pos: 90, tokens: make(chan token.Token)}
 	go lexAction(l)
 	select {
-	case <-time.After(time.Second * 2):
+	case <-time.After(time.Millisecond):
 		t.Fatal("emitting an action was expected but it wasn't")
 	case tok := <-l.tokens:
 		require.Equal(t, token.ACTION, tok.Type)

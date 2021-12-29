@@ -84,7 +84,7 @@ func TestLexKeybinding(t *testing.T) { //nolint:funlen
 		}
 		go lexKeybinding(l)
 		select {
-		case <-time.After(time.Second * 2):
+		case <-time.After(time.Millisecond):
 			if test.expect != "" {
 				t.Fatal("emitting a keybinding was expected but it wasn't")
 			}

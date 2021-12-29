@@ -34,7 +34,7 @@ func TestLexShebang(t *testing.T) {
 		}
 		go lexShebang(l)
 		select {
-		case <-time.After(time.Second * 2):
+		case <-time.After(time.Millisecond):
 			if test.expect != "" {
 				t.Fatal("emitting a shebang was expected but it wasn't")
 			}
