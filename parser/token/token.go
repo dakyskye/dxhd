@@ -6,6 +6,7 @@ const (
 	ERROR Type = iota
 	EOF
 	SHEBANG
+	GLOBALS
 	KEYBINDING
 	ACTION
 )
@@ -23,6 +24,8 @@ func (t *Token) String() (res string) {
 		res = "EOF"
 	case SHEBANG:
 		res = "SHEBANG"
+	case GLOBALS:
+		res = "GLOBALS"
 	case KEYBINDING:
 		res = "KEYBINDING"
 	case ACTION:
