@@ -32,8 +32,6 @@ echo "I don't care!"
 # yet another {{} bar`
 
 func TestLexKeybinding(t *testing.T) { //nolint:funlen
-	l := &lexer{input: lexerInputKeybinding}
-
 	tests := []struct {
 		pos    int
 		expect string
@@ -78,9 +76,12 @@ func TestLexKeybinding(t *testing.T) { //nolint:funlen
 	}
 
 	for in, test := range tests {
-		l.start = test.pos
-		l.pos = test.pos
-		l.tokens = make(chan token.Token)
+		l := &lexer{
+			input:  lexerInputKeybinding,
+			start:  test.pos,
+			pos:    test.pos,
+			tokens: make(chan token.Token),
+		}
 		go lexKeybinding(l)
 		select {
 		case <-time.After(time.Second * 2):

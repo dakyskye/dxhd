@@ -12,8 +12,6 @@ const lexerInputShebang = `#!/bin/bash
 FOO=bar`
 
 func TestLexShebang(t *testing.T) {
-	l := &lexer{input: lexerInputShebang}
-
 	tests := []struct {
 		pos    int
 		expect string
@@ -29,8 +27,11 @@ func TestLexShebang(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		l.tokens = make(chan token.Token)
-		l.pos = test.pos
+		l := &lexer{
+			input:  lexerInputShebang,
+			pos:    test.pos,
+			tokens: make(chan token.Token),
+		}
 		go lexShebang(l)
 		select {
 		case <-time.After(time.Second * 2):
