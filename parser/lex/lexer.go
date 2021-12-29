@@ -37,6 +37,13 @@ func (l *lexer) peek() rune {
 	return r
 }
 
+func (l *lexer) overlook() rune {
+	l.pos -= l.width
+	r, _ := utf8.DecodeLastRuneInString(l.input[0:l.pos])
+	l.pos += l.width
+	return r
+}
+
 func (l *lexer) ignore() {
 	l.start = l.pos
 }
@@ -49,4 +56,9 @@ func (l *lexer) skipLine() {
 func (l *lexer) emit(typ token.Type) {
 	l.tokens <- token.Token{Type: typ, Value: l.input[l.start:l.pos]}
 	l.start = l.pos
+}
+
+func (l *lexer) error(err error) {
+	l.tokens <- token.Token{Type: token.ERROR, Value: err.Error()}
+	close(l.tokens)
 }

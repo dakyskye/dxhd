@@ -32,6 +32,12 @@ func TestPeek(t *testing.T) {
 	require.Equal(t, 2, l.pos)
 }
 
+func TestOverlook(t *testing.T) {
+	l := &lexer{input: lexerInput, pos: 3, width: 1}
+	require.Equal(t, '!', l.overlook())
+	require.Equal(t, 3, l.pos)
+}
+
 func TestIgnore(t *testing.T) {
 	l := &lexer{input: lexerInput, pos: 50}
 	l.ignore()
