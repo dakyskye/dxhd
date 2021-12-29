@@ -24,7 +24,8 @@ func lexKeybinding(l *lexer) stateFn {
 				l.error(err)
 				return nil
 			}
-		} else if ch == '}' {
+		}
+		if ch == '}' {
 			l.error(errExtraClosingMeta)
 			return nil
 		}
