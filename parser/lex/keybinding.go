@@ -20,7 +20,7 @@ func lexKeybinding(l *lexer) stateFn {
 			return lexAction
 		}
 		if ch == '{' {
-			if err := lexVariantGroup(l); err != nil {
+			if err := lexKeybindingVariantGroup(l); err != nil {
 				l.error(err)
 				return nil
 			}
@@ -32,16 +32,14 @@ func lexKeybinding(l *lexer) stateFn {
 	}
 }
 
-func lexVariantGroup(l *lexer) error {
+func lexKeybindingVariantGroup(l *lexer) error {
 	for {
-		ch := l.next()
-		if ch == '\n' {
+		switch l.next() {
+		case '\n':
 			return errUnclosedVariantGroup
-		}
-		if ch == '{' {
+		case '{':
 			return errExtraOpeningMeta
-		}
-		if ch == '}' {
+		case '}':
 			return nil
 		}
 	}
