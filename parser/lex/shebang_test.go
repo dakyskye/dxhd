@@ -7,8 +7,12 @@ import (
 	"time"
 )
 
+const lexerInputShebang = `#!/bin/bash
+
+FOO=bar`
+
 func TestLexShebang(t *testing.T) {
-	l := newLexer()
+	l := &lexer{input: lexerInputShebang}
 
 	tests := []struct {
 		pos    int
