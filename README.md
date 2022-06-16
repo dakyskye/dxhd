@@ -7,7 +7,15 @@ for configuration files!
 
 Thanks [JetBrains](https://jetbrains.com) for providing dxhd with free licenses.
 
-## READ THIS FIRST
+## READ THIS NOTICE FIRST
+
+Dear repository visitor, I'm sorry I wrote a horrible codebase years ago which I've tried to rewrite a couple of times now but never finished because of losing interest sometimes, because of work sometimes, because of my "time for a new side-project" mood sometimes.
+
+However, I want to tell you the rewrite will definitely take place, because I want to apply things I have learnt to dxhd. I want to write a proper parser this time, I want to structure codebase properly this time, I want to show my today's Go knowledge & practice in dxhd codebase because current master branch does not represent it. I usually put dxhd in my CV but always hate to do it because current master codebase does not show my present Go skills but rather my past mistakes that taught me how not to program.
+
+The rewrite process will begin in 2022 summer: july and august.
+
+## READ THIS SECOND (older notice)
 
 ~~dxhd is being rewritten in the [Rust](https://rust-lang.org/) programming language.
 The two main collaborators, [dakyskye](https://github.com/dakyskye) and
