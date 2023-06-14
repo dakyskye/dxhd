@@ -25,7 +25,7 @@ always hate to do it because current master codebase does not show my present
 [Go](https://go.dev) skills but rather my past mistakes that taught me how not
 to program.
 
-The rewrite process will begin in 2022 summer: july and august.
+The rewrite process will begin in 2022 summer: July and august.
 
 ## READ THIS SECOND (older notice)
 
@@ -133,7 +133,7 @@ file somewhere in your `$PATH`.
 ## Configuration
 
 The default config file is `~/.config/dxhd/dxhd.sh`, however, `dxhd` can read a
-file from any path, by passing it to `-c` commandline flag:
+file from any path, by passing it the `-c` command line flag:
 
 ```sh
 dxhd -c /my/custom/path/to/a/config/file
@@ -199,20 +199,19 @@ developing `dxhd`.
 
 * `dxhd` uses shebang to determine which shell to use (so you don't have to set
   an environment variable).
-* `dxhd` config file syntax matches shell, python, perl and probably some other
-  language syntaxes.
+* `dxhd` configuration file syntax matches shell, Python, Perl and probably some
+  other language syntaxes.
 * `dxhd` config lets you declare global variables for each keybinding command.
-* `dxhd` is great with scripting, because of it's elegant syntax.  multi line
-  scripts do not need `\` at the end of
-* line.
+* `dxhd` is great with scripting, because of its elegant syntax. Multi line
+  scripts do not need `\` at the end of line.
 * `dxhd` allows you to have different range in a keybinding's command, for
   example, `1-9` in a keybinding, and
-* `11-19` in its body (command area) .
+* `11-19` in its body (command area).
 * `dxhd` has support for mouse bindings out of the box, no patching required!
 
 ### How do I port my `sxhkd` config to `dxhd`
 
-It is simple enough! (I personally used Vim macros when I did it.. Vim users
+It is simple enough! (I personally used Vim macros when I did it... Vim users
 will get it)
 * convert any line starting with single `#` to a `dxhd` comment (so ## or
   more)
@@ -244,7 +243,7 @@ echo world
 ### I use ranges, released key events and chords from `sxhkd`, does `dxhd` have them
 
 Yes! And no. `dxhd` has released key events and ranges, but no chords (yet -
-[wip](https://github.com/dakyskye/dxhd/issues/8))
+[WIP](https://github.com/dakyskye/dxhd/issues/8))
 
 ### How do global variables inside a config file work
 
@@ -278,7 +277,7 @@ print(foo)
 
 ### Is `dxhd` faster than `sxhkd`
 
-They haven't benchmarked yet, so I don't know. However, I'been using `dxhd`
+They haven't benchmarked yet, so I don't know. However, I have been using `dxhd`
 since the first release and haven't noticed any speed loss!
 
 ### Why is the released binary file ~~+8mb~~ ~~+6mb~~ +3mb
