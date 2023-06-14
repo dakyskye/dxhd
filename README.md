@@ -2,10 +2,11 @@
 
 ## daky's X11 hotkey daemon
 
-_dxhd_ is heavily inspired by [sxhkd](https://github.com/baskerville/sxhkd),
+`dxhd` is heavily inspired by [sxhkd](https://github.com/baskerville/sxhkd),
 written in Go, and has an elegant syntax for configuration files!
 
-Thanks [JetBrains](https://jetbrains.com) for providing dxhd with free licenses.
+Thanks [JetBrains](https://jetbrains.com) for providing `dxhd` with free
+licenses.
 
 ## READ THIS NOTICE FIRST
 
@@ -15,18 +16,18 @@ interest sometimes, because of work sometimes, because of my "time for a new
 side-project" mood sometimes.
 
 However, I want to tell you the rewrite will definitely take place, because I
-want to apply things I have learnt to dxhd. I want to write a proper parser this
-time, I want to structure codebase properly this time, I want to show my today's
-Go knowledge & practice in dxhd codebase because current master branch does not
-represent it. I usually put dxhd in my CV but always hate to do it because
-current master codebase does not show my present Go skills but rather my past
-mistakes that taught me how not to program.
+want to apply things I have learnt to `dxhd`. I want to write a proper parser
+this time, I want to structure codebase properly this time, I want to show my
+today's Go knowledge & practice in `dxhd` codebase because current master branch
+does not represent it. I usually put `dxhd` in my CV but always hate to do it
+because current master codebase does not show my present Go skills but rather my
+past mistakes that taught me how not to program.
 
 The rewrite process will begin in 2022 summer: july and august.
 
 ## READ THIS SECOND (older notice)
 
-~~dxhd is being rewritten in the [Rust](https://rust-lang.org/) programming
+~~`dxhd` is being rewritten in the [Rust](https://rust-lang.org/) programming
 language. The two main collaborators, [dakyskye](https://github.com/dakyskye)
 and [NotUnlikeTheWaves](https://github.com/NotUnlikeTheWaves), are working on
 it.~~
@@ -34,14 +35,14 @@ it.~~
 ~~Follow [issue #39](https://github.com/dakyskye/dxhd/issues/39) for more
 information regarding the rewrite.~~
 
-dxhd is going to be rewritten in Go only to provide much better codebase to make
-contributions easier as well as have a quality code so others can reference from
-it.
+`dxhd` is going to be rewritten in Go only to provide much better codebase to
+make contributions easier as well as have a quality code so others can reference
+from it.
 
 The reason why a rewrite is required is that the current codebase is terrible
 (but the app works well so it does not matter for an end-user). There is only
 one known bug in the parser which I have documented here. It will be resolved,
-as well as many things will be improved, after releasing the rewritten dxhd.
+as well as many things will be improved, after releasing the rewritten `dxhd`.
 
 **the bug**:
 
@@ -96,14 +97,14 @@ cd dxhd
 make fast
 ```
 
-Copy the _dxhd_ executable file somewhere in your `$PATH`
+Copy the `dxhd` executable file somewhere in your `$PATH`
 
 ... or alternatively run `make install`, which builds and copies the built
 executable to `/usr/local/bin/` directory.
 
 * From releases
 
-Download the _dxhd_ executable file from the latest release, from [releases
+Download the `dxhd` executable file from the latest release, from [releases
 page](https://github.com/dakyskye/dxhd/releases), then copy `dxhd` executable
 file somewhere in your `$PATH`.
 
@@ -125,18 +126,18 @@ file somewhere in your `$PATH`.
 | support for any shell scripting language                                                                       | sh, bash, ksh, zsh, python, perl, etc. given as a shebang                |
 | support for global variable declarations in a config                                                           | -                                                                        |
 | support for scripting, as much as a user wishes!                                                               | -                                                                        |
-| support for running as many dxhd instances simultaneously as you want, to logically separate your keybindings  | -                                                                        |
+| support for running as many `dxhd` instances simultaneously as you want, to logically separate your keybindings  | -                                                                        |
 
 ## Configuration
 
-The default config file is `~/.config/dxhd/dxhd.sh`, however, _dxhd_ can read a
+The default config file is `~/.config/dxhd/dxhd.sh`, however, `dxhd` can read a
 file from any path, by passing it to `-c` commandline flag:
 
 ```sh
 dxhd -c /my/custom/path/to/a/config/file
 ```
 
-A _dxhd_ config file should contain a shebang (defaults to `/bin/sh`) on top of
+A `dxhd` config file should contain a shebang (defaults to `/bin/sh`) on top of
 a file, which will be the shell used for executing commands.
 
 ## Syntax
@@ -163,14 +164,14 @@ By just running `dxhd`, you only get information level logs, however, you can
 set `DEBUG` environment variable, which will output more information, like what
 bindings are registered, what command failed etc.
 
-To kill every running instance of dxhd, you can use built-in `-k` flag, which
+To kill every running instance of `dxhd`, you can use built-in `-k` flag, which
 under the hood uses `pkill` command to kill instances.
 
 ## Daemonisation
 
-~~Rather than dxhd self daemonising itself, let other programs do their job.~~
+~~Rather than `dxhd` self daemonising itself, let other programs do their job.~~
 
-The `--background` (`-b`) flag is a simple workaround for *daemonising* _dxhd_.
+The `--background` (`-b`) flag is a simple workaround for *daemonising* `dxhd`.
 It uses `/usr/sh` shell to achieve it, as Go does not allow forking a process
 without executing it.
 
@@ -186,32 +187,33 @@ Licensed under the [**MIT**](https://choosealicense.com/licenses/mit/) license.
 
 ## FAQ
 
-### Why was dxhd made
+### Why was `dxhd` made
 
 Because I had ~~(and have)~~ 20 workspaces, and `sxhkd` did not allow me to
 define `11-19` range easily which was one of the main reasons I started
-developing dxhd.
+developing `dxhd`.
 
-### What makes dxhd better than sxhkd
+### What makes `dxhd` better than `sxhkd`
 
-* _dxhd_ uses shebang to determine which shell to use (so you don't have to set
+* `dxhd` uses shebang to determine which shell to use (so you don't have to set
   an environment variable).
-* _dxhd_ config file syntax matches shell, python, perl and probably some other
+* `dxhd` config file syntax matches shell, python, perl and probably some other
   language syntaxes.
-* _dxhd_ config lets you declare global variables for each keybinding command.
-* _dxhd_ is great with scripting, because of it's elegant syntax.  multi line
+* `dxhd` config lets you declare global variables for each keybinding command.
+* `dxhd` is great with scripting, because of it's elegant syntax.  multi line
   scripts do not need `\` at the end of
 * line.
-* _dxhd_ allows you to have different range in a keybinding's command, for
+* `dxhd` allows you to have different range in a keybinding's command, for
   example, `1-9` in a keybinding, and
 * `11-19` in its body (command area) .
-* _dxhd_ has support for mouse bindings out of the box, no patching required!
+* `dxhd` has support for mouse bindings out of the box, no patching required!
 
-### How do I port my sxhkd config to dxhd
+### How do I port my `sxhkd` config to `dxhd`
 
 It is simple enough! (I personally used Vim macros when I did it.. Vim users
 will get it)
-* convert any line starting with single `#` to a *dxhd comment* (so ## or more)
+* convert any line starting with single `#` to a *`dxhd` comment* (so ## or
+  more)
 * put a `#` before every keybinding (`super + a` to `# super + a`)
 * remove spaces before lines (`  echo foo` to `echo foo`) (optional)
 * remove every end-line backslash (`echo bar \` to `echo bar`) (most likely
@@ -237,9 +239,9 @@ echo hello
 echo world
 ```
 
-### I use ranges, released key events and chords from sxhkd, does dxhd have them
+### I use ranges, released key events and chords from `sxhkd`, does `dxhd` have them
 
-Yes! And no. dxhd has released key events and ranges, but no chords (yet -
+Yes! And no. `dxhd` has released key events and ranges, but no chords (yet -
 [wip](https://github.com/dakyskye/dxhd/issues/8))
 
 ### How do global variables inside a config file work
@@ -272,9 +274,9 @@ foo="foo bar"
 print(foo)
 ```
 
-### Is dxhd faster than sxhkd
+### Is `dxhd` faster than `sxhkd`
 
-They haven't benchmarked yet, so I don't know. However, I'been using _dxhd_
+They haven't benchmarked yet, so I don't know. However, I'been using `dxhd`
 since the first release and haven't noticed any speed loss!
 
 ### Why is the released binary file ~~+8mb~~ ~~+6mb~~ +3mb
