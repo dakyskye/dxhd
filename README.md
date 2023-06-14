@@ -3,7 +3,8 @@
 ## daky's X11 hotkey daemon
 
 `dxhd` is heavily inspired by [sxhkd](https://github.com/baskerville/sxhkd),
-written in Go, and has an elegant syntax for configuration files!
+written in [Go](https://go.dev), and has an elegant syntax for configuration
+files!
 
 Thanks [JetBrains](https://jetbrains.com) for providing `dxhd` with free
 licenses.
@@ -18,10 +19,11 @@ side-project" mood sometimes.
 However, I want to tell you the rewrite will definitely take place, because I
 want to apply things I have learnt to `dxhd`. I want to write a proper parser
 this time, I want to structure codebase properly this time, I want to show my
-today's Go knowledge & practice in `dxhd` codebase because current master branch
-does not represent it. I usually put `dxhd` in my CV but always hate to do it
-because current master codebase does not show my present Go skills but rather my
-past mistakes that taught me how not to program.
+today's [Go](https://go.dev) knowledge & practice in `dxhd` codebase because
+current master branch does not represent it. I usually put `dxhd` in my CV but
+always hate to do it because current master codebase does not show my present
+[Go](https://go.dev) skills but rather my past mistakes that taught me how not
+to program.
 
 The rewrite process will begin in 2022 summer: july and august.
 
@@ -35,9 +37,9 @@ it.~~
 ~~Follow [issue #39](https://github.com/dakyskye/dxhd/issues/39) for more
 information regarding the rewrite.~~
 
-`dxhd` is going to be rewritten in Go only to provide much better codebase to
-make contributions easier as well as have a quality code so others can reference
-from it.
+`dxhd` is going to be rewritten in [Go](https://go.dev) only to provide much
+better codebase to make contributions easier as well as have a quality code so
+others can reference from it.
 
 The reason why a rewrite is required is that the current codebase is terrible
 (but the app works well so it does not matter for an end-user). There is only
@@ -172,8 +174,8 @@ under the hood uses `pkill` command to kill instances.
 ~~Rather than `dxhd` self daemonising itself, let other programs do their job.~~
 
 The `--background` (`-b`) flag is a simple workaround for *daemonising* `dxhd`.
-It uses `/usr/sh` shell to achieve it, as Go does not allow forking a process
-without executing it.
+It uses `/usr/sh` shell to achieve it, as [Go](https://go.dev) does not allow
+forking a process without executing it.
 
 ## Examples
 
