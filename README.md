@@ -46,7 +46,7 @@ The reason why a rewrite is required is that the current codebase is terrible
 one known bug in the parser which I have documented here. It will be resolved,
 as well as many things will be improved, after releasing the rewritten `dxhd`.
 
-**the bug**:
+The bug:
 
 ```sh
 #!/bin/sh
@@ -71,8 +71,8 @@ echo I want to print "$what"
 
 ## Installation
 
-**NOTE:** the git version (the master version) is usually more bug-free than the
-released, binary ones, since introduced bugs first get fixed in this version.
+The Git version (the master version) is usually more bug-free than the released,
+binary ones, since introduced bugs first get fixed in this version.
 
 ### Manual Arch User Repository installation
 
@@ -173,8 +173,8 @@ under the hood uses `pkill` command to kill instances.
 
 ~~Rather than `dxhd` self daemonising itself, let other programs do their job.~~
 
-The `--background` (`-b`) flag is a simple workaround for *daemonising* `dxhd`.
-It uses `/usr/sh` shell to achieve it, as [Go](https://go.dev) does not allow
+The `--background` (`-b`) flag is a simple workaround for daemonising `dxhd`. It
+uses `/usr/sh` shell to achieve it, as [Go](https://go.dev) does not allow
 forking a process without executing it.
 
 ## Examples
@@ -185,7 +185,7 @@ forking a process without executing it.
 
 ## License
 
-Licensed under the [**MIT**](https://choosealicense.com/licenses/mit/) license.
+Licensed under the [MIT](https://choosealicense.com/licenses/mit/) license.
 
 ## FAQ
 
@@ -214,7 +214,7 @@ developing `dxhd`.
 
 It is simple enough! (I personally used Vim macros when I did it.. Vim users
 will get it)
-* convert any line starting with single `#` to a *`dxhd` comment* (so ## or
+* convert any line starting with single `#` to a `dxhd` comment (so ## or
   more)
 * put a `#` before every keybinding (`super + a` to `# super + a`)
 * remove spaces before lines (`  echo foo` to `echo foo`) (optional)
