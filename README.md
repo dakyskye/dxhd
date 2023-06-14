@@ -74,7 +74,7 @@ echo I want to print "$what"
 **NOTE:** the git version (the master version) is usually more bug-free than the
 released, binary ones, since introduced bugs first get fixed in this version.
 
-* Manual Arch User Repository installation
+### Manual Arch User Repository installation
 
 ```sh
 git clone https://aur.archlinux.org/dxhd-git.git
@@ -84,14 +84,14 @@ cd dxhd-git
 makepkg -si
 ```
 
-* Using an [AUR helper](https://wiki.archlinux.org/index.php/AUR_helpers)
+### Using an [AUR helper](https://wiki.archlinux.org/index.php/AUR_helpers)
 
 | AUR helper                                  | Command        |
 |---------------------------------------------|----------------|
 | [paru](https://github.com/morganamilo/paru) | `paru -S dxhd` |
 | [yay](https://github.com/Jguer/yay)         | `yay -S dxhd`  |
 
-* From the source
+### From the source
 
 ```sh
 git clone https://github.com/dakyskye/dxhd.git
@@ -104,7 +104,7 @@ Copy the `dxhd` executable file somewhere in your `$PATH`
 ... or alternatively run `make install`, which builds and copies the built
 executable to `/usr/local/bin/` directory.
 
-* From releases
+### From releases
 
 Download the `dxhd` executable file from the latest release, from [releases
 page](https://github.com/dakyskye/dxhd/releases), then copy `dxhd` executable
